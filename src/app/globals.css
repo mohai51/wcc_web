@@ -18,7 +18,26 @@
 body {
   background-color: var(--bg-page);
   color: #1E293B;
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", sans-serif;
+  font-family: var(--font-hind-siliguri), "Hind Siliguri", sans-serif;
+  transition: font-family 0.15s ease-in-out;
+}
+
+/* Bangla Language: Exclusively use Hind Siliguri */
+body.lang-bn,
+body.lang-bn input,
+body.lang-bn button,
+body.lang-bn select,
+body.lang-bn textarea {
+  font-family: var(--font-hind-siliguri), "Hind Siliguri", sans-serif !important;
+}
+
+/* English Language: Exclusively use Poppins */
+body.lang-en,
+body.lang-en input,
+body.lang-en button,
+body.lang-en select,
+body.lang-en textarea {
+  font-family: var(--font-poppins), "Poppins", sans-serif !important;
 }
 
 /* Modern Sleek Scrollbar */

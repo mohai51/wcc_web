@@ -7,10 +7,13 @@ import { Menu, ExternalLink } from 'lucide-react';
 import Navbar from '@/Components/navbar';
 import Footer from '@/Components/footer';
 import Sidebar from '@/Components/Sidebar';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/Components/LanguageToggle';
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { lang, t } = useLanguage();
   const [user, setUser] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -58,17 +61,20 @@ export default function AppShell({ children }) {
   const isPublicVerify = pathname === '/verify' && !user;
 
   const getRoleBadge = (role) => {
+    const roleName = t(`roles.${role}`, role);
     switch (role) {
       case 'admin':
-        return { text: 'Admin', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' };
+        return { text: roleName, color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' };
       case 'coordinator':
-        return { text: 'Coordinator', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+        return { text: roleName, color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+      case 'wing_leader':
+        return { text: roleName, color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
       case 'volunteer':
-        return { text: 'Volunteer', color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
+        return { text: roleName, color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
       case 'finance_officer':
-        return { text: 'Finance', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
+        return { text: roleName, color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
       default:
-        return { text: 'Member', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' };
+        return { text: roleName, color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' };
     }
   };
 
@@ -105,15 +111,19 @@ export default function AppShell({ children }) {
             <div className="w-12 h-12 bg-rose-50 text-[#B62A35] rounded-2xl flex items-center justify-center mx-auto">
               <span className="font-black text-xl">!</span>
             </div>
-            <h2 className="text-xl font-black text-slate-900">Portal Access Restricted</h2>
+            <h2 className="text-xl font-black text-slate-900">
+              {lang === 'bn' ? 'পোর্টাল প্রবেশাধিকার সংরক্ষিত' : 'Portal Access Restricted'}
+            </h2>
             <p className="text-xs text-slate-500">
-              Please sign in with your verified Member, Volunteer, or Admin credentials to access this system.
+              {lang === 'bn'
+                ? 'সিস্টেমে প্রবেশ করতে অনুগ্রহ করে আপনার যাচাইকৃত মেম্বার, ভলান্টিয়ার বা অ্যাডমিন আইডি দিয়ে লগইন করুন।'
+                : 'Please sign in with your verified Member, Volunteer, or Admin credentials to access this system.'}
             </p>
             <Link
               href="/login"
               className="inline-block w-full py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl transition-colors shadow-xs"
             >
-              Go to Portal Login
+              {lang === 'bn' ? 'লগইন পেজে যান' : 'Go to Portal Login'}
             </Link>
           </div>
         </main>
@@ -177,6 +187,7 @@ export default function AppShell({ children }) {
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${getRoleBadge(user.role).color}`}>
               {getRoleBadge(user.role).text}
             </span>
@@ -184,7 +195,7 @@ export default function AppShell({ children }) {
               href="/"
               className="text-[11px] font-semibold text-slate-300 hover:text-white flex items-center gap-1 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 transition-colors"
             >
-              <span>Guest Site</span>
+              <span>{lang === 'bn' ? 'পাবলিক' : 'Guest'}</span>
               <ExternalLink className="w-3 h-3 text-[#F1AD1A]" />
             </Link>
           </div>

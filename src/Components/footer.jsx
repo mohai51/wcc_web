@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   Heart,
@@ -7,8 +9,11 @@ import {
   ArrowUpRight,
   Sparkles
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
+  const { lang, t } = useLanguage();
+
   return (
     <footer className="bg-slate-950 text-slate-300 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -24,16 +29,16 @@ export default function Footer() {
                 />
               </div>
               <div>
-                <span className="text-xl font-black text-white tracking-tight">We Can Change</span>
+                <span className="text-xl font-black text-white tracking-tight">{t('brand.name')}</span>
                 <span className="ml-2 text-xs font-bold text-[#F1AD1A] bg-[#F1AD1A]/10 px-2 py-0.5 rounded border border-[#F1AD1A]/20">
-                  WCC
+                  {t('brand.shortName')}
                 </span>
-                <p className="text-xs text-slate-400">আমরাই আনব পরিবর্তন</p>
+                <p className="text-xs text-slate-400">{t('brand.tagline')}</p>
               </div>
             </div>
 
             <p className="text-sm text-slate-400 leading-relaxed max-w-md">
-              ঝালকাঠি জেলাভিত্তিক একটি অগ্রণী স্বেচ্ছাসেবী ও সামাজিক সংগঠন। তরুণ প্রজন্মের সততা, দক্ষতা ও উদ্ভাবনী শক্তিকে কাজে লাগিয়ে একটি স্বচ্ছ, ন্যায়পরায়ণ ও সমৃদ্ধ ভবিষ্যৎ বিনির্মাণে আমরা অঙ্গীকারবদ্ধ।
+              {t('footer.aboutText')}
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -75,38 +80,38 @@ export default function Footer() {
 
           {/* Column 3: Quick Links */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">Quick Explore</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link href="/vision-mission" className="hover:text-white transition-colors">
-                  Vision & Mission
+                  {t('nav.visionMission')}
                 </Link>
               </li>
               <li>
                 <Link href="/wings" className="hover:text-white transition-colors">
-                  Organizational Wings
+                  {t('nav.wings')}
                 </Link>
               </li>
               <li>
                 <Link href="/programs" className="hover:text-white transition-colors">
-                  Our Programs
+                  {t('nav.programs')}
                 </Link>
               </li>
               <li>
                 <Link href="/events" className="hover:text-white transition-colors">
-                  Community Events
+                  {t('nav.events')}
                 </Link>
               </li>
               <li>
                 <Link href="/report-issue" className="hover:text-[#F1AD1A] transition-colors flex items-center gap-1.5 font-medium text-amber-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#F1AD1A]"></span>
-                  <span>Report Civic Issue</span>
+                  <span>{t('nav.reportIssue')}</span>
                 </Link>
               </li>
               <li>
                 <Link href="/verify" className="flex items-center gap-1 hover:text-white transition-colors text-emerald-400">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Public QR Verification</span>
+                  <span>{t('nav.verifyId')}</span>
                 </Link>
               </li>
             </ul>
@@ -114,22 +119,24 @@ export default function Footer() {
 
           {/* Column 4: Portals & Access */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">Join & Access</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">
+              {lang === 'bn' ? 'সদস্যপদ ও পোর্টাল' : 'Join & Access'}
+            </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link href="/login" className="hover:text-white transition-colors flex items-center gap-1 text-[#F1AD1A] font-semibold">
-                  <span>Sign In / Join WCC</span>
+                  <span>{t('nav.login')}</span>
                   <ArrowUpRight className="w-3 h-3 text-slate-400" />
                 </Link>
               </li>
               <li>
                 <Link href="/register" className="hover:text-white transition-colors flex items-center gap-1 text-slate-200">
-                  <span>Register Membership</span>
+                  <span>{t('nav.register')}</span>
                 </Link>
               </li>
               <li>
                 <Link href="/dashboard" className="hover:text-white transition-colors">
-                  Member Portal Dashboard
+                  {t('nav.portal')}
                 </Link>
               </li>
             </ul>
@@ -137,16 +144,16 @@ export default function Footer() {
 
           {/* Column 5: Office & Contact */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">Head Office</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">{t('footer.contact')}</h4>
             <div className="space-y-3 text-sm text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#B62A35] shrink-0 mt-0.5" />
-                <span>20 Kumarpotti Road, Jhalokathi Sadar, Jhalokathi, Bangladesh</span>
+                <span>{t('footer.address')}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#B62A35] shrink-0" />
-                <a href="mailto:wccjhalokathi@gmail.com" className="hover:text-white transition-colors">
-                  wccjhalokathi@gmail.com
+                <a href={`mailto:${t('footer.email')}`} className="hover:text-white transition-colors">
+                  {t('footer.email')}
                 </a>
               </div>
             </div>
@@ -155,10 +162,12 @@ export default function Footer() {
               <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
                 <div className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1.5 mb-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>100% Non-Profit Transparency</span>
+                  <span>{lang === 'bn' ? '১০০% অলাভজনক ও স্বচ্ছতা' : '100% Non-Profit Transparency'}</span>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Every donation and membership fee is accounted for in our real-time audit ledger.
+                  {lang === 'bn'
+                    ? 'প্রতিটি অনুদান ও সদস্য চাঁদা আমাদের অডিট লেজারে স্বচ্ছভাবে রেকর্ড করা থাকে।'
+                    : 'Every donation and membership fee is accounted for in our real-time audit ledger.'}
                 </p>
               </div>
             </div>
@@ -167,11 +176,11 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} We Can Change (WCC). All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {t('brand.name')}. {lang === 'bn' ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}</p>
           <div className="flex items-center gap-2">
-            <span>Powered by Youth Leadership</span>
+            <span>{lang === 'bn' ? 'তারুণ্যের নেতৃত্বে পরিচালিত' : 'Powered by Youth Leadership'}</span>
             <span>•</span>
-            <span className="text-[#F1AD1A]">Jhalokathi, Bangladesh</span>
+            <span className="text-[#F1AD1A]">{lang === 'bn' ? 'ঝালকাঠি, বাংলাদেশ' : 'Jhalokathi, Bangladesh'}</span>
           </div>
         </div>
       </div>

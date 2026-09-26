@@ -7,9 +7,12 @@ import { LogIn, ShieldCheck, User, Lock, AlertCircle, ArrowLeft } from 'lucide-r
 import { api } from '@/lib/api';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/Components/LanguageToggle';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { lang, t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +32,11 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Invalid email or password.');
+      setError(
+        lang === 'bn'
+          ? (err.message || 'ভুল ইমেইল বা পাসওয়ার্ড দেওয়া হয়েছে।')
+          : (err.message || 'Invalid email or password.')
+      );
     } finally {
       setLoading(false);
     }
@@ -40,7 +47,7 @@ export default function LoginPage() {
     setGoogleLoading(true);
     try {
       if (!auth || !googleProvider) {
-        throw new Error('Firebase authentication is not ready.');
+        throw new Error(lang === 'bn' ? 'গুগল অথেনটিকেশন প্রস্তুত নয়।' : 'Firebase authentication is not ready.');
       }
       const result = await signInWithPopup(auth, googleProvider);
       const fbUser = result.user;
@@ -60,9 +67,9 @@ export default function LoginPage() {
     } catch (err) {
       console.error('Google Sign In Error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
-        setError('Google sign-in popup was closed before completing.');
+        setError(lang === 'bn' ? 'গুগল সাইন-ইন উইন্ডো বন্ধ করা হয়েছে।' : 'Google sign-in popup was closed before completing.');
       } else {
-        setError(err.message || 'Google sign-in failed. Please try again.');
+        setError(err.message || (lang === 'bn' ? 'গুগল সাইন-ইন ব্যর্থ হয়েছে।' : 'Google sign-in failed. Please try again.'));
       }
     } finally {
       setGoogleLoading(false);
@@ -75,20 +82,29 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Top Header & Language Switcher */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-md flex items-center justify-between mb-4">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#B62A35] transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          <span>{lang === 'bn' ? 'মূল ওয়েবসাইটে ফিরুন' : 'Back to Home'}</span>
+        </Link>
+        <LanguageToggle />
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
         <Link href="/" className="inline-block">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#F1AD1A] bg-white p-1 mx-auto shadow-md">
             <img src="/landing/wcc.png" alt="WCC" className="w-full h-full object-contain" />
           </div>
         </Link>
-        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Sign In to WCC</h2>
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">{t('auth.loginTitle')}</h2>
         <p className="text-xs text-slate-500">
-          Sign in to access your WCC Digital ID and member dashboard.
+          {t('auth.loginSubtitle')}
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-8 border border-slate-200 rounded-3xl shadow-sm space-y-5">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
@@ -99,7 +115,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
+              <label className="block font-semibold text-slate-700 mb-1">{t('auth.emailLabel')}</label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
@@ -114,7 +130,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Password</label>
+              <label className="block font-semibold text-slate-700 mb-1">{t('auth.passLabel')}</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
@@ -131,7 +147,7 @@ export default function LoginPage() {
                   href="/forgot-password"
                   className="text-xs font-semibold text-[#B62A35] hover:underline"
                 >
-                  Forgot password?
+                  {t('auth.forgotPass')}
                 </Link>
               </div>
             </div>
@@ -142,16 +158,16 @@ export default function LoginPage() {
               className="w-full py-2.5 px-4 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
-              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+              <span>{loading ? t('btn.loading') : t('auth.signInBtn')}</span>
             </button>
           </form>
 
-          {/* Google Sign-in Option Under Sign In Button */}
+          {/* Google Sign-in Option */}
           <div className="space-y-3">
             <div className="relative flex py-1 items-center">
               <div className="grow border-t border-slate-200"></div>
               <span className="shrink mx-3 text-slate-400 text-[11px] uppercase font-bold tracking-wider">
-                Or continue with
+                {t('auth.orGoogle')}
               </span>
               <div className="grow border-t border-slate-200"></div>
             </div>
@@ -180,14 +196,14 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
+              <span>{googleLoading ? t('btn.loading') : t('auth.continueGoogle')}</span>
             </button>
           </div>
 
           {/* Quick Credential Presets */}
           <div className="pt-4 border-t border-slate-100 space-y-2">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-              Quick Test Login (এক ক্লিকে অটো-ফিল)
+              {t('auth.quickFill')}
             </span>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -196,7 +212,7 @@ export default function LoginPage() {
                 className="py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-rose-50 hover:text-[#B62A35] border border-slate-200 text-slate-700 text-[11px] font-bold text-center transition-colors cursor-pointer"
                 title="Admin Login"
               >
-                👑 Admin
+                👑 {t('roles.admin')}
               </button>
               <button
                 type="button"
@@ -204,7 +220,7 @@ export default function LoginPage() {
                 className="py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
                 title="Education Wing Leader Login"
               >
-                🎓 Wing Leader
+                🎓 {t('roles.wing_leader')}
               </button>
               <button
                 type="button"
@@ -212,7 +228,7 @@ export default function LoginPage() {
                 className="py-2 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
                 title="General Member Login"
               >
-                👤 General Member
+                👤 {t('roles.member')}
               </button>
               <button
                 type="button"
@@ -220,22 +236,16 @@ export default function LoginPage() {
                 className="py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
                 title="Volunteer Login"
               >
-                🤝 Volunteer
+                🤝 {t('roles.volunteer')}
               </button>
             </div>
           </div>
 
           <div className="pt-2 text-center text-xs text-slate-500 space-y-2">
             <div>
-              Don&apos;t have an ID?{' '}
+              {t('auth.noAccount')}{' '}
               <Link href="/register" className="font-bold text-[#B62A35] hover:underline">
-                Register for WCC Membership
-              </Link>
-            </div>
-            <div>
-              <Link href="/" className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-[#B62A35]">
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Guest Site</span>
+                {t('auth.registerNow')}
               </Link>
             </div>
           </div>

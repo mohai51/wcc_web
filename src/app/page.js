@@ -29,6 +29,7 @@ import {
   LogIn
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 
 const heroImages = [
   '/landing/image1.jpg',
@@ -45,6 +46,7 @@ const heroImages = [
 
 export default function HomePage() {
   const router = useRouter();
+  const { lang, tx, t } = useLanguage();
 
   // Hero Carousel State
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -162,14 +164,14 @@ export default function HomePage() {
         <button
           onClick={handlePrevSlide}
           aria-label="Previous image"
-          className="absolute left-4 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-[#B62A35] border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all hidden sm:flex"
+          className="absolute left-4 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-[#B62A35] border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all hidden sm:flex cursor-pointer"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         <button
           onClick={handleNextSlide}
           aria-label="Next image"
-          className="absolute right-4 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-[#B62A35] border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all hidden sm:flex"
+          className="absolute right-4 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-[#B62A35] border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all hidden sm:flex cursor-pointer"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -181,7 +183,7 @@ export default function HomePage() {
               key={idx}
               onClick={() => setCurrentSlide(idx)}
               aria-label={`Go to slide ${idx + 1}`}
-              className={`h-2 rounded-full transition-all ${
+              className={`h-2 rounded-full transition-all cursor-pointer ${
                 idx === currentSlide ? 'w-8 bg-[#F1AD1A]' : 'w-2 bg-white/40 hover:bg-white/70'
               }`}
             />
@@ -195,17 +197,29 @@ export default function HomePage() {
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur text-xs font-bold text-[#F1AD1A]">
                 <ShieldCheck className="w-4 h-4 text-[#F1AD1A]" />
-                <span>We Can Change (WCC) • Official Guest Portal</span>
+                <span>{tx('উই ক্যান চেঞ্জ (WCC) • অফিসিয়াল পোর্টাল', 'We Can Change (WCC) • Official Portal')}</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
-                The Power of <br />
-                <span className="text-[#F1AD1A]">Youth & Good Governance</span> <br />
-                Can Build the <span className="text-[#B62A35]">Bangladesh</span> of Tomorrow.
+                {lang === 'bn' ? (
+                  <>
+                    <span className="text-[#F1AD1A]">তরুণদের শক্তি ও সুশাসনই</span> <br />
+                    গড়ে তুলবে আগামীর <span className="text-[#B62A35]">বাংলাদেশ</span>
+                  </>
+                ) : (
+                  <>
+                    The Power of <br />
+                    <span className="text-[#F1AD1A]">Youth & Good Governance</span> <br />
+                    Can Build the <span className="text-[#B62A35]">Bangladesh</span> of Tomorrow.
+                  </>
+                )}
               </h1>
 
               <p className="text-base sm:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl">
-                ঝালকাঠি জেলাভিত্তিক একটি অগ্রণী অরাজনৈতিক সামাজিক সংগঠন। সততা, স্বচ্ছতা ও তরুণ প্রজন্মের সম্মিলিত ক্ষমতায়নে আমরা গঠন করছি এক বৈষম্যহীন ও স্বনির্ভর সমাজ।
+                {tx(
+                  'ঝালকাঠি জেলাভিত্তিক একটি অগ্রণী অরাজনৈতিক সামাজিক সংগঠন। সততা, স্বচ্ছতা ও তরুণ প্রজন্মের সম্মিলিত ক্ষমতায়নে আমরা গঠন করছি এক বৈষম্যহীন ও স্বনির্ভর সমাজ।',
+                  'A leading civic impact initiative based in Jhalakathi. Driven by integrity, accountability, and the boundless potential of the next generation to empower grassroots communities.'
+                )}
               </p>
 
               {/* Action Buttons for Guest / Logged In */}
@@ -213,27 +227,27 @@ export default function HomePage() {
                 {user ? (
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold text-sm shadow-lg transition-all hover:scale-[1.02]"
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold text-sm shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
                   >
-                    <span>Go to My {user.role.toUpperCase()} Portal</span>
+                    <span>{tx('আমার ড্যাশবোর্ডে প্রবেশ করুন', `Go to My ${user.role.toUpperCase()} Portal`)}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 ) : (
                   <>
                     <Link
                       href="/login"
-                      className="flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold text-sm shadow-xl transition-all hover:scale-[1.02]"
+                      className="flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold text-sm shadow-xl transition-all hover:scale-[1.02] cursor-pointer"
                     >
                       <LogIn className="w-4 h-4" />
-                      <span>Join WCC / Sign In</span>
+                      <span>{tx('লগইন করুন', 'Sign In')}</span>
                     </Link>
 
                     <Link
                       href="/register"
-                      className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold text-sm shadow-lg transition-all hover:scale-[1.02]"
+                      className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
                     >
                       <UserPlus className="w-4 h-4" />
-                      <span>Register Here</span>
+                      <span>{tx('নতুন মেম্বার নিবন্ধন', 'Register Here')}</span>
                     </Link>
                   </>
                 )}
@@ -252,15 +266,20 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-2xl font-black text-white tracking-tight">We Can Change</h3>
-                  <p className="text-xs text-[#F1AD1A] font-bold tracking-wider uppercase mt-0.5">আমরাই আনব পরিবর্তন</p>
+                  <p className="text-xs text-[#F1AD1A] font-bold tracking-wider uppercase mt-0.5">
+                    {tx('আমরাই আনব পরিবর্তন', 'Together We Build Tomorrow')}
+                  </p>
                 </div>
                 <p className="text-xs text-slate-200 leading-relaxed">
-                  ঝালকাঠি সদর, নলছিটি, রাজাপুর ও কাঠালিয়াসহ সমগ্র বাংলাদেশের তরুণদের একত্রিত করে জনকল্যাণ ও সুশাসনের শক্ত ভিত গড়ে তোলাই আমাদের লক্ষ্য।
+                  {tx(
+                    'ঝালকাঠি সদর, নলছিটি, রাজাপুর ও কাঠালিয়াসহ সমগ্র বাংলাদেশের তরুণদের একত্রিত করে জনকল্যাণ ও সুশাসনের শক্ত ভিত গড়ে তোলাই আমাদের লক্ষ্য।',
+                    'Uniting purposeful youth across Jhalakathi Sadar, Nalchity, Rajapur, and Kathalia to forge enduring social progress and ethical leadership.'
+                  )}
                 </p>
                 <div className="pt-3 border-t border-white/15 flex items-center justify-center text-center">
                   <div>
                     <div className="text-xl font-black text-[#F1AD1A]">2026</div>
-                    <div className="text-[10px] text-slate-300 uppercase font-semibold">Charter Year</div>
+                    <div className="text-[10px] text-slate-300 uppercase font-semibold">{tx('প্রতিষ্ঠা বর্ষ', 'Charter Year')}</div>
                   </div>
                 </div>
               </div>
@@ -279,9 +298,9 @@ export default function HomePage() {
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Registered Members</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{tx('নিবন্ধিত সদস্য', 'Registered Members')}</p>
               <h3 className="text-2xl font-black text-slate-900">{stats.totalMembers}</h3>
-              <span className="text-[11px] text-emerald-600 font-semibold">{stats.activeMembers} Verified Active</span>
+              <span className="text-[11px] text-emerald-600 font-semibold">{stats.activeMembers} {tx('যাচাইকৃত সক্রিয়', 'Verified Active')}</span>
             </div>
           </div>
 
@@ -290,9 +309,9 @@ export default function HomePage() {
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Treasury Balance</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{tx('তহবিল ব্যালেন্স', 'Treasury Balance')}</p>
               <h3 className="text-2xl font-black text-slate-900">৳ {stats.totalLiquidity.toLocaleString()}</h3>
-              <span className="text-[11px] text-slate-500 font-medium">100% Audited Fund</span>
+              <span className="text-[11px] text-slate-500 font-medium">{tx('১০০% অডিটেড হিসাব', '100% Audited Fund')}</span>
             </div>
           </div>
 
@@ -301,9 +320,9 @@ export default function HomePage() {
               <Activity className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Social Activities</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{tx('সামাজিক কার্যক্রম', 'Social Activities')}</p>
               <h3 className="text-2xl font-black text-slate-900">{stats.totalActivities}</h3>
-              <span className="text-[11px] text-blue-600 font-semibold">Health Camps & Drives</span>
+              <span className="text-[11px] text-blue-600 font-semibold">{tx('ক্যাম্প ও ফিল্ড ড্রাইভ', 'Health Camps & Drives')}</span>
             </div>
           </div>
 
@@ -312,9 +331,9 @@ export default function HomePage() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Public Credentials</p>
-              <h3 className="text-2xl font-black text-slate-900">Live QR</h3>
-              <span className="text-[11px] text-emerald-600 font-semibold">Tamper-Proof ID Cards</span>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{tx('ডিজিটাল পরিচয়পত্র', 'Public Credentials')}</p>
+              <h3 className="text-2xl font-black text-slate-900">{tx('স্মার্ট কিউআর', 'Live QR')}</h3>
+              <span className="text-[11px] text-emerald-600 font-semibold">{tx('যাচাইযোগ্য আইডি কার্ড', 'Tamper-Proof ID Cards')}</span>
             </div>
           </div>
         </div>
@@ -326,13 +345,16 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full space-y-12" id="about">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="text-xs font-extrabold uppercase tracking-wider text-[#B62A35] bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
-            OUR GUIDING PRINCIPLES
+            {tx('আমাদের মূলনীতি', 'OUR GUIDING PRINCIPLES')}
           </span>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Building a <span className="text-[#B62A35]">Nation</span> on Principles
+            {tx('মূলনীতির ভিত্তিতে', 'Building a')} <span className="text-[#B62A35]">{tx('সমাজ বিনির্মাণ', 'Nation on Principles')}</span>
           </h2>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            WCC is more than an organization; it’s a promise. A promise to hold power accountable and to build a society where the young generation can lead the future with dignity and justice.
+            {tx(
+              'WCC কেবল একটি প্রতিষ্ঠান নয়; এটি একটি অঙ্গীকার। তরুণ সমাজ যাতে মর্যাদা ও ন্যায়ের সাথে ভবিষ্যতের নেতৃত্ব দিতে পারে, সেই সুদৃঢ় শপথ।',
+              'WCC is more than an organization; it’s a promise. A promise to hold power accountable and to build a society where the young generation can lead the future with dignity and justice.'
+            )}
           </p>
         </div>
 
@@ -341,9 +363,12 @@ export default function HomePage() {
             <div className="w-14 h-14 rounded-2xl bg-[#B62A35] text-white flex items-center justify-center mx-auto shadow-md">
               <Award className="w-7 h-7" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Moral Power (নৈতিক শক্তি)</h3>
+            <h3 className="text-xl font-bold text-slate-900">{tx('নৈতিক শক্তি (Moral Power)', 'Moral Power')}</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              সততা ও নীতিবোধের দৃঢ় ভিত্তির ওপর দাঁড়িয়ে সমাজ সংস্কারের প্রত্যয়। ব্যক্তিগত স্বার্থের ঊর্ধ্বে উঠে গণকল্যাণকে সর্বোচ্চ অগ্রাধিকার দেওয়া।
+              {tx(
+                'সততা ও নীতিবোধের দৃঢ় ভিত্তির ওপর দাঁড়িয়ে সমাজ সংস্কারের প্রত্যয়। ব্যক্তিগত স্বার্থের ঊর্ধ্বে উঠে গণকল্যাণকে সর্বোচ্চ অগ্রাধিকার দেওয়া।',
+                'Uncompromising ethics forming the bedrock of social reform. Placing public welfare unequivocally above personal gain.'
+              )}
             </p>
           </div>
 
@@ -351,9 +376,12 @@ export default function HomePage() {
             <div className="w-14 h-14 rounded-2xl bg-[#1D3557] text-white flex items-center justify-center mx-auto shadow-md">
               <ShieldCheck className="w-7 h-7" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Accountability (জবাবদিহিতা)</h3>
+            <h3 className="text-xl font-bold text-slate-900">{tx('জবাবদিহিতা (Accountability)', 'Accountability')}</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              প্রতিটি সিদ্ধান্ত, কার্যক্রম ও আর্থিক হিসাবের উন্মুক্ত স্বচ্ছতা। শতভাগ ডিজিটাল লেজার ও জনসম্মুখে সার্বিক খরচের নিরপেক্ষ হিসাব প্রদান।
+              {tx(
+                'প্রতিটি সিদ্ধান্ত, কার্যক্রম ও আর্থিক হিসাবের উন্মুক্ত স্বচ্ছতা। শতভাগ ডিজিটাল লেজার ও জনসম্মুখে সার্বিক খরচের নিরপেক্ষ হিসাব প্রদান।',
+                'Full transparency across decisions, operations, and finances. 100% digitized double-entry ledgers audited for public trust.'
+              )}
             </p>
           </div>
 
@@ -361,9 +389,12 @@ export default function HomePage() {
             <div className="w-14 h-14 rounded-2xl bg-[#F1AD1A] text-slate-950 flex items-center justify-center mx-auto shadow-md">
               <Sparkles className="w-7 h-7" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Youth Leadership (যুব নেতৃত্ব)</h3>
+            <h3 className="text-xl font-bold text-slate-900">{tx('যুব নেতৃত্ব (Youth Leadership)', 'Youth Leadership')}</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              তরুণদের মেধা, প্রযুক্তিগত দক্ষতা ও সৃষ্টিশীলতাকে দেশের মূল চালিকাশক্তিতে রূপান্তর। নেতৃত্বের অগ্রভাগে সৎ ও সাহসী যুবসমাজ।
+              {tx(
+                'তরুণদের মেধা, প্রযুক্তিগত দক্ষতা ও সৃষ্টিশীলতাকে দেশের মূল চালিকাশক্তিতে রূপান্তর। নেতৃত্বের অগ্রভাগে সৎ ও সাহসী যুবসমাজ।',
+                'Transforming youth technical ability, creativity, and conviction into our country’s primary engine of lasting development.'
+              )}
             </p>
           </div>
         </div>
@@ -377,28 +408,28 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <span className="text-xs font-extrabold uppercase tracking-wider text-[#B62A35]">
-                OUR AGENDA
+                {tx('আমাদের কর্মপরিকল্পনা', 'OUR AGENDA')}
               </span>
               <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
-                Key Focus Areas (মূল কর্মক্ষেত্র)
+                {tx('মূল কর্মক্ষেত্র ও উইংসমূহ', 'Key Focus Areas & Wings')}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                সমগ্র ঝালকাঠি জেলায় তৃণমূল পর্যায়ে বাস্তবমুখী সমাজকল্যাণ উদ্যোগ
+                {tx('সমগ্র ঝালকাঠি জেলায় তৃণমূল পর্যায়ে বাস্তবমুখী সমাজকল্যাণ উদ্যোগ', 'Practical grassroots community advancement across Jhalakathi district')}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/wings"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:border-[#B62A35]/30 hover:text-[#B62A35] px-3.5 py-2 rounded-full shadow-xs transition-all"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:border-[#B62A35]/30 hover:text-[#B62A35] px-3.5 py-2 rounded-full shadow-xs transition-all cursor-pointer"
               >
-                <span>Browse All Wings</span>
+                <span>{tx('সকল উইং দেখুন', 'Browse All Wings')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#B62A35] hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#B62A35] hover:underline cursor-pointer"
               >
-                <span>Join as a volunteer</span>
+                <span>{tx('ভলান্টিয়ার হিসেবে যুক্ত হোন', 'Join as a volunteer')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -412,21 +443,21 @@ export default function HomePage() {
                 <Link
                   key={wing.slug}
                   href={`/wings/${wing.slug}`}
-                  className="group bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md hover:border-[#B62A35]/30 transition-all flex flex-col justify-between space-y-4"
+                  className="group bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md hover:border-[#B62A35]/30 transition-all flex flex-col justify-between space-y-4 cursor-pointer"
                 >
                   <div className="space-y-3">
                     <div className={`w-12 h-12 rounded-2xl ${visual.color} flex items-center justify-center group-hover:scale-105 transition-transform`}>
                       <Icon className="w-6 h-6" />
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#B62A35] transition-colors">
-                      {wing.nameBn} ({wing.nameEn})
+                      {lang === 'bn' ? (wing.nameBn || wing.nameEn) : (wing.nameEn || wing.nameBn)}
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      {wing.description}
+                      {lang === 'bn' ? (wing.description || 'সমাজ রূপান্তরে যুব সমাজের সক্রিয় উদ্যোগ।') : (wing.descriptionEn || wing.description || 'Dedicated to civic empowerment and social impact.')}
                     </p>
                   </div>
                   <div className="pt-2 flex items-center text-xs font-bold text-[#B62A35] group-hover:translate-x-1 transition-transform">
-                    <span>Explore Wing Details</span>
+                    <span>{tx('উইংয়ের বিবরণ দেখুন', 'Explore Wing Details')}</span>
                     <ArrowRight className="w-3.5 h-3.5 ml-1" />
                   </div>
                 </Link>
@@ -455,7 +486,7 @@ export default function HomePage() {
                   />
                 </div>
                 <div className="absolute -bottom-3 -right-3 bg-[#B62A35] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
-                  Chairman, WCC
+                  {tx('চেয়ারম্যান, WCC', 'Chairman, WCC')}
                 </div>
               </div>
             </div>
@@ -464,34 +495,37 @@ export default function HomePage() {
             <div className="lg:col-span-8 space-y-5">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#F1AD1A]">
-                  LEADERSHIP & VISION
+                  {tx('নেতৃত্ব ও দৃষ্টিভঙ্গি', 'LEADERSHIP & VISION')}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  Professor Dr. SM Khalid Mahmud Shakil
+                  {tx('অধ্যাপক ডা. এস এম খালিদ মাহমুদ শাকিল', 'Professor Dr. SM Khalid Mahmud Shakil')}
                 </h2>
                 <div className="text-xs sm:text-sm text-slate-300 space-y-0.5 pt-1">
                   <p className="font-semibold text-[#F1AD1A]">MBBS, MS (Paediatric Surgery)</p>
-                  <p>WHO Fellow (China), Advanced Training (India)</p>
-                  <p>Professor, Department of Paediatric Surgery, Bangladesh Medical College & Hospital</p>
+                  <p>{tx('ডব্লিউএইচও ফেলো (চীন), উচ্চতর প্রশিক্ষণ (ভারত)', 'WHO Fellow (China), Advanced Training (India)')}</p>
+                  <p>{tx('অধ্যাপক, শিশু সার্জারি বিভাগ, বাংলাদেশ মেডিকেল কলেজ ও হাসপাতাল', 'Professor, Department of Paediatric Surgery, Bangladesh Medical College & Hospital')}</p>
                 </div>
               </div>
 
               <blockquote className="text-xs sm:text-sm text-slate-300 italic border-l-2 border-[#F1AD1A] pl-4 leading-relaxed">
-                &ldquo;আমাদের প্রিয় ঝালকাঠি ও এই দেশের যুবসমাজের সততা, সৃজনশীলতা এবং অদম্য ইচ্ছাশক্তিকে কাজে লাগাতে পারলে যেকোনো সংকট দূর করা সম্ভব। আমরা চাই প্রতিটি তরুণকে দক্ষ, শিক্ষিত এবং আত্মপ্রত্যয়ী নাগরিক হিসেবে গড়ে তুলতে। পরিবর্তনের পথে আপনাদের সবাইকে আমাদের সাথে আহ্বান জানাই।&rdquo;
+                {tx(
+                  '“আমাদের প্রিয় ঝালকাঠি ও এই দেশের যুবসমাজের সততা, সৃজনশীলতা এবং অদম্য ইচ্ছাশক্তিকে কাজে লাগাতে পারলে যেকোনো সংকট দূর করা সম্ভব। আমরা চাই প্রতিটি তরুণকে দক্ষ, শিক্ষিত এবং আত্মপ্রত্যয়ী নাগরিক হিসেবে গড়ে তুলতে। পরিবর্তনের পথে আপনাদের সবাইকে আমাদের সাথে আহ্বান জানাই।”',
+                  '“With the integrity, creative courage, and steadfast resolve of our youth in Jhalakathi and across Bangladesh, no obstacle is insurmountable. We are committed to nurturing skilled, self-reliant, and morally grounded leaders. We welcome everyone to join hands on this transformative journey.”'
+                )}
               </blockquote>
 
               <div className="pt-2 flex flex-wrap gap-3">
                 <Link
                   href="/register"
-                  className="px-5 py-2.5 bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold rounded-xl text-xs transition-colors shadow-xs"
+                  className="px-5 py-2.5 bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold rounded-xl text-xs transition-colors shadow-xs cursor-pointer"
                 >
-                  Join Under WCC Leadership
+                  {tx('WCC-তে যোগদান করুন', 'Join Under WCC Leadership')}
                 </Link>
                 <Link
                   href="/#about"
-                  className="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl text-xs transition-colors"
+                  className="px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer"
                 >
-                  Learn Organization History
+                  {tx('আমাদের ইতিহাস জানুন', 'Learn Organization History')}
                 </Link>
               </div>
             </div>
@@ -506,13 +540,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-extrabold uppercase tracking-wider text-[#B62A35]">
-              OUR PLEDGE
+              {tx('আমাদের অঙ্গীকার', 'OUR PLEDGE')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Institutional Commitments of WCC
+              {tx('WCC-এর প্রাতিষ্ঠানিক প্রতিশ্রুতিসমূহ', 'Institutional Commitments of WCC')}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600">
-              সুশাসন, জবাবদিহিতা ও যুব সমাজের স্বতঃস্ফূর্ত অংশগ্রহণে আমাদের অঙ্গীকার
+              {tx('সুশাসন, জবাবদিহিতা ও যুব সমাজের স্বতঃস্ফূর্ত অংশগ্রহণে আমাদের অঙ্গীকার', 'Good governance, unreserved accountability, and dynamic youth mobilization')}
             </p>
           </div>
 
@@ -521,9 +555,12 @@ export default function HomePage() {
               <div className="w-12 h-12 rounded-2xl bg-rose-50 text-[#B62A35] flex items-center justify-center">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">Digital Registry & Verification</h3>
+              <h3 className="text-base font-bold text-slate-900">{tx('ডিজিটাল রেজিস্ট্রি ও ভেরিফিকেশন', 'Digital Registry & Verification')}</h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                প্রতিটি সদস্য ও ভলান্টিয়ারের তথ্য সরাসরি সেন্ট্রাল ডাটাবেজে সংরক্ষিত। কিউআর কোড স্ক্যানের মাধ্যমে তাৎক্ষণিক পরিচয়পত্র যাচাইয়ের উন্মুক্ত ব্যবস্থা।
+                {tx(
+                  'প্রতিটি সদস্য ও ভলান্টিয়ারের তথ্য সরাসরি সেন্ট্রাল ডাটাবেজে সংরক্ষিত। কিউআর কোড স্ক্যানের মাধ্যমে তাৎক্ষণিক পরিচয়পত্র যাচাইয়ের উন্মুক্ত ব্যবস্থা।',
+                  'Member records are stored in a secured cloud database. Instant public credential verification through unique encrypted dynamic QR codes.'
+                )}
               </p>
             </div>
 
@@ -531,9 +568,12 @@ export default function HomePage() {
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-[#A6772A] flex items-center justify-center">
                 <Wallet className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">Total Financial Transparency</h3>
+              <h3 className="text-base font-bold text-slate-900">{tx('সম্পূর্ণ আর্থিক স্বচ্ছতা', 'Total Financial Transparency')}</h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                তহবিলের প্রতিটি টাকা ডাবল-এন্ট্রি অ্যাকাউন্টিং লেজারে লিপিবদ্ধ। কেন্দ্রীয় অডিট ও রসিদ ছাড়া কোনো লেনদেন অনুমোদিত হয় না।
+                {tx(
+                  'তহবিলের প্রতিটি টাকা ডাবল-এন্ট্রি অ্যাকাউন্টিং লেজারে লিপিবদ্ধ। কেন্দ্রীয় অডিট ও রসিদ ছাড়া কোনো লেনদেন অনুমোদিত হয় না।',
+                  'Every contribution and expenditure is registered in real-time double-entry ledgers with zero unauthorized off-book cash handling.'
+                )}
               </p>
             </div>
 
@@ -541,9 +581,12 @@ export default function HomePage() {
               <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#1D3557] flex items-center justify-center">
                 <HeartHandshake className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">Community-Driven Action</h3>
+              <h3 className="text-base font-bold text-slate-900">{tx('জনকল্যাণমূলক মাঠপর্যায়ের কাজ', 'Community-Driven Action')}</h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                স্বাস্থ্য, শিক্ষা, বৃক্ষরোপণ ও সমাজকল্যাণে তৃণমূল পর্যায়ে সরাসরি ফিল্ড কর্মসূচি। তরুণদের মেধা ও শ্রম সরাসরি জনকল্যাণে নিয়োজিত।
+                {tx(
+                  'স্বাস্থ্য, শিক্ষা, বৃক্ষরোপণ ও সমাজকল্যাণে তৃণমূল পর্যায়ে সরাসরি ফিল্ড কর্মসূচি। তরুণদের মেধা ও শ্রম সরাসরি জনকল্যাণে নিয়োজিত।',
+                  'Hands-on field drives across free healthcare, academic support, environmental reforestation, and immediate disaster relief.'
+                )}
               </p>
             </div>
           </div>
@@ -557,13 +600,16 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6 space-y-6">
             <span className="text-xs font-extrabold uppercase tracking-wider text-[#B62A35]">
-              MEMBERSHIP & COMMUNITY
+              {tx('সদস্যপদ ও কমিউনিটি', 'MEMBERSHIP & COMMUNITY')}
             </span>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Why Join <span className="text-[#B62A35]">We Can Change?</span>
+              {tx('কেন উই ক্যান চেঞ্জে', 'Why Join')} <span className="text-[#B62A35]">{tx('যুক্ত হবেন?', 'We Can Change?')}</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              We provide the platform, you provide the passion. WCC brings together youth, academicians, engineers, doctors, and community builders into a unified engine for social good.
+              {tx(
+                'আমরা দিচ্ছি প্ল্যাটফর্ম, আপনি দেবেন আপনার অনুপ্রেরণা। শিক্ষক, প্রকৌশলী, চিকিৎসক ও সমাজকর্মীদের সমন্বয়ে এক শক্তিশালী নাগরিক ফ্রন্ট।',
+                'We provide the platform, you provide the passion. WCC brings together youth, academicians, engineers, doctors, and community builders into a unified engine for social good.'
+              )}
             </p>
 
             <ul className="space-y-4 text-xs sm:text-sm text-slate-700">
@@ -571,36 +617,36 @@ export default function HomePage() {
                 <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                   <Check className="w-3.5 h-3.5" />
                 </div>
-                <span><strong>Empowerment & Justice:</strong> A platform where honesty beats systematic corruption and youth voices lead.</span>
+                <span><strong>{tx('ক্ষমতায়ন ও ন্যায়বিচার:', 'Empowerment & Justice:')}</strong> {tx('সততা যেখানে পদ্ধতিগত দুর্নীতিকে পরাস্ত করে এবং যুব সমাজের কণ্ঠস্বর প্রাধান্য পায়।', 'A platform where honesty beats systematic corruption and youth voices lead.')}</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                   <Check className="w-3.5 h-3.5" />
                 </div>
-                <span><strong>Learn, Lead, and Grow Together:</strong> Master valuable leadership, organizing, and digital technology skills.</span>
+                <span><strong>{tx('একসাথে শেখা ও নেতৃত্ব বিকাশ:', 'Learn, Lead, and Grow Together:')}</strong> {tx('সাংগঠনিক দক্ষতা, নেতৃত্ব ও ডিজিটাল প্রযুক্তির বাস্তব অভিজ্ঞতা অর্জন করুন।', 'Master valuable leadership, organizing, and digital technology skills.')}</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                   <Check className="w-3.5 h-3.5" />
                 </div>
-                <span><strong>Official Credentials:</strong> Receive a verified Digital ID card with live QR code and public credibility.</span>
+                <span><strong>{tx('অফিসিয়াল ডিজিটাল পরিচয়পত্র:', 'Official Credentials:')}</strong> {tx('লাইভ কিউআর ভেরিফাইড স্মার্ট ডিজিটাল সদস্য কার্ড লাভ করুন।', 'Receive a verified Digital ID card with live QR code and public credibility.')}</span>
               </li>
             </ul>
 
             <div className="pt-2 flex flex-wrap gap-3">
               <Link
                 href="/login"
-                className="px-6 py-3 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Join WCC / Sign In</span>
+                <span>{tx('লগইন করুন', 'Sign In')}</span>
               </Link>
               <Link
                 href="/register"
-                className="px-6 py-3 bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                <span>Register Online</span>
+                <span>{tx('অনলাইন মেম্বারশিপ নিবন্ধন', 'Register Online')}</span>
               </Link>
             </div>
           </div>
@@ -633,28 +679,33 @@ export default function HomePage() {
       <section className="bg-gradient-to-r from-[#B62A35] via-[#8E1A23] to-[#1D3557] text-white py-16 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
-            Enough Talk. Time for Action.
+            {tx('আর অপেক্ষা নয়। এখনই পরিবর্তনের সময়।', 'Enough Talk. Time for Action.')}
           </h2>
           <p className="text-sm sm:text-base text-slate-200 max-w-xl mx-auto leading-relaxed">
-            আমাদের দেশের প্রয়োজন আপনার মেধা, শক্তি ও দৃষ্টিভঙ্গি। আজই যুক্ত হোন এবং পরিবর্তনের অংশীদার হিসেবে আপনার পদচিহ্ন রাখুন।
+            {tx(
+              'আমাদের দেশের প্রয়োজন আপনার মেধা, শক্তি ও দৃষ্টিভঙ্গি। আজই যুক্ত হোন এবং পরিবর্তনের অংশীদার হিসেবে আপনার পদচিহ্ন রাখুন।',
+              'Our communities need your intellect, passion, and vision. Step forward today to shape an enduring legacy.'
+            )}
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-3">
             <Link
               href="/login"
-              className="px-8 py-3.5 bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold rounded-xl text-sm shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+              className="px-8 py-3.5 bg-[#F1AD1A] hover:bg-[#D9980F] text-slate-950 font-bold rounded-xl text-sm shadow-xl transition-all hover:scale-105 flex items-center gap-2 cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
-              <span>Join WCC / Sign In</span>
+              <span>{tx('লগইন করুন', 'Sign In')}</span>
             </Link>
             <Link
               href="/register"
-              className="px-8 py-3.5 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold rounded-xl text-sm backdrop-blur transition-all flex items-center gap-2"
+              className="px-8 py-3.5 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold rounded-xl text-sm backdrop-blur transition-all flex items-center gap-2 cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
-              <span>Register Here</span>
+              <span>{tx('নিবন্ধন করুন', 'Register Here')}</span>
             </Link>
           </div>
-          <span className="block text-xs text-slate-300 pt-2">Takes less than 2 minutes to register online.</span>
+          <span className="block text-xs text-slate-300 pt-2">
+            {tx('অনলাইন রেজিস্ট্রেশনে সময় লাগে মাত্র ২ মিনিট।', 'Takes less than 2 minutes to register online.')}
+          </span>
         </div>
       </section>
     </div>
