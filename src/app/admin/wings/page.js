@@ -17,7 +17,8 @@ import {
   ShieldAlert,
   Image as ImageIcon,
   ListChecks,
-  RefreshCw
+  RefreshCw,
+  UserCheck
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -55,6 +56,41 @@ export default function AdminWingsPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [wingToDelete, setWingToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Leader assignment state
+  const [leaderModalOpen, setLeaderModalOpen] = useState(false);
+  const [wingForLeader, setWingForLeader] = useState(null);
+  const [usersList, setUsersList] = useState([]);
+  const [selectedLeaderId, setSelectedLeaderId] = useState('');
+  const [savingLeader, setSavingLeader] = useState(false);
+
+  const handleOpenAssignLeader = async (wing) => {
+    setWingForLeader(wing);
+    setSelectedLeaderId(wing.leader?._id || wing.leader || '');
+    setLeaderModalOpen(true);
+    try {
+      const data = await api.getUsers();
+      setUsersList(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error('Failed to load users:', e);
+    }
+  };
+
+  const handleSaveLeader = async (e) => {
+    e.preventDefault();
+    if (!wingForLeader) return;
+    setSavingLeader(true);
+    try {
+      await api.assignWingLeader(wingForLeader._id, selectedLeaderId || null);
+      flashSuccess(`উইং লিডার সফলভাবে নির্ধারিত হয়েছে (${wingForLeader.nameEn})!`);
+      setLeaderModalOpen(false);
+      fetchWings();
+    } catch (err) {
+      setErrorMessage(err.message || 'উইং লিডার অ্যাসাইন করতে সমস্যা হয়েছে।');
+    } finally {
+      setSavingLeader(false);
+    }
+  };
 
   // 1. Check user role
   useEffect(() => {
@@ -342,6 +378,37 @@ export default function AdminWingsPage() {
         </div>
       )}
 
+      {/* Quick Jump to Wings */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-3.5 sm:p-4 rounded-2xl border border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-[#F1AD1A] flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-xs font-bold text-white block">সরাসরি উইং পেজে প্রবেশ করুন (Direct Wing Access)</span>
+            <span className="text-[11px] text-slate-400">নিচের যেকোনো উইংয়ে ক্লিক করলে সরাসরি সেই উইংয়ের পেজ ওপেন হবে:</span>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {wings.map((w) => (
+            <Link
+              key={w._id || w.slug}
+              href={`/wings/${w.slug}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
+                w.slug === 'education'
+                  ? 'bg-[#B62A35] hover:bg-[#9E1F2A] text-white ring-1 ring-rose-400/50 scale-[1.02]'
+                  : 'bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white'
+              }`}
+              title={`${w.nameEn} পেজে যান`}
+            >
+              <span>{w.slug === 'education' ? '🎓' : w.slug === 'health' ? '🏥' : w.slug === 'sports' ? '⚽' : w.slug === 'cultural' ? '🎨' : '🌱'}</span>
+              <span>{w.nameEn}</span>
+              <ExternalLink className="w-3 h-3 opacity-70" />
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Search & Layout Toggle Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
@@ -415,8 +482,9 @@ export default function AdminWingsPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-extrabold text-[10px]">
-                  <th className="py-3.5 px-4">Wing</th>
+                  <th className="py-3.5 px-4">Wing (উইংয়ের নাম)</th>
                   <th className="py-3.5 px-4">Slug</th>
+                  <th className="py-3.5 px-4">Wing Leader</th>
                   <th className="py-3.5 px-4">Description</th>
                   <th className="py-3.5 px-4">Mission Goals</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
@@ -426,30 +494,75 @@ export default function AdminWingsPage() {
                 {filteredWings.map((wing) => (
                   <tr key={wing._id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
+                      <Link
+                        href={`/wings/${wing.slug}`}
+                        className="flex items-center gap-3 group/link hover:opacity-90 transition-all cursor-pointer"
+                        title={`${wing.nameEn} পেজে যান`}
+                      >
                         {wing.coverImage ? (
                           <img
                             src={wing.coverImage}
                             alt={wing.nameEn}
-                            className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-100"
+                            className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-100 group-hover/link:ring-2 group-hover/link:ring-[#B62A35] transition-all"
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 group-hover/link:bg-rose-50 group-hover/link:text-[#B62A35] transition-all">
                             <ImageIcon className="w-5 h-5" />
                           </div>
                         )}
                         <div>
-                          <div className="font-extrabold text-slate-900 text-sm">{wing.nameEn}</div>
-                          <div className="text-[11px] text-slate-500 font-medium">{wing.nameBn}</div>
+                          <div className="font-extrabold text-slate-900 text-sm group-hover/link:text-[#B62A35] flex items-center gap-1.5 transition-colors">
+                            <span>{wing.nameEn}</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-[#B62A35] opacity-0 group-hover/link:opacity-100 transition-opacity" />
+                          </div>
+                          <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                            <span>{wing.nameBn}</span>
+                            <span className="text-[10px] text-emerald-600 font-semibold opacity-0 group-hover/link:opacity-100 transition-opacity">
+                              • পেজে যান →
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="font-mono text-[11px] px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md border border-slate-200">
-                        {wing.slug}
-                      </span>
+                      <Link
+                        href={`/wings/${wing.slug}`}
+                        className="font-mono text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-[#B62A35] rounded-md border border-slate-200 hover:border-rose-200 transition-colors inline-flex items-center gap-1"
+                        title={`${wing.slug} উইং পেজে যান`}
+                      >
+                        <span>/{wing.slug}</span>
+                        <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                      </Link>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      {wing.leader ? (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={wing.leader.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
+                            alt={wing.leader.name}
+                            className="w-7 h-7 rounded-full object-cover border border-amber-400"
+                          />
+                          <div>
+                            <span className="font-bold text-slate-800 text-[11px] block">{wing.leader.name}</span>
+                            <button
+                              onClick={() => handleOpenAssignLeader(wing)}
+                              className="text-[10px] text-purple-600 hover:underline font-semibold cursor-pointer"
+                            >
+                              পরিবর্তন করুন
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleOpenAssignLeader(wing)}
+                          className="text-[10px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer"
+                        >
+                          + লিডার নিয়োগ করুন
+                        </button>
+                      )}
                     </td>
 
                     <td className="py-3.5 px-4 max-w-xs">
@@ -477,6 +590,13 @@ export default function AdminWingsPage() {
 
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/wings/${wing.slug}`}
+                          className="p-1.5 text-slate-600 hover:text-[#B62A35] hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1"
+                          title="উইং পেজে প্রবেশ করুন (Go to Wing Page)"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Link>
                         <button
                           onClick={() => handleOpenEdit(wing)}
                           className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
@@ -508,12 +628,16 @@ export default function AdminWingsPage() {
               className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col overflow-hidden group"
             >
               {/* Card Cover */}
-              <div className="h-36 bg-gradient-to-r from-slate-900 to-slate-800 relative overflow-hidden flex items-center justify-center">
+              <Link
+                href={`/wings/${wing.slug}`}
+                className="h-36 bg-gradient-to-r from-slate-900 to-slate-800 relative overflow-hidden flex items-center justify-center cursor-pointer block group/cover"
+                title={`${wing.nameEn} পেজে যান`}
+              >
                 {wing.coverImage ? (
                   <img
                     src={wing.coverImage}
                     alt={wing.nameEn}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover/cover:scale-105 transition-transform duration-300"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 ) : (
@@ -523,17 +647,25 @@ export default function AdminWingsPage() {
                   </div>
                 )}
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                  <span className="font-mono text-[10px] px-2 py-0.5 bg-black/60 text-white rounded-md backdrop-blur-xs font-bold border border-white/10">
-                    {wing.slug}
+                  <span className="font-mono text-[10px] px-2 py-0.5 bg-black/60 text-white rounded-md backdrop-blur-xs font-bold border border-white/10 flex items-center gap-1">
+                    <span>/{wing.slug}</span>
+                    <ExternalLink className="w-3 h-3 text-white/80" />
                   </span>
                 </div>
-              </div>
+              </Link>
 
               {/* Card Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="font-black text-slate-900 text-base">{wing.nameEn}</h3>
+                    <Link
+                      href={`/wings/${wing.slug}`}
+                      className="group/wtitle flex items-center gap-1.5 hover:text-[#B62A35] transition-colors"
+                      title={`${wing.nameEn} পেজে যান`}
+                    >
+                      <h3 className="font-black text-slate-900 text-base group-hover/wtitle:text-[#B62A35]">{wing.nameEn}</h3>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover/wtitle:text-[#B62A35] transition-colors" />
+                    </Link>
                     <span className="text-xs font-bold text-[#B62A35] shrink-0">{wing.nameBn}</span>
                   </div>
                   <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
@@ -541,8 +673,25 @@ export default function AdminWingsPage() {
                   </p>
                 </div>
 
+                {/* Wing Leader on Card */}
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">উইং লিডার</span>
+                  {wing.leader ? (
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        src={wing.leader.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
+                        alt={wing.leader.name}
+                        className="w-5 h-5 rounded-full object-cover border border-amber-400"
+                      />
+                      <span className="text-xs font-bold text-slate-800">{wing.leader.name}</span>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-slate-400 italic">নিযুক্ত নেই</span>
+                  )}
+                </div>
+
                 {/* Mission Points */}
-                <div className="space-y-1.5 pt-3 border-t border-slate-100">
+                <div className="space-y-1.5 pt-2 border-t border-slate-100">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                     <ListChecks className="w-3.5 h-3.5 text-[#B62A35]" />
                     <span>Mission Goals ({wing.missionPoints?.length || 0})</span>
@@ -564,21 +713,30 @@ export default function AdminWingsPage() {
                 </div>
 
                 {/* Card Actions */}
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                  <button
-                    onClick={() => handleOpenEdit(wing)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                  <Link
+                    href={`/wings/${wing.slug}`}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-[#B62A35] hover:bg-[#9E1F2A] rounded-xl transition-colors shadow-xs"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={() => { setWingToDelete(wing); setDeleteModalOpen(true); }}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete</span>
-                  </button>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>উইং পেজ দেখুন</span>
+                  </Link>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => handleOpenEdit(wing)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => { setWingToDelete(wing); setDeleteModalOpen(true); }}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -795,6 +953,81 @@ export default function AdminWingsPage() {
                 <span>Confirm Delete</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Wing Leader Modal */}
+      {leaderModalOpen && wingForLeader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase text-purple-700">উইং নেতৃত্ব ব্যবস্থাপনা</span>
+                <h3 className="font-extrabold text-base text-slate-900">
+                  {wingForLeader.nameBn} ({wingForLeader.nameEn})
+                </h3>
+              </div>
+              <button
+                onClick={() => setLeaderModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500">
+              এই উইংয়ের সার্বিক কার্যক্রম, কোর্স এবং বই আদান-প্রদান তদারকির জন্য একজন উইং লিডার নিয়োগ করুন।
+            </p>
+
+            <form onSubmit={handleSaveLeader} className="space-y-4 pt-1">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">সদস্য নির্বাচন করুন</label>
+                <select
+                  value={selectedLeaderId}
+                  onChange={(e) => setSelectedLeaderId(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-purple-600"
+                >
+                  <option value="">-- কোনো লিডার নেই (পদ শূন্য) --</option>
+                  {usersList.map((u) => (
+                    <option key={u._id || u.id} value={u._id || u.id}>
+                      {u.name} ({u.email}) - {u.role}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="p-3 bg-purple-50 rounded-xl border border-purple-100 text-[11px] text-purple-900 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <UserCheck className="w-3.5 h-3.5 text-purple-700" />
+                  <span>উইং লিডারের দায়িত্ব ও ক্ষমতা:</span>
+                </p>
+                <ul className="list-disc list-inside space-y-0.5 text-purple-800">
+                  <li>শিক্ষা উইংয়ের সকল বই অনুদান অনুমোদন বা বাতিল</li>
+                  <li>সদস্যদের বই রিকোয়েস্ট যাচাই ও অনুমোদন</li>
+                  <li>উইংয়ের অধীনে নতুন ফ্রি কোর্স ও লেকচার প্রকাশ</li>
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setLeaderModalOpen(false)}
+                  disabled={savingLeader}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingLeader}
+                  className="px-5 py-2.5 text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {savingLeader && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  <span>সংরক্ষণ করুন</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

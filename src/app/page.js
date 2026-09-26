@@ -120,8 +120,10 @@ export default function HomePage() {
         return { icon: Stethoscope, color: 'bg-emerald-50 text-emerald-600' };
       case 'sports':
         return { icon: Trophy, color: 'bg-amber-50 text-[#A6772A]' };
+      case 'cultural':
       case 'culture':
         return { icon: Landmark, color: 'bg-purple-50 text-purple-600' };
+      case 'environment':
       case 'heritage':
         return { icon: TreePine, color: 'bg-teal-50 text-teal-600' };
       default:

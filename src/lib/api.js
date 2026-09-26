@@ -106,7 +106,38 @@ export const api = {
   getWing: (slug) => request(`/wings/${slug}`),
   createWing: (data) => request('/wings', { method: 'POST', body: JSON.stringify(data) }),
   updateWing: (id, data) => request(`/wings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  assignWingLeader: (id, leaderId) => request(`/wings/${id}/leader`, { method: 'PATCH', body: JSON.stringify({ leaderId }) }),
   deleteWing: (id) => request(`/wings/${id}`, { method: 'DELETE' }),
+
+  // Education Wing: Free Courses
+  getCourses: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/education/courses${query ? `?${query}` : ''}`);
+  },
+  getCourse: (id) => request(`/education/courses/${id}`),
+  enrollCourse: (id) => request(`/education/courses/${id}/enroll`, { method: 'POST' }),
+  createCourse: (data) => request('/education/courses', { method: 'POST', body: JSON.stringify(data) }),
+  updateCourse: (id, data) => request(`/education/courses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteCourse: (id) => request(`/education/courses/${id}`, { method: 'DELETE' }),
+
+  // Education Wing: Book Donations & Library
+  getBooks: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/education/books${query ? `?${query}` : ''}`);
+  },
+  getMyBookDonations: () => request('/education/books/my-donations'),
+  getBook: (id) => request(`/education/books/${id}`),
+  donateBook: (data) => request('/education/books', { method: 'POST', body: JSON.stringify(data) }),
+  updateBookStatus: (id, data) => request(`/education/books/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
+
+  // Education Wing: Book Requests
+  requestBook: (id, data) => request(`/education/books/${id}/request`, { method: 'POST', body: JSON.stringify(data) }),
+  getMyBookRequests: () => request('/education/book-requests/my-requests'),
+  getBookRequests: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/education/book-requests${query ? `?${query}` : ''}`);
+  },
+  updateBookRequestStatus: (id, data) => request(`/education/book-requests/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
 
   // Programs
   getPrograms: (params = {}) => {
