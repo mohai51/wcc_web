@@ -184,15 +184,45 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Quick Admin Credential Preset */}
+          {/* Quick Credential Presets */}
           <div className="pt-4 border-t border-slate-100 space-y-2">
-            <button
-              type="button"
-              onClick={() => handleRolePreset('admin@wecanchange.org', 'wccadmin2026')}
-              className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-rose-50 hover:text-[#B62A35] border border-slate-200 text-slate-700 text-xs font-bold text-center transition-colors cursor-pointer"
-            >
-              Auto-fill Admin (admin@wecanchange.org)
-            </button>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block text-center">
+              Quick Test Login (এক ক্লিকে অটো-ফিল)
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleRolePreset('admin@wecanchange.org', 'wccadmin2026')}
+                className="py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-rose-50 hover:text-[#B62A35] border border-slate-200 text-slate-700 text-[11px] font-bold text-center transition-colors cursor-pointer"
+                title="Admin Login"
+              >
+                👑 Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRolePreset('tanvir.chowdhury@example.com', 'wccmember2026')}
+                className="py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
+                title="Education Wing Leader Login"
+              >
+                🎓 Wing Leader
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRolePreset('member@wecanchange.org', 'wccmember2026')}
+                className="py-2 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
+                title="General Member Login"
+              >
+                👤 General Member
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRolePreset('volunteer@wecanchange.org', 'wccvol2026')}
+                className="py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
+                title="Volunteer Login"
+              >
+                🤝 Volunteer
+              </button>
+            </div>
           </div>
 
           <div className="pt-2 text-center text-xs text-slate-500 space-y-2">

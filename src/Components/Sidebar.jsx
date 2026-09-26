@@ -49,6 +49,8 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
         return { text: 'Admin', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' };
       case 'coordinator':
         return { text: 'Coordinator', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+      case 'wing_leader':
+        return { text: 'Wing Leader', color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
       case 'volunteer':
         return { text: 'Volunteer', color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
       case 'finance_officer':
@@ -102,25 +104,24 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
       ];
     }
 
-    if (user.role === 'coordinator') {
-      const assignedWingSlug = user.assignedWing?.slug || '';
+    if (user.role === 'coordinator' || user.role === 'wing_leader') {
+      const assignedWingSlug = user.assignedWing?.slug || 'education';
       return [
         {
-          title: 'WING OPERATIONS',
+          title: user.role === 'wing_leader' ? 'WING LEADERSHIP' : 'WING OPERATIONS',
           items: [
-            { id: 'overview', label: 'Coordinator Hub', icon: LayoutDashboard, href: '/dashboard' },
-            { id: 'profile', label: 'Coordinator Profile', icon: User, href: '/profile' },
+            { id: 'overview', label: 'Leader Hub', icon: LayoutDashboard, href: '/dashboard' },
+            { id: 'wing-portal', label: 'My Wing Platform', icon: Sparkles, href: `/wings/${assignedWingSlug}` },
+            { id: 'profile', label: 'Leader Profile', icon: User, href: '/profile' },
             { id: 'programs', label: 'Wing Programs', icon: Calendar, href: '/admin/programs' },
             { id: 'events', label: 'Wing Events', icon: CalendarDays, href: '/admin/events' },
             { id: 'issues', label: 'Community Issues', icon: AlertTriangle, href: '/admin/issues' }
           ]
         },
         {
-          title: 'COMMUNITY & WING',
+          title: 'COMMUNITY & PUBLIC',
           items: [
-            ...(assignedWingSlug
-              ? [{ id: 'public-wing', label: 'My Public Wing', icon: Sparkles, href: `/wings/${assignedWingSlug}` }]
-              : [{ id: 'public-wings', label: 'Explore Wings', icon: Sparkles, href: '/wings' }]),
+            { id: 'public-wings', label: 'Explore All Wings', icon: Sparkles, href: '/wings' },
             { id: 'verify', label: 'Public QR Verification', icon: ShieldCheck, href: '/verify' }
           ]
         }
@@ -135,6 +136,7 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
             { id: 'hub', label: 'Volunteer Hub', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
             { id: 'profile', label: 'Volunteer Profile', icon: User, href: '/profile' },
             { id: 'requests', label: 'Wing Requests', icon: HeartHandshake, href: '/dashboard?tab=requests' },
+            { id: 'wings-portal', label: 'Education Wing', icon: Sparkles, href: '/wings/education' },
             { id: 'badge', label: 'My Digital Badge', icon: Award, href: '/dashboard?tab=badge' },
             { id: 'log', label: 'Log Service Hours', icon: Clock, href: '/dashboard?tab=log' },
             { id: 'history', label: 'Service Log History', icon: FileText, href: '/dashboard?tab=history' }
@@ -156,6 +158,8 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
         title: 'MY MEMBERSHIP',
         items: [
           { id: 'hub', label: 'Member Portal', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
+          { id: 'education-wing', label: 'Education Wing (কোর্স ও বই)', icon: Sparkles, href: '/wings/education' },
+          { id: 'all-wings', label: 'WCC Wings Directory', icon: Sparkles, href: '/wings' },
           { id: 'profile', label: 'Membership Profile', icon: User, href: '/profile' },
           { id: 'requests', label: 'Wing & Volunteer Hub', icon: HeartHandshake, href: '/dashboard?tab=requests' },
           { id: 'id-card', label: 'Official Digital ID', icon: Award, href: '/dashboard?tab=id-card' }
