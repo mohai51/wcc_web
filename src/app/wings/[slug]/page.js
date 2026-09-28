@@ -37,8 +37,54 @@ import {
   Send,
   Eye,
   Check,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
+
+export function getYouTubeEmbedUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+
+  let videoId = '';
+  const shortMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (shortMatch && shortMatch[1]) {
+    videoId = shortMatch[1];
+  }
+
+  if (!videoId) {
+    const watchMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+    if (watchMatch && watchMatch[1]) {
+      videoId = watchMatch[1];
+    }
+  }
+
+  if (!videoId) {
+    const embedMatch = trimmed.match(/youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{11})/);
+    if (embedMatch && embedMatch[1]) {
+      videoId = embedMatch[1];
+    }
+  }
+
+  if (!videoId) {
+    const shortsMatch = trimmed.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+    if (shortsMatch && shortsMatch[1]) {
+      videoId = shortsMatch[1];
+    }
+  }
+
+  if (!videoId) {
+    const liveMatch = trimmed.match(/youtube\.com\/live\/([a-zA-Z0-9_-]{11})/);
+    if (liveMatch && liveMatch[1]) {
+      videoId = liveMatch[1];
+    }
+  }
+
+  if (!videoId && /^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    videoId = trimmed;
+  }
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : trimmed;
+}
 
 export default function WingDetailPage({ params }) {
   const resolvedParams = use(params);
@@ -116,6 +162,8 @@ export default function WingDetailPage({ params }) {
     ]
   });
   const [submittingCourse, setSubmittingCourse] = useState(false);
+  const [deletingCourseId, setDeletingCourseId] = useState(null);
+  const [courseToDelete, setCourseToDelete] = useState(null);
 
   // Flash Feedback
   const [feedback, setFeedback] = useState({ type: '', message: '' });
@@ -369,8 +417,15 @@ export default function WingDetailPage({ params }) {
 
     setSubmittingCourse(true);
     try {
+      const processedLessons = (courseForm.lessons || []).map((les, idx) => ({
+        ...les,
+        videoUrl: getYouTubeEmbedUrl(les.videoUrl),
+        order: les.order || idx + 1
+      }));
+
       await api.createCourse({
         ...courseForm,
+        lessons: processedLessons,
         instructor: {
           name: courseForm.instructorName || user?.name || 'WCC Instructor',
           title: courseForm.instructorTitle,
@@ -392,11 +447,30 @@ export default function WingDetailPage({ params }) {
         ]
       });
       loadEducationData();
-      setLeaderTab('donations');
+      setLeaderTab('manage_courses');
     } catch (err) {
       showFeedback('error', err.message || tx('কোর্স তৈরি করতে ব্যর্থ হয়েছে।', 'Failed to create course.'));
     } finally {
       setSubmittingCourse(false);
+    }
+  };
+
+  // Handle Delete Course
+  const handleDeleteCourse = async (courseId) => {
+    if (!courseId) return;
+    setDeletingCourseId(courseId);
+    try {
+      await api.deleteCourse(courseId);
+      showFeedback('success', tx('কোর্সটি সফলভাবে মুছে ফেলা হয়েছে!', 'Course deleted successfully!'));
+      setCourseToDelete(null);
+      if (selectedCourse && selectedCourse._id === courseId) {
+        setSelectedCourse(null);
+      }
+      loadEducationData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('কোর্সটি মুছতে ব্যর্থ হয়েছে।', 'Failed to delete course.'));
+    } finally {
+      setDeletingCourseId(null);
     }
   };
 
@@ -893,6 +967,19 @@ export default function WingDetailPage({ params }) {
                             {course.category || 'General'}
                           </span>
                         </div>
+                        {isLeaderOrAdmin && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCourseToDelete(course);
+                            }}
+                            className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white backdrop-blur transition-colors cursor-pointer shadow-md"
+                            title={tx('কোর্সটি ডিলিট করুন', 'Delete Course')}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
 
                       <div className="p-6 space-y-3">
@@ -930,17 +1017,30 @@ export default function WingDetailPage({ params }) {
                       </div>
                     </div>
 
-                    <div className="p-6 pt-0">
+                    <div className="p-6 pt-0 flex items-center gap-2">
                       <button
                         onClick={() => {
                           setSelectedCourse(course);
                           setActiveLessonIndex(0);
                         }}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 hover:bg-[#B62A35] text-white font-bold text-xs transition-colors cursor-pointer"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 hover:bg-[#B62A35] text-white font-bold text-xs transition-colors cursor-pointer"
                       >
                         <Play className="w-3.5 h-3.5 fill-current" />
                         <span>{tx('কোর্সে প্রবেশ করুন', 'Start Course')}</span>
                       </button>
+                      {isLeaderOrAdmin && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCourseToDelete(course);
+                          }}
+                          className="p-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer shrink-0"
+                          title={tx('কোর্সটি ডিলিট করুন', 'Delete Course')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1240,6 +1340,14 @@ export default function WingDetailPage({ params }) {
                   {tx('পেন্ডিং বই রিকোয়েস্ট', 'Pending Requests')} ({allBookRequests.filter(r => r.status === 'pending').length})
                 </button>
                 <button
+                  onClick={() => setLeaderTab('manage_courses')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    leaderTab === 'manage_courses' ? 'bg-white text-purple-700 shadow-xs' : 'text-slate-600'
+                  }`}
+                >
+                  {tx('কোর্স পরিচালনা ও ডিলিট', 'Manage Courses')} ({courses.length})
+                </button>
+                <button
                   onClick={() => setLeaderTab('new_course')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     leaderTab === 'new_course' ? 'bg-white text-purple-700 shadow-xs' : 'text-slate-600'
@@ -1437,10 +1545,10 @@ export default function WingDetailPage({ params }) {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">{tx('ভিডিও লেকচার লিঙ্ক (YouTube Embed / Direct)', 'Video Lecture Embed URL')}</label>
+                  <label className="text-xs font-bold text-slate-700">{tx('ভিডিও লেকচার লিঙ্ক (YouTube URL / Embed)', 'Video Lecture YouTube URL')}</label>
                   <input
-                    type="url"
-                    placeholder="https://www.youtube.com/embed/..."
+                    type="text"
+                    placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
                     value={courseForm.lessons[0]?.videoUrl || ''}
                     onChange={e => {
                       const lessons = [...courseForm.lessons];
@@ -1449,6 +1557,9 @@ export default function WingDetailPage({ params }) {
                     }}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-purple-600"
                   />
+                  <p className="text-[11px] text-slate-500">
+                    {tx('💡 যেকোনো YouTube লিংক (যেমন watch, share বা shorts লিঙ্ক) পেস্ট করলে তা স্বয়ংক্রিয়ভাবে প্লেয়ারের উপযোগী Embed লিংকে পরিবর্তিত হবে।', '💡 Any YouTube link will automatically be converted to a working embed format.')}
+                  </p>
                 </div>
 
                 <button
@@ -1459,6 +1570,80 @@ export default function WingDetailPage({ params }) {
                   {submittingCourse ? tx('লঞ্চ হচ্ছে...', 'Publishing...') : tx('কোর্সটি পাবলিশ করুন', 'Publish Course')}
                 </button>
               </form>
+            )}
+
+            {/* Moderation Sub-Tab 4: Manage Courses */}
+            {leaderTab === 'manage_courses' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-800">
+                    {tx('প্রকাশিত কোর্স তালিকা ও নিয়ন্ত্রণ', 'Published Courses & Controls')}
+                  </h3>
+                  <button
+                    onClick={() => setLeaderTab('new_course')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{tx('নতুন কোর্স যোগ করুন', 'Add New Course')}</span>
+                  </button>
+                </div>
+
+                {courses.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl">
+                    {tx('বর্তমানে কোনো কোর্স প্রকাশিত নেই।', 'No courses published yet.')}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {courses.map(c => (
+                      <div
+                        key={c._id}
+                        className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-4 justify-between"
+                      >
+                        <div className="flex gap-3 min-w-0">
+                          <img
+                            src={c.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800'}
+                            alt={c.title}
+                            className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200"
+                          />
+                          <div className="min-w-0 space-y-1">
+                            <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                              {c.category || 'General'}
+                            </span>
+                            <h4 className="text-sm font-bold text-slate-900 truncate">
+                              {c.title}
+                            </h4>
+                            <p className="text-xs text-slate-500">
+                              {c.lessons?.length || 0} {tx('টি লেকচার', 'Lessons')} • {c.duration || 'Self-paced'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCourse(c);
+                              setActiveLessonIndex(0);
+                            }}
+                            className="p-2 text-slate-700 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-colors cursor-pointer"
+                            title={tx('কোর্স দেখুন', 'View Course')}
+                          >
+                            <Play className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCourseToDelete(c)}
+                            className="p-2 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer"
+                            title={tx('কোর্সটি ডিলিট করুন', 'Delete Course')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </section>
         )}
@@ -1702,12 +1887,25 @@ export default function WingDetailPage({ params }) {
                 </span>
                 <h3 className="text-base sm:text-lg font-black">{selectedCourse.title}</h3>
               </div>
-              <button
-                onClick={() => setSelectedCourse(null)}
-                className="text-slate-400 hover:text-white p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                {isLeaderOrAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setCourseToDelete(selectedCourse)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition-colors cursor-pointer"
+                    title={tx('কোর্সটি ডিলিট করুন', 'Delete Course')}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{tx('কোর্স মুছুন', 'Delete')}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedCourse(null)}
+                  className="text-slate-400 hover:text-white p-1 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Video & Lessons Body */}
@@ -1717,7 +1915,7 @@ export default function WingDetailPage({ params }) {
                 {selectedCourse.lessons?.[activeLessonIndex]?.videoUrl ? (
                   <div className="aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-md">
                     <iframe
-                      src={selectedCourse.lessons[activeLessonIndex].videoUrl}
+                      src={getYouTubeEmbedUrl(selectedCourse.lessons[activeLessonIndex].videoUrl)}
                       title={selectedCourse.lessons[activeLessonIndex].title}
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -1839,6 +2037,53 @@ export default function WingDetailPage({ params }) {
                 className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs"
               >
                 {tx('বাতিল নিশ্চিত করুন', 'Confirm Rejection')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Course Deletion Confirmation Modal */}
+      {courseToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 shadow-2xl text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-black text-slate-900">
+                {tx('কোর্সটি মুছে ফেলতে চান?', 'Delete this course?')}
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                &quot;<strong>{courseToDelete.title}</strong>&quot; {tx('কোর্সটি মুছে ফেললে শিক্ষার্থীরা আর এই কোর্সের ভিডিও দেখতে পারবে না। আপনি কি নিশ্চিত?', 'Once deleted, this course will no longer be accessible to students. Are you sure you want to proceed?')}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setCourseToDelete(null)}
+                disabled={deletingCourseId === courseToDelete._id}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                {tx('বাতিল', 'Cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteCourse(courseToDelete._id)}
+                disabled={deletingCourseId === courseToDelete._id}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {deletingCourseId === courseToDelete._id ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>{tx('মুছে ফেলা হচ্ছে...', 'Deleting...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{tx('হ্যাঁ, মুছে ফেলুন', 'Yes, Delete Course')}</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
