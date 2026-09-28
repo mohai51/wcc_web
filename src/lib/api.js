@@ -139,6 +139,57 @@ export const api = {
   },
   updateBookRequestStatus: (id, data) => request(`/education/book-requests/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
 
+  // Health Wing: Free Health Camps
+  getHealthCamps: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/health/camps${query ? `?${query}` : ''}`);
+  },
+  getHealthCamp: (id) => request(`/health/camps/${id}`),
+  createHealthCamp: (data) => request('/health/camps', { method: 'POST', body: JSON.stringify(data) }),
+  updateHealthCamp: (id, data) => request(`/health/camps/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteHealthCamp: (id) => request(`/health/camps/${id}`, { method: 'DELETE' }),
+  registerHealthCamp: (id, data) => request(`/health/camps/${id}/register`, { method: 'POST', body: JSON.stringify(data) }),
+  assignVolunteerToCamp: (id, data) => request(`/health/camps/${id}/assign-volunteer`, { method: 'POST', body: JSON.stringify(data) }),
+
+  // Health Wing: Blood Bank
+  getBloodDonors: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/health/donors${query ? `?${query}` : ''}`);
+  },
+  getBloodDonor: (id) => request(`/health/donors/${id}`),
+  createBloodDonor: (data) => request('/health/donors', { method: 'POST', body: JSON.stringify(data) }),
+  updateBloodDonor: (id, data) => request(`/health/donors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteBloodDonor: (id) => request(`/health/donors/${id}`, { method: 'DELETE' }),
+
+  // Health Wing: Emergency Cell
+  createEmergencyRequest: (data) => request('/health/emergency-requests', { method: 'POST', body: JSON.stringify(data) }),
+  getMyEmergencyRequests: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/health/emergency-requests/my${query ? `?${query}` : ''}`);
+  },
+  getEmergencyRequests: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/health/emergency-requests${query ? `?${query}` : ''}`);
+  },
+  getEmergencyRequest: (id) => request(`/health/emergency-requests/${id}`),
+  updateEmergencyRequestStatus: (id, data) => request(`/health/emergency-requests/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
+  addEmergencyResponse: (id, data) => request(`/health/emergency-requests/${id}/responses`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteEmergencyRequest: (id) => request(`/health/emergency-requests/${id}`, { method: 'DELETE' }),
+
+  // Health Wing: Emergency Cell Team
+  getEmergencyTeam: () => request('/health/emergency-team'),
+  addEmergencyTeamMember: (data) => request('/health/emergency-team', { method: 'POST', body: JSON.stringify(data) }),
+  removeEmergencyTeamMember: (id) => request(`/health/emergency-team/${id}`, { method: 'DELETE' }),
+
+  // Health Wing: Volunteer Tasks
+  getHealthTasks: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/health/tasks${query ? `?${query}` : ''}`);
+  },
+  createHealthTask: (data) => request('/health/tasks', { method: 'POST', body: JSON.stringify(data) }),
+  updateHealthTaskStatus: (id, data) => request(`/health/tasks/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteHealthTask: (id) => request(`/health/tasks/${id}`, { method: 'DELETE' }),
+
   // Programs
   getPrograms: (params = {}) => {
     const query = new URLSearchParams(params).toString();

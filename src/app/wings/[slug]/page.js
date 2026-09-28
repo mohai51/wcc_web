@@ -4,6 +4,7 @@ import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
+import HealthWingView from '@/components/HealthWingView';
 import {
   ArrowLeft,
   Calendar,
@@ -38,7 +39,17 @@ import {
   Eye,
   Check,
   X,
-  Trash2
+  Trash2,
+  Heart,
+  Activity,
+  Stethoscope,
+  Ambulance,
+  PhoneCall,
+  MessageSquare,
+  UserPlus,
+  Droplets,
+  AlertTriangle,
+  Building2
 } from 'lucide-react';
 
 export function getYouTubeEmbedUrl(url) {
@@ -173,6 +184,118 @@ export default function WingDetailPage({ params }) {
     setTimeout(() => setFeedback({ type: '', message: '' }), 5000);
   };
 
+  // =========================================================================
+  // HEALTH WING STATES
+  // =========================================================================
+  const isHealth = slug === 'health';
+
+  // 1. Health Camps
+  const [camps, setCamps] = useState([]);
+  const [campsLoading, setCampsLoading] = useState(false);
+  const [selectedCamp, setSelectedCamp] = useState(null);
+  const [registerCampModalOpen, setRegisterCampModalOpen] = useState(false);
+  const [campRegisterForm, setCampRegisterForm] = useState({ name: '', phone: '', age: '', gender: 'Male' });
+  const [submittingCampRegister, setSubmittingCampRegister] = useState(false);
+  const [campToDelete, setCampToDelete] = useState(null);
+  const [deletingCampId, setDeletingCampId] = useState(null);
+
+  // 2. Blood Bank
+  const [donors, setDonors] = useState([]);
+  const [donorsLoading, setDonorsLoading] = useState(false);
+  const [bloodGroupFilter, setBloodGroupFilter] = useState('all');
+  const [donorLocationFilter, setDonorLocationFilter] = useState('all');
+  const [bloodSearch, setBloodSearch] = useState('');
+  const [donorModalOpen, setDonorModalOpen] = useState(false);
+  const [donorForm, setDonorForm] = useState({
+    name: '',
+    age: '',
+    gender: 'Male',
+    bloodGroup: 'A+',
+    phone: '',
+    alternatePhone: '',
+    location: 'ঝালকাঠি সদর',
+    district: 'ঝালকাঠি',
+    lastDonationDate: '',
+    donationCount: 0,
+    notes: ''
+  });
+  const [submittingDonor, setSubmittingDonor] = useState(false);
+  const [donorToDelete, setDonorToDelete] = useState(null);
+  const [deletingDonorId, setDeletingDonorId] = useState(null);
+
+  // 3. Emergency Cell
+  const [emergencyRequests, setEmergencyRequests] = useState([]);
+  const [myEmergencyRequests, setMyEmergencyRequests] = useState([]);
+  const [emergencyLoading, setEmergencyLoading] = useState(false);
+  const [emergencyModalOpen, setEmergencyModalOpen] = useState(false);
+  const [emergencyForm, setEmergencyForm] = useState({
+    patientName: '',
+    hospital: 'ঝালকাঠি সদর হাসপাতাল',
+    ward: '',
+    contactName: '',
+    contactPhone: '',
+    emergencyType: 'admission',
+    urgency: 'high',
+    description: ''
+  });
+  const [submittingEmergency, setSubmittingEmergency] = useState(false);
+  const [selectedEmergency, setSelectedEmergency] = useState(null);
+  const [emergencyResponseText, setEmergencyResponseText] = useState('');
+  const [submittingResponse, setSubmittingResponse] = useState(false);
+  const [isEmergencyVolunteer, setIsEmergencyVolunteer] = useState(false);
+
+  // 4. Leader Panel & Volunteer Tasks
+  const [healthLeaderTab, setHealthLeaderTab] = useState('camps'); // 'camps' | 'tasks' | 'emergency_team' | 'add_donor'
+  const [healthTasks, setHealthTasks] = useState([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [assignTaskModalOpen, setAssignTaskModalOpen] = useState(false);
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    description: '',
+    assignedToName: '',
+    assignedToPhone: '',
+    assignedToEmail: '',
+    assignedToUserId: '',
+    campId: '',
+    campTitle: '',
+    priority: 'medium',
+    dueDate: ''
+  });
+  const [submittingTask, setSubmittingTask] = useState(false);
+  const [newCampForm, setNewCampForm] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: 'সকাল ৯:০০ - বিকাল ৪:০০',
+    location: 'ঝালকাঠি সদর হাসপাতাল রোড',
+    district: 'ঝালকাঠি',
+    targetBeneficiaries: '৫০০+ সুবিধাবঞ্চিত মানুষ',
+    coverImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
+    doctors: [
+      { name: 'ডা. মোস্তাফিজুর রহমান', specialty: 'মেডিসিন বিশেষজ্ঞ', hospital: 'ঝালকাঠি সদর হাসপাতাল', degree: 'MBBS, FCPS (Medicine)' }
+    ],
+    services: [
+      'বিনামূল্যে সাধারণ স্বাস্থ্য পরীক্ষা',
+      'বিনামূল্যে ওষুধ বিতরণ',
+      'ব্লাড প্রেসার ও ডায়াবেটিস টেস্ট',
+      'রক্তের গ্রুপ নির্ণয় (Blood Grouping)'
+    ]
+  });
+  const [submittingCamp, setSubmittingCamp] = useState(false);
+  const [emergencyTeam, setEmergencyTeam] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [addTeamMemberModalOpen, setAddTeamMemberModalOpen] = useState(false);
+  const [teamMemberForm, setTeamMemberForm] = useState({
+    userId: '',
+    name: '',
+    phone: '',
+    email: '',
+    roleTitle: 'ইমার্জেন্সি সেল ভলান্টিয়ার',
+    hospitalAssigned: 'all'
+  });
+  const [submittingTeamMember, setSubmittingTeamMember] = useState(false);
+  const [availableVolunteers, setAvailableVolunteers] = useState([]);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem('wcc_user');
@@ -300,20 +423,346 @@ export default function WingDetailPage({ params }) {
     }
   };
 
+  // =========================================================================
+  // HEALTH WING LOADERS & EFFECTS
+  // =========================================================================
+  const loadHealthData = async () => {
+    if (slug !== 'health') return;
+    setCampsLoading(true);
+    setDonorsLoading(true);
+    try {
+      const [campsData, donorsData] = await Promise.all([
+        api.getHealthCamps().catch(() => []),
+        api.getBloodDonors().catch(() => [])
+      ]);
+      setCamps(Array.isArray(campsData) ? campsData : []);
+      setDonors(Array.isArray(donorsData) ? donorsData : []);
+    } catch (err) {
+      console.error('Error loading health data:', err);
+    } finally {
+      setCampsLoading(false);
+      setDonorsLoading(false);
+    }
+  };
+
+  const loadEmergencyData = async () => {
+    if (slug !== 'health') return;
+    setEmergencyLoading(true);
+    try {
+      const myReqs = await api.getMyEmergencyRequests({ phone: user?.phone }).catch(() => []);
+      setMyEmergencyRequests(Array.isArray(myReqs) ? myReqs : []);
+
+      try {
+        const allReqs = await api.getEmergencyRequests();
+        if (Array.isArray(allReqs)) {
+          setEmergencyRequests(allReqs);
+          setIsEmergencyVolunteer(true);
+        }
+      } catch (e) {
+        setIsEmergencyVolunteer(false);
+      }
+    } catch (err) {
+      console.error('Error loading emergency data:', err);
+    } finally {
+      setEmergencyLoading(false);
+    }
+  };
+
+  const loadHealthLeaderData = async () => {
+    if (slug !== 'health' || !isLeaderOrAdmin) return;
+    setTasksLoading(true);
+    setTeamLoading(true);
+    try {
+      const [tasksData, teamData, usersData] = await Promise.all([
+        api.getHealthTasks().catch(() => []),
+        api.getEmergencyTeam().catch(() => []),
+        api.getUsers().catch(() => [])
+      ]);
+      setHealthTasks(Array.isArray(tasksData) ? tasksData : []);
+      setEmergencyTeam(Array.isArray(teamData) ? teamData : []);
+      const uList = Array.isArray(usersData) ? usersData : (usersData?.users || []);
+      setAvailableVolunteers(uList);
+    } catch (err) {
+      console.error('Error loading health leader data:', err);
+    } finally {
+      setTasksLoading(false);
+      setTeamLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (slug === 'education' && wing) {
       loadEducationData();
     }
-  }, [slug, wing]);
+    if (slug === 'health' && wing) {
+      loadHealthData();
+      loadEmergencyData();
+    }
+  }, [slug, wing, user]);
 
   useEffect(() => {
     if (activeTab === 'leader_panel' && isLeaderOrAdmin) {
-      loadLeaderData();
+      if (slug === 'education') loadLeaderData();
+      if (slug === 'health') loadHealthLeaderData();
     }
-    if (myHistoryTab && user) {
+    if (myHistoryTab && user && slug === 'education') {
       loadMyBookHistory();
     }
-  }, [activeTab, myHistoryTab, isLeaderOrAdmin, user]);
+  }, [activeTab, myHistoryTab, isLeaderOrAdmin, user, slug]);
+
+  // Health Wing Handlers
+  const handleCampRegisterSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedCamp) return;
+    if (!campRegisterForm.name || !campRegisterForm.phone) {
+      showFeedback('error', tx('নাম এবং মোবাইল নম্বর দেওয়া আবশ্যক।', 'Name and phone number are required.'));
+      return;
+    }
+    setSubmittingCampRegister(true);
+    try {
+      await api.registerHealthCamp(selectedCamp._id, campRegisterForm);
+      showFeedback('success', tx('স্বাস্থ্য ক্যাম্পের জন্য রেজিস্ট্রেশন সফল হয়েছে!', 'Successfully registered for the health camp!'));
+      setRegisterCampModalOpen(false);
+      setCampRegisterForm({ name: '', phone: '', age: '', gender: 'Male' });
+      loadHealthData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('রেজিস্ট্রেশন ব্যর্থ হয়েছে।', 'Registration failed.'));
+    } finally {
+      setSubmittingCampRegister(false);
+    }
+  };
+
+  const handleCreateCampSubmit = async (e) => {
+    e.preventDefault();
+    if (!newCampForm.title || !newCampForm.date || !newCampForm.location) {
+      showFeedback('error', tx('ক্যাম্পের নাম, তারিখ এবং স্থান আবশ্যক।', 'Camp title, date, and location are required.'));
+      return;
+    }
+    setSubmittingCamp(true);
+    try {
+      await api.createHealthCamp(newCampForm);
+      showFeedback('success', tx('নতুন ফ্রি স্বাস্থ্য ক্যাম্প সফলভাবে তৈরি হয়েছে!', 'New Free Health Camp created successfully!'));
+      loadHealthData();
+      setActiveTab('camps');
+    } catch (err) {
+      showFeedback('error', err.message || tx('ক্যাম্প তৈরি করতে সমস্যা হয়েছে।', 'Failed to create camp.'));
+    } finally {
+      setSubmittingCamp(false);
+    }
+  };
+
+  const handleDeleteCamp = async (campId) => {
+    setDeletingCampId(campId);
+    try {
+      await api.deleteHealthCamp(campId);
+      showFeedback('success', tx('স্বাস্থ্য ক্যাম্পটি মুছে ফেলা হয়েছে।', 'Health camp deleted.'));
+      setCampToDelete(null);
+      loadHealthData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('ডিলিট করতে ব্যর্থ হয়েছে।', 'Failed to delete camp.'));
+    } finally {
+      setDeletingCampId(null);
+    }
+  };
+
+  const handleRegisterDonorSubmit = async (e) => {
+    e.preventDefault();
+    if (!donorForm.name || !donorForm.age || !donorForm.phone || !donorForm.bloodGroup) {
+      showFeedback('error', tx('নাম, বয়স, রক্তের গ্রুপ ও মোবাইল নম্বর আবশ্যক।', 'Name, age, blood group and phone are required.'));
+      return;
+    }
+    setSubmittingDonor(true);
+    try {
+      await api.createBloodDonor(donorForm);
+      showFeedback('success', tx('ধন্যবাদ! ব্লাড ব্যাংকে রক্তদাতা হিসেবে নিবন্ধন সফল হয়েছে।', 'Blood donor registered successfully!'));
+      setDonorModalOpen(false);
+      setDonorForm({
+        name: '',
+        age: '',
+        gender: 'Male',
+        bloodGroup: 'A+',
+        phone: '',
+        alternatePhone: '',
+        location: 'ঝালকাঠি সদর',
+        district: 'ঝালকাঠি',
+        lastDonationDate: '',
+        donationCount: 0,
+        notes: ''
+      });
+      loadHealthData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('নিবন্ধন ব্যর্থ হয়েছে।', 'Registration failed.'));
+    } finally {
+      setSubmittingDonor(false);
+    }
+  };
+
+  const handleDeleteDonor = async (donorId) => {
+    setDeletingDonorId(donorId);
+    try {
+      await api.deleteBloodDonor(donorId);
+      showFeedback('success', tx('রক্তদাতার তথ্য মুছে ফেলা হয়েছে।', 'Blood donor removed.'));
+      setDonorToDelete(null);
+      loadHealthData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('ডিলিট করতে ব্যর্থ হয়েছে।', 'Failed to delete donor.'));
+    } finally {
+      setDeletingDonorId(null);
+    }
+  };
+
+  const handleSubmitEmergencyRequest = async (e) => {
+    e.preventDefault();
+    if (!emergencyForm.patientName || !emergencyForm.contactName || !emergencyForm.contactPhone || !emergencyForm.description) {
+      showFeedback('error', tx('রোগীর নাম, যোগাযোগের নাম, ফোন নম্বর ও বিস্তারিত তথ্য পূরণ করুন।', 'Please fill in patient name, contact details and problem description.'));
+      return;
+    }
+    setSubmittingEmergency(true);
+    try {
+      await api.createEmergencyRequest(emergencyForm);
+      showFeedback('success', tx('জরুরি বার্তা সফলভাবে প্রেরিত হয়েছে! আমাদের উইং লিডার ও জরুরি টিম তাৎক্ষণিক যোগাযোগ করবে।', 'Emergency request sent! Our team will contact you immediately.'));
+      setEmergencyModalOpen(false);
+      setEmergencyForm({
+        patientName: '',
+        hospital: 'ঝালকাঠি সদর হাসপাতাল',
+        ward: '',
+        contactName: '',
+        contactPhone: '',
+        emergencyType: 'admission',
+        urgency: 'high',
+        description: ''
+      });
+      loadEmergencyData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('বার্তা পাঠাতে ব্যর্থ হয়েছে।', 'Failed to submit emergency request.'));
+    } finally {
+      setSubmittingEmergency(false);
+    }
+  };
+
+  const handleUpdateEmergencyStatus = async (id, status, assignedVolunteer = null, message = '') => {
+    try {
+      await api.updateEmergencyRequestStatus(id, { status, assignedVolunteer, message });
+      showFeedback('success', tx('ইমার্জেন্সি সেলের স্ট্যাটাস আপডেট হয়েছে।', 'Emergency status updated.'));
+      loadEmergencyData();
+      if (selectedEmergency && selectedEmergency._id === id) {
+        const updatedReq = await api.getEmergencyRequest(id);
+        setSelectedEmergency(updatedReq);
+      }
+    } catch (err) {
+      showFeedback('error', err.message || tx('স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।', 'Failed to update status.'));
+    }
+  };
+
+  const handleSendEmergencyResponse = async (e) => {
+    e.preventDefault();
+    if (!selectedEmergency || !emergencyResponseText.trim()) return;
+    setSubmittingResponse(true);
+    try {
+      const res = await api.addEmergencyResponse(selectedEmergency._id, { message: emergencyResponseText.trim() });
+      showFeedback('success', tx('রেসপন্স পাঠানো হয়েছে।', 'Response posted.'));
+      setEmergencyResponseText('');
+      if (res?.request) {
+        setSelectedEmergency(res.request);
+      }
+      loadEmergencyData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('মেসেজ পাঠাতে সমস্যা হয়েছে।', 'Failed to post message.'));
+    } finally {
+      setSubmittingResponse(false);
+    }
+  };
+
+  const handleAssignTaskSubmit = async (e) => {
+    e.preventDefault();
+    if (!taskForm.title || !taskForm.assignedToName) {
+      showFeedback('error', tx('কাজের শিরোনাম ও ভলান্টিয়ারের নাম আবশ্যক।', 'Task title and volunteer name are required.'));
+      return;
+    }
+    setSubmittingTask(true);
+    try {
+      await api.createHealthTask({
+        title: taskForm.title,
+        description: taskForm.description,
+        assignedTo: {
+          name: taskForm.assignedToName,
+          phone: taskForm.assignedToPhone,
+          email: taskForm.assignedToEmail,
+          user: taskForm.assignedToUserId || null
+        },
+        camp: taskForm.campId || null,
+        campTitle: taskForm.campTitle || '',
+        priority: taskForm.priority,
+        dueDate: taskForm.dueDate || null
+      });
+      showFeedback('success', tx('ভলান্টিয়ারকে দায়িত্ব অর্পণ সম্পন্ন হয়েছে!', 'Task assigned to volunteer successfully!'));
+      setAssignTaskModalOpen(false);
+      setTaskForm({
+        title: '',
+        description: '',
+        assignedToName: '',
+        assignedToPhone: '',
+        assignedToEmail: '',
+        assignedToUserId: '',
+        campId: '',
+        campTitle: '',
+        priority: 'medium',
+        dueDate: ''
+      });
+      loadHealthLeaderData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('দায়িত্ব অর্পণ ব্যর্থ হয়েছে।', 'Failed to assign task.'));
+    } finally {
+      setSubmittingTask(false);
+    }
+  };
+
+  const handleUpdateTaskStatus = async (taskId, newStatus) => {
+    try {
+      await api.updateHealthTaskStatus(taskId, { status: newStatus });
+      showFeedback('success', tx('কাজের অগ্রগতি আপডেট হয়েছে।', 'Task status updated.'));
+      loadHealthLeaderData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('আপডেট ব্যর্থ হয়েছে।', 'Failed to update task.'));
+    }
+  };
+
+  const handleAddTeamMemberSubmit = async (e) => {
+    e.preventDefault();
+    if (!teamMemberForm.name || !teamMemberForm.phone) {
+      showFeedback('error', tx('ভলান্টিয়ারের নাম ও মোবাইল নম্বর আবশ্যক।', 'Volunteer name and phone are required.'));
+      return;
+    }
+    setSubmittingTeamMember(true);
+    try {
+      await api.addEmergencyTeamMember(teamMemberForm);
+      showFeedback('success', tx('ইমার্জেন্সি সেল টিমে ভলান্টিয়ার যুক্ত হয়েছে এবং স্বয়ংক্রিয় এক্সেস প্রদান করা হয়েছে!', 'Volunteer added to Emergency Cell team with automatic access!'));
+      setAddTeamMemberModalOpen(false);
+      setTeamMemberForm({
+        userId: '',
+        name: '',
+        phone: '',
+        email: '',
+        roleTitle: 'ইমার্জেন্সি সেল ভলান্টিয়ার',
+        hospitalAssigned: 'all'
+      });
+      loadHealthLeaderData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('টিমে যুক্ত করতে সমস্যা হয়েছে।', 'Failed to add team member.'));
+    } finally {
+      setSubmittingTeamMember(false);
+    }
+  };
+
+  const handleRemoveTeamMember = async (memberId) => {
+    try {
+      await api.removeEmergencyTeamMember(memberId);
+      showFeedback('success', tx('ইমার্জেন্সি সেল টিম থেকে ভলান্টিয়ার প্রত্যাহার করা হয়েছে।', 'Volunteer removed from Emergency Cell team.'));
+      loadHealthLeaderData();
+    } catch (err) {
+      showFeedback('error', err.message || tx('প্রত্যাহার ব্যর্থ হয়েছে।', 'Failed to remove member.'));
+    }
+  };
 
   // Handle Book Donation Submit
   const handleDonateSubmit = async (e) => {
@@ -679,6 +1128,19 @@ export default function WingDetailPage({ params }) {
                         <span className="text-[10px] text-blue-400">{tx('আদান-প্রদান প্রস্তুত', 'Exchange Ready')}</span>
                       </div>
                     </>
+                  ) : isHealth ? (
+                    <>
+                      <div className="bg-slate-900/60 rounded-2xl p-4 border border-white/5">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase">{tx('স্বাস্থ্য ক্যাম্প', 'Health Camps')}</p>
+                        <p className="text-2xl font-black text-white">{camps.length}</p>
+                        <span className="text-[10px] text-emerald-400">{tx('বিনামূল্যে সেবা', 'Free Services')}</span>
+                      </div>
+                      <div className="bg-slate-900/60 rounded-2xl p-4 border border-white/5">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase">{tx('ব্লাড ব্যাংক', 'Blood Donors')}</p>
+                        <p className="text-2xl font-black text-white">{donors.length}</p>
+                        <span className="text-[10px] text-rose-400">{tx('জরুরি প্রস্তুত', 'Ready to Donate')}</span>
+                      </div>
+                    </>
                   ) : (
                     <>
                       <div className="bg-slate-900/60 rounded-2xl p-4 border border-white/5">
@@ -769,12 +1231,89 @@ export default function WingDetailPage({ params }) {
         </section>
       )}
 
+      {/* Tabs Navigation for Health Wing */}
+      {isHealth && (
+        <section className="bg-white border-b border-slate-200 sticky top-16 z-30 shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-2 overflow-x-auto py-2.5 scrollbar-none">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'overview'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>{tx('উইং ওভারভিউ', 'Overview')}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('camps')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'camps'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Stethoscope className="w-4 h-4" />
+                <span>{tx('ফ্রি স্বাস্থ্য ক্যাম্প', 'Free Health Camps')} ({camps.length})</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black">
+                  FREE
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('blood_bank')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'blood_bank'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Droplets className="w-4 h-4 text-rose-500" />
+                <span>{tx('ব্লাড ব্যাংক', 'Blood Bank')} ({donors.length})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('emergency_cell')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'emergency_cell'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Ambulance className="w-4 h-4" />
+                <span>{tx('জরুরি হাসপাতাল সেল', 'Hospital Emergency Cell')}</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black animate-pulse">
+                  ২৪/৭
+                </span>
+              </button>
+
+              {isLeaderOrAdmin && (
+                <button
+                  onClick={() => setActiveTab('leader_panel')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    activeTab === 'leader_panel'
+                      ? 'bg-purple-700 text-white shadow-xs'
+                      : 'text-purple-700 bg-purple-50 hover:bg-purple-100'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>{tx('উইং লিডার কন্ট্রোল প্যানেল', 'Wing Leader Panel')}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Main Body Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
         {/* ========================================================================= */}
         {/* TAB 1: OVERVIEW & INITIATIVES                                            */}
         {/* ========================================================================= */}
-        {(!isEducation || activeTab === 'overview') && (
+        {(!isEducation && !isHealth || activeTab === 'overview') && (
           <>
             {/* Wing Leader Profile Card */}
             {wing.leader && (
@@ -1646,6 +2185,22 @@ export default function WingDetailPage({ params }) {
               </div>
             )}
           </section>
+        )}
+
+        {/* ========================================================================= */}
+        {/* HEALTH WING CONTENT & TABS                                                */}
+        {/* ========================================================================= */}
+        {isHealth && (
+          <HealthWingView
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            isLeaderOrAdmin={isLeaderOrAdmin}
+            user={user}
+            wing={wing}
+            tx={tx}
+            lang={lang}
+            showFeedback={showFeedback}
+          />
         )}
       </div>
 
