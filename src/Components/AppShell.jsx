@@ -169,31 +169,31 @@ export default function AppShell({ children }) {
       {/* Main Portal Workspace */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         {/* Mobile Top Header Bar (With Drawer Toggle) */}
-        <div className="lg:hidden sticky top-0 z-30 bg-slate-950 border-b border-slate-800 text-white px-4 py-3 flex items-center justify-between shadow-md">
-          <div className="flex items-center gap-3">
+        <div className="lg:hidden sticky top-0 z-30 bg-slate-950 border-b border-slate-800 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shadow-md gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setMobileOpen(true)}
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 focus:outline-hidden transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 focus:outline-hidden transition-colors cursor-pointer shrink-0"
               aria-label="Open Navigation Menu"
             >
               <Menu className="w-5 h-5 text-[#F1AD1A]" />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-white p-0.5 border border-[#F1AD1A] shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white p-0.5 border border-[#F1AD1A] shrink-0">
                 <img src="/landing/wcc.png" alt="WCC" className="w-full h-full object-contain" />
               </div>
-              <span className="font-black text-xs text-white tracking-tight">WCC PORTAL</span>
+              <span className="font-black text-[11px] sm:text-xs text-white tracking-tight whitespace-nowrap">WCC PORTAL</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <LanguageToggle />
-            <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${getRoleBadge(user.role).color}`}>
+            <span className={`text-[9px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded border whitespace-nowrap hidden xs:inline-block ${getRoleBadge(user.role).color}`}>
               {getRoleBadge(user.role).text}
             </span>
             <Link
               href="/"
-              className="text-[11px] font-semibold text-slate-300 hover:text-white flex items-center gap-1 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 transition-colors"
+              className="text-[10px] sm:text-[11px] font-semibold text-slate-300 hover:text-white flex items-center gap-1 bg-slate-800/80 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700 transition-colors whitespace-nowrap shrink-0"
             >
               <span>{lang === 'bn' ? 'পাবলিক' : 'Guest'}</span>
               <ExternalLink className="w-3 h-3 text-[#F1AD1A]" />

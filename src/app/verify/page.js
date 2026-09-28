@@ -14,8 +14,10 @@ import {
   Lock
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 
 function VerifyContent() {
+  const { lang, tx, t } = useLanguage();
   const searchParams = useSearchParams();
   const initialId = searchParams.get('id') || '';
 
@@ -35,7 +37,7 @@ function VerifyContent() {
       setMember(data);
     } catch (err) {
       setMember(null);
-      setError(err.message || 'Member verification failed. Record not found.');
+      setError(err.message || tx('সদস্য আইডি পাওয়া যায়নি। যাচাই ব্যর্থ হয়েছে।', 'Member verification failed. Record not found.'));
     } finally {
       setLoading(false);
     }
@@ -58,13 +60,16 @@ function VerifyContent() {
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Official Public Registry Verification</span>
+          <span>{tx('অফিসিয়াল সেন্ট্রাল রেজিস্ট্রি ভেরিফিকেশন', 'Official Public Registry Verification')}</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Verify WCC Membership
+          {tx('WCC সদস্য পরিচয়পত্র যাচাই', 'Verify WCC Membership')}
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto">
-          Scan the QR code on any official We Can Change (WCC) member ID card or enter the Member ID below to confirm authenticity.
+          {tx(
+            'যেকোনো অফিসিয়াল We Can Change (WCC) সদস্য কার্ডের কিউআর কোড স্ক্যান করুন অথবা সঠিকতা যাচাই করতে নিচে সদস্য আইডি লিখুন।',
+            'Scan the QR code on any official We Can Change (WCC) member ID card or enter the Member ID below to confirm authenticity.'
+          )}
         </p>
       </div>
 
@@ -77,16 +82,16 @@ function VerifyContent() {
               type="text"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              placeholder="Enter Member ID (e.g. WCC-2026-0001)..."
+              placeholder={tx('সদস্য আইডি লিখুন (যেমন WCC-2026-0001)...', 'Enter Member ID (e.g. WCC-2026-0001)...')}
               className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl shadow-xs transition-colors shrink-0 disabled:opacity-50"
+            className="px-6 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl shadow-xs transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Checking Registry...' : 'Verify Now'}
+            {loading ? tx('যাচাই করা হচ্ছে...', 'Checking Registry...') : tx('এখনই যাচাই করুন', 'Verify Now')}
           </button>
         </form>
       </div>
@@ -95,7 +100,9 @@ function VerifyContent() {
       {loading ? (
         <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
           <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-xs font-semibold text-slate-500">Verifying member identity against central records...</p>
+          <p className="text-xs font-semibold text-slate-500">
+            {tx('সেন্ট্রাল ডাটাবেজে সদস্যের তথ্য যাচাই করা হচ্ছে...', 'Verifying member identity against central records...')}
+          </p>
         </div>
       ) : searched && member ? (
         <div className="bg-white rounded-3xl border-2 border-emerald-500 shadow-xl overflow-hidden animate-in fade-in-50">
@@ -104,12 +111,16 @@ function VerifyContent() {
             <div className="flex items-center gap-2.5">
               <CheckCircle2 className="w-6 h-6 text-emerald-200" />
               <div>
-                <h3 className="font-bold text-sm sm:text-base leading-tight">Official Active Member</h3>
-                <p className="text-[11px] text-emerald-100">Authenticated by We Can Change (WCC) Central Registry</p>
+                <h3 className="font-bold text-sm sm:text-base leading-tight">
+                  {tx('অফিসিয়াল সক্রিয় সদস্য', 'Official Active Member')}
+                </h3>
+                <p className="text-[11px] text-emerald-100">
+                  {tx('উই ক্যান চেঞ্জ (WCC) কেন্দ্রীয় রেজিস্ট্রি দ্বারা প্রত্যায়িত', 'Authenticated by We Can Change (WCC) Central Registry')}
+                </p>
               </div>
             </div>
             <span className="text-[11px] font-black px-2.5 py-1 bg-white text-emerald-800 rounded-full uppercase tracking-wider">
-              {member.status || 'Active'}
+              {member.status === 'Active' ? tx('সক্রিয়', 'Active') : (member.status || 'Active')}
             </span>
           </div>
 
@@ -133,10 +144,10 @@ function VerifyContent() {
                 <div className="inline-block px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold">
                   {member.memberId}
                 </div>
-                <h2 className="text-2xl font-black text-slate-900">{member.nameEn}</h2>
-                <p className="text-sm font-semibold text-[#B62A35]">{member.nameBn}</p>
+                <h2 className="text-2xl font-black text-slate-900">{lang === 'bn' ? (member.nameBn || member.nameEn) : member.nameEn}</h2>
+                <p className="text-sm font-semibold text-[#B62A35]">{lang === 'bn' ? member.nameEn : member.nameBn}</p>
                 <div className="text-xs text-slate-500 pt-1">
-                  Assigned Wing: <span className="font-bold text-slate-800">{member.wing}</span>
+                  {tx('নির্ধারিত উইং:', 'Assigned Wing:')} <span className="font-bold text-slate-800">{member.wing}</span>
                 </div>
               </div>
             </div>
@@ -144,17 +155,17 @@ function VerifyContent() {
             {/* Credential Specs */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs">
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Membership Tier</span>
-                <span className="font-bold text-slate-800">{member.membership || 'General Member'}</span>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold block">{tx('সদস্যপদের ধরন', 'Membership Tier')}</span>
+                <span className="font-bold text-slate-800">{member.membership || tx('সাধারণ সদস্য', 'General Member')}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Affiliation Wing</span>
-                <span className="font-bold text-slate-800">{member.wing || 'General Wing'}</span>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold block">{tx('যুক্ত উইং', 'Affiliation Wing')}</span>
+                <span className="font-bold text-slate-800">{member.wing || tx('সাধারণ উইং', 'General Wing')}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Joined Date</span>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold block">{tx('যোগদানের তারিখ', 'Joined Date')}</span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {member.joinedDate ? new Date(member.joinedDate).toLocaleDateString() : 'Active Member'}
+                  {member.joinedDate ? new Date(member.joinedDate).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US') : tx('সক্রিয় সদস্য', 'Active Member')}
                 </span>
               </div>
             </div>
@@ -163,7 +174,10 @@ function VerifyContent() {
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500">
               <Lock className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
               <span>
-                <strong>Privacy Protected:</strong> In compliance with security standards, sensitive personal data (national ID, home address, and private phone numbers) are masked from public QR scan views.
+                <strong>{tx('গোপনীয়তা সুরক্ষা:', 'Privacy Protected:')}</strong> {tx(
+                  'নিরাপত্তা নীতি অনুযায়ী স্পর্শকাতর ব্যক্তিগত তথ্য (জাতীয় পরিচয়পত্র, বিস্তারিত ঠিকানা ও মোবাইল নম্বর) উন্মুক্ত কিউআর ভিউ থেকে গোপন রাখা হয়েছে।',
+                  'In compliance with security standards, sensitive personal data (national ID, home address, and private phone numbers) are masked from public QR scan views.'
+                )}
               </span>
             </div>
 
@@ -172,7 +186,7 @@ function VerifyContent() {
                 href={`/members/${member.memberId}`}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#B62A35] hover:underline"
               >
-                <span>View Full Member Profile (Authorized Portal)</span>
+                <span>{tx('সম্পূর্ণ সদস্য প্রোফাইল দেখুন (অনুমোদিত পোর্টাল)', 'View Full Member Profile (Authorized Portal)')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -183,12 +197,15 @@ function VerifyContent() {
           <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto">
             <ShieldAlert className="w-6 h-6" />
           </div>
-          <h3 className="font-bold text-base text-slate-800">Verification Unsuccessful</h3>
+          <h3 className="font-bold text-base text-slate-800">{tx('যাচাইকরণ ব্যর্থ হয়েছে', 'Verification Unsuccessful')}</h3>
           <p className="text-xs text-rose-600 font-semibold max-w-md mx-auto">
-            {error || 'No active member was found in the official registry matching this ID.'}
+            {error || tx('এই আইডির সাথে মিলিয়ে অফিসিয়াল কেন্দ্রীয় রেজিস্ট্রিতে কোনো সক্রিয় সদস্য পাওয়া যায়নি।', 'No active member was found in the official registry matching this ID.')}
           </p>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Please check the Member ID and try again, or contact the We Can Change central office at info@wecanchange.org.
+            {tx(
+              'অনুগ্রহ করে সদস্য আইডিটি পুনরায় পরীক্ষা করুন অথবা WCC কেন্দ্রীয় দপ্তরে যোগাযোগ করুন।',
+              'Please check the Member ID and try again, or contact the We Can Change central office at info@wecanchange.org.'
+            )}
           </p>
         </div>
       ) : null}
@@ -197,11 +214,12 @@ function VerifyContent() {
 }
 
 export default function VerifyPage() {
+  const { tx } = useLanguage();
   return (
     <Suspense
       fallback={
         <div className="p-12 text-center text-xs font-semibold text-slate-500">
-          Loading verification portal...
+          {tx('ভেরিফিকেশন পোর্টাল লোড হচ্ছে...', 'Loading verification portal...')}
         </div>
       }
     >
