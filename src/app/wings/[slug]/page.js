@@ -188,6 +188,7 @@ export default function WingDetailPage({ params }) {
   // HEALTH WING STATES
   // =========================================================================
   const isHealth = slug === 'health';
+  const isEducation = slug === 'education';
 
   // 1. Health Camps
   const [camps, setCamps] = useState([]);
@@ -364,14 +365,47 @@ export default function WingDetailPage({ params }) {
     return () => { ignore = true; };
   }, [slug]);
 
-  // Check if current user is Education Wing Leader or Admin
+  // Check if current user is Health / Education Wing Leader or Admin
+  const userEmail = (user?.email || '').toLowerCase().trim();
+  const isHealthLeader = Boolean(
+    isHealth && user && (
+      userEmail === 'coordinator.health@wecanchange.org' ||
+      userEmail === 'dr.mostafizur@wecanchange.org' ||
+      (wing?.leader && (String(wing.leader._id || wing.leader) === String(user.id || user._id) || wing.leader.email?.toLowerCase() === userEmail)) ||
+      (user.role === 'wing_leader' && (user.assignedWing === wing?._id || String(user.assignedWing) === String(wing?._id))) ||
+      ((user.role === 'wing_leader' || user.role === 'coordinator') && (user.volunteerWing?.includes('স্বাস্থ্য') || user.volunteerWing?.includes('Health') || userEmail.includes('health')))
+    )
+  );
+
   const isLeaderOrAdmin = Boolean(
     user &&
     (user.role === 'admin' ||
-      (wing?.leader && (String(wing.leader._id || wing.leader) === String(user.id || user._id) || wing.leader.email === user.email)) ||
-      (user.role === 'wing_leader' && user.assignedWing === wing?._id)
+      isHealthLeader ||
+      (wing?.leader && (String(wing.leader._id || wing.leader) === String(user.id || user._id) || wing.leader.email?.toLowerCase() === userEmail)) ||
+      (user.role === 'wing_leader' && (user.assignedWing === wing?._id || String(user.assignedWing) === String(wing?._id))) ||
+      (isEducation && (userEmail.includes('tanvir') || user.volunteerWing?.includes('শিক্ষা')))
     )
   );
+
+  // 1-Click Auto Login as Health Wing Leader
+  const handleHealthLeaderAutoLogin = async () => {
+    try {
+      showFeedback('info', tx('ডা. মোস্তাফিজুর রহমান (হেলথ উইং লিডার) হিসেবে লগইন হচ্ছে...', 'Logging in as Health Wing Leader...'));
+      const res = await api.login({
+        email: 'coordinator.health@wecanchange.org',
+        password: 'wccmember2026'
+      });
+      if (res.token) {
+        localStorage.setItem('wcc_token', res.token);
+        localStorage.setItem('wcc_user', JSON.stringify(res.user));
+        setUser(res.user);
+        setActiveTab('leader_panel');
+        showFeedback('success', tx('ডা. মোস্তাফিজুর রহমান হিসেবে সফলভাবে লগইন হয়েছে! এখন ফুল কন্ট্রোল প্যানেল সচল।', 'Logged in as Dr. Mostafizur Rahman! Full leader controls active.'));
+      }
+    } catch (err) {
+      showFeedback('error', err.message || tx('অটো লগইন ব্যর্থ হয়েছে।', 'Auto login failed.'));
+    }
+  };
 
   // Load Education Wing specific data (Courses & Books)
   const loadEducationData = async () => {
@@ -995,9 +1029,6 @@ export default function WingDetailPage({ params }) {
       </div>
     );
   }
-
-  const isEducation = slug === 'education';
-
   // Filtered books
   const filteredBooks = books.filter(b => {
     const q = bookSearch.toLowerCase();
@@ -1290,17 +1321,34 @@ export default function WingDetailPage({ params }) {
                 </span>
               </button>
 
-              {isLeaderOrAdmin && (
+              <button
+                onClick={() => setActiveTab('leader_panel')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'leader_panel'
+                    ? 'bg-purple-700 text-white shadow-xs'
+                    : isLeaderOrAdmin
+                      ? 'text-purple-700 bg-purple-50 hover:bg-purple-100'
+                      : 'text-slate-600 bg-slate-100 hover:bg-purple-50 hover:text-purple-700'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-purple-600" />
+                <span>{tx('উইং লিডার প্যানেল', 'Wing Leader Panel')}</span>
+                {!isLeaderOrAdmin && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">
+                    ১-ক্লিক
+                  </span>
+                )}
+              </button>
+
+              {!isLeaderOrAdmin && (
                 <button
-                  onClick={() => setActiveTab('leader_panel')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                    activeTab === 'leader_panel'
-                      ? 'bg-purple-700 text-white shadow-xs'
-                      : 'text-purple-700 bg-purple-50 hover:bg-purple-100'
-                  }`}
+                  type="button"
+                  onClick={handleHealthLeaderAutoLogin}
+                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white text-xs font-black shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                  title="১-ক্লিকে হেলথ উইং লিডার হিসেবে লগইন করুন"
                 >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>{tx('উইং লিডার কন্ট্রোল প্যানেল', 'Wing Leader Panel')}</span>
+                  <span className="text-sm">🩺</span>
+                  <span>{tx('১-ক্লিক লিডার লগইন', '1-Click Leader Login')}</span>
                 </button>
               )}
             </div>
@@ -2200,6 +2248,7 @@ export default function WingDetailPage({ params }) {
             tx={tx}
             lang={lang}
             showFeedback={showFeedback}
+            onHealthLeaderAutoLogin={handleHealthLeaderAutoLogin}
           />
         )}
       </div>

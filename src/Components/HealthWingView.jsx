@@ -40,7 +40,8 @@ export default function HealthWingView({
   wing,
   tx,
   lang,
-  showFeedback
+  showFeedback,
+  onHealthLeaderAutoLogin
 }) {
   // =========================================================================
   // 1. FREE HEALTH CAMPS STATE
@@ -572,6 +573,32 @@ export default function HealthWingView({
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <section className="space-y-6">
+          {!isLeaderOrAdmin && (
+            <div className="bg-gradient-to-r from-rose-50 via-purple-50 to-pink-50 border border-rose-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3 text-xs text-slate-700 text-center sm:text-left">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-rose-200 text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                  🩺
+                </div>
+                <div>
+                  <span className="font-extrabold text-slate-900 text-sm block">
+                    {tx('স্বাস্থ্য উইং লিডার টেস্ট মোড (1-Click Demo Login)', 'Health Wing Leader Demo Access')}
+                  </span>
+                  <span className="text-slate-600 text-xs">
+                    {tx('১-ক্লিকে ডা. মোস্তাফিজুর রহমান (হেলথ উইং লিডার) হিসেবে লগইন করে ক্যাম্প আয়োজন, ভলান্টিয়ার টাস্ক ও ফুল কন্ট্রোল পরীক্ষা করুন।', 'Test full controls (health camps, tasks, hospital emergency cell) with 1-click instant login.')}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onHealthLeaderAutoLogin}
+                className="px-5 py-2.5 bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white rounded-2xl text-xs font-black shadow-md shadow-rose-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 shrink-0"
+              >
+                <span>⚡</span>
+                <span>{tx('১-ক্লিকে লিডার লগইন', '1-Click Leader Login')}</span>
+              </button>
+            </div>
+          )}
+
           <div className="border-b border-slate-200 pb-4">
             <span className="text-xs font-extrabold uppercase tracking-wider text-rose-600">
               {tx('WCC স্বাস্থ্য উইং সেবা ও কার্যক্রম', 'WCC Health Wing Services & Facilities')}
@@ -1247,9 +1274,16 @@ export default function HealthWingView({
         <section className="space-y-8 bg-white rounded-3xl p-6 sm:p-8 border border-purple-200 shadow-md">
           <div className="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-black">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{tx('স্বাস্থ্য উইং লিডার কন্ট্রোল প্যানেল', 'Health Wing Leader Panel')}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-black">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{tx('স্বাস্থ্য উইং লিডার কন্ট্রোল প্যানেল', 'Health Wing Leader Panel')}</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>{tx('ফুল কন্ট্রোল সচল', 'Full Access Active')}</span>
+                  <span className="text-[11px] font-normal text-emerald-700">({user?.name || 'ডা. মোস্তাফিজুর রহমান'})</span>
+                </div>
               </div>
               <h2 className="text-2xl font-black text-slate-900 mt-2">
                 {tx('স্বাস্থ্য ক্যাম্প, ভলান্টিয়ার টিম ও সেবা ব্যবস্থাপনা', 'Camps, Volunteers & Operations Management')}
@@ -1640,6 +1674,61 @@ export default function HealthWingView({
               </form>
             </div>
           )}
+        </section>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: HEALTH WING LEADER ACCESS RESTRICTED / AUTO-LOGIN BANNER              */}
+      {/* ========================================================================= */}
+      {activeTab === 'leader_panel' && !isLeaderOrAdmin && (
+        <section className="bg-white rounded-3xl p-8 sm:p-12 border border-purple-200 shadow-xl text-center max-w-2xl mx-auto space-y-6 my-8">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-100 to-rose-100 text-purple-700 flex items-center justify-center mx-auto shadow-inner">
+            <ShieldCheck className="w-10 h-10" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-black uppercase tracking-wider">
+              {tx('শুধুমাত্র স্বাস্থ্য উইং লিডার ও এডমিন', 'Health Wing Leader & Admin Restricted')}
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              {tx('স্বাস্থ্য উইং লিডার কন্ট্রোল প্যানেল', 'Health Wing Leader Panel')}
+            </h2>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
+              {tx('ক্যাম্প অনুমোদন, ভলান্টিয়ারদের কাজ বণ্টন ও হাসপাতাল ইমার্জেন্সি সেলের পূর্ণ নিয়ন্ত্রণ স্বাস্থ্য উইং লিডার এবং এডমিনের জন্য সংরক্ষিত।', 'Camp management, task delegations, and emergency cell team authorizations are reserved for the Health Wing Leader.')}
+            </p>
+          </div>
+
+          {/* Leader Profile Badge */}
+          <div className="p-4 rounded-2xl bg-purple-50/80 border border-purple-100 text-left text-xs space-y-2 max-w-md mx-auto">
+            <div className="flex items-center gap-3 pb-2 border-b border-purple-200/60">
+              <div className="w-10 h-10 rounded-full bg-purple-200 text-purple-800 flex items-center justify-center font-bold text-sm">
+                🩺
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900">ডা. মোস্তাফিজুর রহমান (Dr. Mostafizur Rahman)</h4>
+                <p className="text-[11px] text-slate-600">মেডিসিন বিশেষজ্ঞ (MBBS, FCPS) • স্বাস্থ্য উইং লিডার</p>
+              </div>
+            </div>
+            <div className="flex justify-between items-center text-[11px] text-slate-600">
+              <span>{tx('অফিসিয়াল ইমেইল:', 'Official Email:')}</span>
+              <span className="font-mono font-bold text-purple-700">coordinator.health@wecanchange.org</span>
+            </div>
+          </div>
+
+          {/* 1-Click Auto Login Button */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={onHealthLeaderAutoLogin}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-rose-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-black text-sm shadow-lg shadow-rose-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer inline-flex items-center justify-center gap-2.5"
+            >
+              <span className="text-base">🩺</span>
+              <span>{tx('১-ক্লিকে হেলথ উইং লিডার হিসেবে লগইন করুন (Auto Login)', '1-Click Auto Login as Health Wing Leader')}</span>
+            </button>
+            <p className="text-[11px] text-slate-400 mt-2">
+              {tx('১ ক্লিকে লগইন হয়ে যাবে এবং সব কন্ট্রোল অপশন তাৎক্ষণিক উন্মুক্ত হবে।', 'Instant 1-click authentication will unlock all controls immediately.')}
+            </p>
+          </div>
         </section>
       )}
 

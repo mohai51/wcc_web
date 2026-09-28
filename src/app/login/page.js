@@ -81,6 +81,30 @@ export default function LoginPage() {
     setPassword(rolePass);
   };
 
+  const handleAutoLogin = async (roleEmail, rolePass, redirectUrl = '/dashboard') => {
+    setEmail(roleEmail);
+    setPassword(rolePass);
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await api.login({ email: roleEmail, password: rolePass });
+      if (res.token) {
+        localStorage.setItem('wcc_token', res.token);
+        localStorage.setItem('wcc_user', JSON.stringify(res.user));
+        router.push(redirectUrl);
+      }
+    } catch (err) {
+      setError(
+        lang === 'bn'
+          ? (err.message || 'অটো লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
+          : (err.message || 'Auto login failed. Please try again.')
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       {/* Top Header & Language Switcher */}
@@ -202,31 +226,63 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Quick Credential Presets */}
-          <div className="pt-4 border-t border-slate-100 space-y-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-              {t('auth.quickFill')}
-            </span>
-            <div className="grid grid-cols-2 gap-2">
+          {/* Quick 1-Click Auto Login Buttons */}
+          <div className="pt-4 border-t border-slate-100 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                {lang === 'bn' ? '১-ক্লিকে অটো লগইন (Quick Demo Access)' : '1-Click Auto Login'}
+              </span>
+              <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
+                {lang === 'bn' ? '১ ক্লিকে প্রবেশ' : 'Instant Login'}
+              </span>
+            </div>
+
+            {/* Health Wing Leader Direct 1-Click Login Button */}
+            <button
+              type="button"
+              onClick={() => handleAutoLogin('coordinator.health@wecanchange.org', 'wccmember2026', '/wings/health')}
+              disabled={loading || googleLoading}
+              className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 hover:from-rose-600 hover:to-red-700 text-white text-xs font-black shadow-md shadow-rose-200 transition-all flex items-center justify-between gap-2 cursor-pointer disabled:opacity-50 group hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="p-1 rounded-xl bg-white/20 text-white text-base">🩺</span>
+                <div className="text-left">
+                  <span className="block font-bold leading-tight text-xs">
+                    {lang === 'bn' ? 'স্বাস্থ্য উইং লিডার (১-ক্লিক লগইন)' : 'Health Wing Leader (1-Click Login)'}
+                  </span>
+                  <span className="block text-[10px] text-white/80 font-normal">
+                    ডা. মোস্তাফিজুর রহমান • coordinator.health@wecanchange.org
+                  </span>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-xl bg-white/20 text-[10px] font-black shrink-0 flex items-center gap-1">
+                <span>{lang === 'bn' ? 'লগইন ➔' : 'Login ➔'}</span>
+              </span>
+            </button>
+
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
               <button
                 type="button"
-                onClick={() => handleRolePreset('admin@wecanchange.org', 'wccadmin2026')}
+                onClick={() => handleAutoLogin('admin@wecanchange.org', 'wccadmin2026', '/dashboard')}
+                disabled={loading}
                 className="py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-rose-50 hover:text-[#B62A35] border border-slate-200 text-slate-700 text-[11px] font-bold text-center transition-colors cursor-pointer"
-                title="Admin Login"
+                title="Admin 1-Click Login"
               >
-                👑 {t('roles.admin')}
+                👑 {t('roles.admin')} (১-ক্লিক)
               </button>
               <button
                 type="button"
-                onClick={() => handleRolePreset('tanvir.chowdhury@example.com', 'wccmember2026')}
+                onClick={() => handleAutoLogin('tanvir.chowdhury@example.com', 'wccmember2026', '/wings/education')}
+                disabled={loading}
                 className="py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
-                title="Education Wing Leader Login"
+                title="Education Wing Leader 1-Click Login"
               >
-                🎓 {t('roles.wing_leader')}
+                🎓 {lang === 'bn' ? 'শিক্ষা লিডার' : 'Edu Leader'} (১-ক্লিক)
               </button>
               <button
                 type="button"
-                onClick={() => handleRolePreset('member@wecanchange.org', 'wccmember2026')}
+                onClick={() => handleAutoLogin('member@wecanchange.org', 'wccmember2026', '/dashboard')}
+                disabled={loading}
                 className="py-2 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
                 title="General Member Login"
               >
@@ -234,7 +290,8 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => handleRolePreset('volunteer@wecanchange.org', 'wccvol2026')}
+                onClick={() => handleAutoLogin('volunteer@wecanchange.org', 'wccvol2026', '/dashboard')}
+                disabled={loading}
                 className="py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-[11px] font-bold text-center transition-colors cursor-pointer"
                 title="Volunteer Login"
               >
