@@ -22,7 +22,8 @@ import {
   RefreshCw,
   Calendar,
   ClipboardCheck,
-  Check
+  Check,
+  Receipt
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -426,9 +427,17 @@ export default function AdminEventsPage() {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#B62A35]' : ''}`} />
           </button>
 
+          <Link
+            href="/finance/event-expenses"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+          >
+            <Receipt className="w-4 h-4 text-[#F1AD1A]" />
+            <span>ইভেন্ট খরচ এন্ট্রি</span>
+          </Link>
+
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl shadow-xs transition-all hover:shadow-md"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl shadow-xs transition-all hover:shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>New Event</span>

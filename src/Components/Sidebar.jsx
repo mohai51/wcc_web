@@ -102,6 +102,7 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
           title: isBn ? 'অর্থ ও হিসাব' : 'FINANCE & AUDIT',
           items: [
             { id: 'finance', label: isBn ? 'অর্থ তহবিল হাব' : 'Finance Hub', icon: Wallet, href: '/finance' },
+            { id: 'event-expenses', label: isBn ? 'ইভেন্ট ও প্রোগ্রামের খরচ' : 'Event Expenses Form', icon: Receipt, href: '/finance/event-expenses' },
             { id: 'accounts', label: isBn ? 'হিসাব ও ভল্ট' : 'Accounts & Vaults', icon: CreditCard, href: '/finance/accounts' },
             { id: 'transactions', label: isBn ? 'লেনদেন খতিয়ান' : 'Master Transactions', icon: ArrowDownUp, href: '/finance/transactions' },
             { id: 'reimbursements', label: isBn ? 'ব্যয় দাবি' : 'Expense Claims', icon: Receipt, href: '/finance/reimbursements' }
@@ -144,6 +145,7 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
             { id: 'profile', label: isBn ? 'লিডার প্রোফাইল' : 'Leader Profile', icon: User, href: '/profile' },
             { id: 'programs', label: isBn ? 'উইং প্রকল্পসমূহ' : 'Wing Programs', icon: Calendar, href: '/admin/programs' },
             { id: 'events', label: isBn ? 'উইং ইভেন্টসমূহ' : 'Wing Events', icon: CalendarDays, href: '/admin/events' },
+            { id: 'event-expenses', label: isBn ? 'ইভেন্ট খরচ এন্ট্রি' : 'Event Expense Entry', icon: Receipt, href: '/finance/event-expenses' },
             { id: 'issues', label: isBn ? 'নাগরিক সমস্যা' : 'Community Issues', icon: AlertTriangle, href: '/admin/issues' }
           ]
         },
