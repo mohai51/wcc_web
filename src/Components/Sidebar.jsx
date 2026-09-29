@@ -26,14 +26,22 @@ import {
   User,
   FileText,
   HeartHandshake,
-  AlertTriangle
+  AlertTriangle,
+  Languages,
+  Stethoscope,
+  Heart,
+  Droplets,
+  Ambulance
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/Components/LanguageToggle';
 
 function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams ? searchParams.get('tab') || '' : '';
+  const { lang, t, setLang } = useLanguage();
 
   if (!user) return null;
 
@@ -44,84 +52,110 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
   };
 
   const getRoleBadge = (role) => {
+    const roleName = t(`roles.${role}`, role);
     switch (role) {
       case 'admin':
-        return { text: 'Admin', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' };
+        return { text: roleName, color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' };
       case 'coordinator':
-        return { text: 'Coordinator', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+        return { text: roleName, color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+      case 'wing_leader':
+        return { text: roleName, color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
       case 'volunteer':
-        return { text: 'Volunteer', color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
+        return { text: roleName, color: 'bg-amber-500/20 text-[#F1AD1A] border-amber-500/30' };
       case 'finance_officer':
-        return { text: 'Finance', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
+        return { text: roleName, color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
       default:
-        return { text: 'Member', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' };
+        return { text: roleName, color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' };
     }
   };
 
-  // Nav menus grouped per role
+  // Nav menus grouped per role with full bilingual support
   const getNavSections = () => {
+    const isBn = lang === 'bn';
+
     if (user.role === 'admin' || user.role === 'finance_officer') {
       return [
         {
-          title: 'CORE OVERSIGHT',
+          title: isBn ? 'মূল পরিচালনা' : 'CORE OVERSIGHT',
           items: [
-            { id: 'overview', label: 'Dashboard Overview', icon: LayoutDashboard, href: '/dashboard' },
+            { id: 'overview', label: isBn ? 'ড্যাশবোর্ড ওভারভিউ' : 'Dashboard Overview', icon: LayoutDashboard, href: '/dashboard' },
             ...(user.role === 'admin'
               ? [
-                  { id: 'coordinators', label: 'Coordinators Hub', icon: ShieldCheck, href: '/dashboard?tab=coordinators' },
-                  { id: 'volunteers', label: 'Volunteer Hub', icon: HeartHandshake, href: '/dashboard?tab=volunteers' },
-                  { id: 'wings', label: 'Wings Management', icon: Sparkles, href: '/admin/wings' },
-                  { id: 'programs', label: 'Programs Hub', icon: Calendar, href: '/admin/programs' },
-                  { id: 'events', label: 'Events Hub', icon: CalendarDays, href: '/admin/events' },
-                  { id: 'issues', label: 'Community Issues', icon: AlertTriangle, href: '/admin/issues' }
+                  { id: 'coordinators', label: isBn ? 'সমন্বয়ক হাব' : 'Coordinators Hub', icon: ShieldCheck, href: '/dashboard?tab=coordinators' },
+                  { id: 'volunteers', label: isBn ? 'স্বেচ্ছাসেবক হাব' : 'Volunteer Hub', icon: HeartHandshake, href: '/dashboard?tab=volunteers' },
+                  { id: 'health-wing-portal', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
+                  { id: 'education-wing-portal', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing (Courses & Books)', icon: Sparkles, href: '/wings/education' },
+                  { id: 'wings', label: isBn ? 'উইং ব্যবস্থাপনা' : 'Wings Management', icon: Sparkles, href: '/admin/wings' },
+                  { id: 'programs', label: isBn ? 'প্রকল্প হাব' : 'Programs Hub', icon: Calendar, href: '/admin/programs' },
+                  { id: 'events', label: isBn ? 'ইভেন্ট ও ক্যাম্প' : 'Events Hub', icon: CalendarDays, href: '/admin/events' },
+                  { id: 'issues', label: isBn ? 'নাগরিক সমস্যা' : 'Community Issues', icon: AlertTriangle, href: '/admin/issues' }
                 ]
               : []),
-            { id: 'profile', label: 'My Profile & Settings', icon: User, href: '/profile' },
-            { id: 'member-requests', label: 'Member Requests', icon: HeartHandshake, href: '/dashboard?tab=requests' },
-            { id: 'members', label: 'Member Directory', icon: Users, href: '/members' },
-            { id: 'add-member', label: 'Register Member', icon: UserPlus, href: '/members/new' },
-            { id: 'approvals', label: 'Pending Approvals', icon: Clock, href: '/members?status=Pending' }
+            { id: 'profile', label: isBn ? 'প্রোফাইল ও সেটিংস' : 'My Profile & Settings', icon: User, href: '/profile' },
+            { id: 'member-requests', label: isBn ? 'সদস্যের আবেদন' : 'Member Requests', icon: HeartHandshake, href: '/dashboard?tab=requests' },
+            { id: 'members', label: isBn ? 'সদস্য তালিকা' : 'Member Directory', icon: Users, href: '/members' },
+            { id: 'add-member', label: isBn ? 'নতুন সদস্য নিবন্ধন' : 'Register Member', icon: UserPlus, href: '/members/new' },
+            { id: 'approvals', label: isBn ? 'অনুমোদনের অপেক্ষায়' : 'Pending Approvals', icon: Clock, href: '/members?status=Pending' }
           ]
         },
         {
-          title: 'FINANCE & AUDIT',
+          title: isBn ? 'অর্থ ও হিসাব' : 'FINANCE & AUDIT',
           items: [
-            { id: 'finance', label: 'Finance Hub', icon: Wallet, href: '/finance' },
-            { id: 'accounts', label: 'Accounts & Vaults', icon: CreditCard, href: '/finance/accounts' },
-            { id: 'transactions', label: 'Master Transactions', icon: ArrowDownUp, href: '/finance/transactions' },
-            { id: 'reimbursements', label: 'Expense Claims', icon: Receipt, href: '/finance/reimbursements' }
+            { id: 'finance', label: isBn ? 'অর্থ তহবিল হাব' : 'Finance Hub', icon: Wallet, href: '/finance' },
+            { id: 'event-expenses', label: isBn ? 'ইভেন্ট ও প্রোগ্রামের খরচ' : 'Event Expenses Form', icon: Receipt, href: '/finance/event-expenses' },
+            { id: 'accounts', label: isBn ? 'হিসাব ও ভল্ট' : 'Accounts & Vaults', icon: CreditCard, href: '/finance/accounts' },
+            { id: 'transactions', label: isBn ? 'লেনদেন খতিয়ান' : 'Master Transactions', icon: ArrowDownUp, href: '/finance/transactions' },
+            { id: 'reimbursements', label: isBn ? 'ব্যয় দাবি' : 'Expense Claims', icon: Receipt, href: '/finance/reimbursements' }
           ]
         },
         {
-          title: 'INTELLIGENCE & PUBLIC',
+          title: isBn ? 'এনালিটিক্স ও পাবলিক' : 'INTELLIGENCE & PUBLIC',
           items: [
-            { id: 'analytics', label: 'Demographic Analytics', icon: PieChart, href: '/analytics' },
-            { id: 'verify', label: 'Public QR Verification', icon: ShieldCheck, href: '/verify' }
+            { id: 'analytics', label: isBn ? 'পরিসংখ্যান' : 'Demographic Analytics', icon: PieChart, href: '/analytics' },
+            { id: 'verify', label: isBn ? 'পাবলিক কিউআর যাচাই' : 'Public QR Verification', icon: ShieldCheck, href: '/verify' }
           ]
         }
       ];
     }
 
-    if (user.role === 'coordinator') {
-      const assignedWingSlug = user.assignedWing?.slug || '';
+    if (user.role === 'coordinator' || user.role === 'wing_leader') {
+      let assignedWingSlug = user.assignedWing?.slug;
+      if (!assignedWingSlug) {
+        const uEmail = (user.email || '').toLowerCase();
+        const vWing = (user.volunteerWing || '').toLowerCase();
+        if (uEmail.includes('health') || vWing.includes('স্বাস্থ্য') || vWing.includes('health')) {
+          assignedWingSlug = 'health';
+        } else {
+          assignedWingSlug = 'education';
+        }
+      }
+      const isHealthLead = assignedWingSlug === 'health';
+
       return [
         {
-          title: 'WING OPERATIONS',
+          title: user.role === 'wing_leader' ? (isBn ? 'উইং পরিচালনা' : 'WING LEADERSHIP') : (isBn ? 'সমন্বয়ক পরিচালনা' : 'WING OPERATIONS'),
           items: [
-            { id: 'overview', label: 'Coordinator Hub', icon: LayoutDashboard, href: '/dashboard' },
-            { id: 'profile', label: 'Coordinator Profile', icon: User, href: '/profile' },
-            { id: 'programs', label: 'Wing Programs', icon: Calendar, href: '/admin/programs' },
-            { id: 'events', label: 'Wing Events', icon: CalendarDays, href: '/admin/events' },
-            { id: 'issues', label: 'Community Issues', icon: AlertTriangle, href: '/admin/issues' }
+            { id: 'overview', label: isBn ? 'লিডার হাব' : 'Leader Hub', icon: LayoutDashboard, href: '/dashboard' },
+            {
+              id: 'wing-portal',
+              label: isBn ? (isHealthLead ? 'আমার স্বাস্থ্য উইং প্ল্যাটফর্ম' : 'আমার শিক্ষা উইং প্ল্যাটফর্ম') : (isHealthLead ? 'My Health Wing Platform' : 'My Wing Platform'),
+              icon: isHealthLead ? Stethoscope : Sparkles,
+              href: `/wings/${assignedWingSlug}`
+            },
+            { id: 'profile', label: isBn ? 'লিডার প্রোফাইল' : 'Leader Profile', icon: User, href: '/profile' },
+            { id: 'programs', label: isBn ? 'উইং প্রকল্পসমূহ' : 'Wing Programs', icon: Calendar, href: '/admin/programs' },
+            { id: 'events', label: isBn ? 'উইং ইভেন্টসমূহ' : 'Wing Events', icon: CalendarDays, href: '/admin/events' },
+            { id: 'event-expenses', label: isBn ? 'ইভেন্ট খরচ এন্ট্রি' : 'Event Expense Entry', icon: Receipt, href: '/finance/event-expenses' },
+            { id: 'issues', label: isBn ? 'নাগরিক সমস্যা' : 'Community Issues', icon: AlertTriangle, href: '/admin/issues' }
           ]
         },
         {
-          title: 'COMMUNITY & WING',
+          title: isBn ? 'উইং ও পাবলিক সেবা' : 'WINGS & PUBLIC SERVICES',
           items: [
-            ...(assignedWingSlug
-              ? [{ id: 'public-wing', label: 'My Public Wing', icon: Sparkles, href: `/wings/${assignedWingSlug}` }]
-              : [{ id: 'public-wings', label: 'Explore Wings', icon: Sparkles, href: '/wings' }]),
-            { id: 'verify', label: 'Public QR Verification', icon: ShieldCheck, href: '/verify' }
+            { id: 'health-wing', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
+            { id: 'education-wing', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing (Courses & Books)', icon: Sparkles, href: '/wings/education' },
+            { id: 'public-wings', label: isBn ? 'সকল উইং তালিকা' : 'Explore All Wings', icon: Sparkles, href: '/wings' },
+            { id: 'verify', label: isBn ? 'পাবলিক কিউআর যাচাই' : 'Public QR Verification', icon: ShieldCheck, href: '/verify' }
           ]
         }
       ];
@@ -130,21 +164,24 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
     if (user.role === 'volunteer') {
       return [
         {
-          title: 'VOLUNTEER CORPS',
+          title: isBn ? 'স্বেচ্ছাসেবক শাখা' : 'VOLUNTEER CORPS',
           items: [
-            { id: 'hub', label: 'Volunteer Hub', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
-            { id: 'profile', label: 'Volunteer Profile', icon: User, href: '/profile' },
-            { id: 'requests', label: 'Wing Requests', icon: HeartHandshake, href: '/dashboard?tab=requests' },
-            { id: 'badge', label: 'My Digital Badge', icon: Award, href: '/dashboard?tab=badge' },
-            { id: 'log', label: 'Log Service Hours', icon: Clock, href: '/dashboard?tab=log' },
-            { id: 'history', label: 'Service Log History', icon: FileText, href: '/dashboard?tab=history' }
+            { id: 'hub', label: isBn ? 'স্বেচ্ছাসেবক হাব' : 'Volunteer Hub', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
+            { id: 'profile', label: isBn ? 'প্রোফাইল' : 'Volunteer Profile', icon: User, href: '/profile' },
+            { id: 'requests', label: isBn ? 'উইং আবেদন' : 'Wing Requests', icon: HeartHandshake, href: '/dashboard?tab=requests' },
+            { id: 'health-wing-volunteer', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
+            { id: 'wings-portal', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing & Books', icon: Sparkles, href: '/wings/education' },
+            { id: 'badge', label: isBn ? 'ডিজিটাল ব্যাজ' : 'My Digital Badge', icon: Award, href: '/dashboard?tab=badge' },
+            { id: 'log', label: isBn ? 'কাজের সময় লিপিবদ্ধ' : 'Log Service Hours', icon: Clock, href: '/dashboard?tab=log' },
+            { id: 'history', label: isBn ? 'কাজের ইতিহাস' : 'Service Log History', icon: FileText, href: '/dashboard?tab=history' }
           ]
         },
         {
-          title: 'COMMUNITY ACTION',
+          title: isBn ? 'সামাজিক কার্যক্রম' : 'COMMUNITY ACTION',
           items: [
-            { id: 'drives', label: 'Upcoming Drives', icon: Calendar, href: '/dashboard?tab=drives' },
-            { id: 'verify', label: 'Verify Credentials', icon: ShieldCheck, href: '/verify' }
+            { id: 'all-wings', label: isBn ? 'সকল উইং তালিকা' : 'All Wings Directory', icon: Sparkles, href: '/wings' },
+            { id: 'drives', label: isBn ? 'আসন্ন ক্যাম্পেইন' : 'Upcoming Drives', icon: Calendar, href: '/dashboard?tab=drives' },
+            { id: 'verify', label: isBn ? 'আইডি কার্ড যাচাই' : 'Verify Credentials', icon: ShieldCheck, href: '/verify' }
           ]
         }
       ];
@@ -153,20 +190,23 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
     // Default: Member
     return [
       {
-        title: 'MY MEMBERSHIP',
+        title: isBn ? 'আমার সদস্যপদ ও সেবা' : 'MY MEMBERSHIP & SERVICES',
         items: [
-          { id: 'hub', label: 'Member Portal', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
-          { id: 'profile', label: 'Membership Profile', icon: User, href: '/profile' },
-          { id: 'requests', label: 'Wing & Volunteer Hub', icon: HeartHandshake, href: '/dashboard?tab=requests' },
-          { id: 'id-card', label: 'Official Digital ID', icon: Award, href: '/dashboard?tab=id-card' }
+          { id: 'hub', label: isBn ? 'মেম্বার পোর্টাল' : 'Member Portal', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
+          { id: 'health-wing', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
+          { id: 'education-wing', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing (Courses & Books)', icon: Sparkles, href: '/wings/education' },
+          { id: 'all-wings', label: isBn ? 'সকল উইং তালিকা' : 'WCC Wings Directory', icon: Sparkles, href: '/wings' },
+          { id: 'profile', label: isBn ? 'সদস্য প্রোফাইল' : 'Membership Profile', icon: User, href: '/profile' },
+          { id: 'requests', label: isBn ? 'উইং ও ভলান্টিয়ার হাব' : 'Wing & Volunteer Hub', icon: HeartHandshake, href: '/dashboard?tab=requests' },
+          { id: 'id-card', label: isBn ? 'অফিসিয়াল ডিজিটাল আইডি' : 'Official Digital ID', icon: Award, href: '/dashboard?tab=id-card' }
         ]
       },
       {
-        title: 'SERVICES & DIRECTORY',
+        title: isBn ? 'সেবা ও ডিরেক্টরি' : 'SERVICES & DIRECTORY',
         items: [
-          { id: 'directory', label: 'Member Directory', icon: Users, href: '/members' },
-          { id: 'reimbursement', label: 'Claim Reimbursement', icon: Receipt, href: '/finance/reimbursements' },
-          { id: 'verify', label: 'Verify Member ID', icon: ShieldCheck, href: '/verify' }
+          { id: 'directory', label: isBn ? 'সদস্য তালিকা' : 'Member Directory', icon: Users, href: '/members' },
+          { id: 'reimbursement', label: isBn ? 'ব্যয় দাবি' : 'Claim Reimbursement', icon: Receipt, href: '/finance/reimbursements' },
+          { id: 'verify', label: isBn ? 'সদস্য আইডি যাচাই' : 'Verify Member ID', icon: ShieldCheck, href: '/verify' }
         ]
       }
     ];
@@ -204,7 +244,9 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
                     {getRoleBadge(user.role).text}
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 truncate">আমরাই আনব পরিবর্তন</p>
+                <p className="text-[10px] text-slate-400 truncate">
+                  {lang === 'bn' ? 'আমরাই আনব পরিবর্তন' : 'Empowering Positive Change'}
+                </p>
               </div>
             )}
           </Link>
@@ -301,17 +343,33 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
 
       {/* Bottom Profile & Actions Container */}
       <div className="p-3 border-t border-slate-800 space-y-2 bg-slate-950 shrink-0">
+        {/* Language Toggle */}
+        {!collapsed ? (
+          <LanguageToggle variant="sidebar" className="mb-2" />
+        ) : (
+          <div className="flex justify-center mb-1">
+            <button
+              type="button"
+              onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
+              className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-[#F1AD1A] hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+              title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}
+            >
+              {lang === 'bn' ? 'বাং' : 'EN'}
+            </button>
+          </div>
+        )}
+
         {/* Quick link to Guest Site */}
         <Link
           href="/"
           onClick={onClose}
-          title="View Public Guest Site"
+          title={lang === 'bn' ? 'পাবলিক ওয়েবসাইটে যান' : 'View Public Guest Site'}
           className={`flex items-center ${
             collapsed ? 'justify-center px-0' : 'gap-2.5 px-3'
           } py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-colors w-full group`}
         >
           <ExternalLink className="w-3.5 h-3.5 text-[#F1AD1A] shrink-0 group-hover:scale-110 transition-transform" />
-          {!collapsed && <span className="truncate">Public Guest Site</span>}
+          {!collapsed && <span className="truncate">{lang === 'bn' ? 'পাবলিক ওয়েবসাইট' : 'Public Guest Site'}</span>}
         </Link>
 
         {/* User Profile Snippet & Logout */}
@@ -327,9 +385,9 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
             </Link>
             <button
               onClick={handleLogout}
-              title="Log out"
+              title={lang === 'bn' ? 'লগআউট' : 'Log out'}
               aria-label="Log out"
-              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -339,7 +397,7 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
             <Link
               href="/profile"
               onClick={onClose}
-              title="Manage My Profile"
+              title={lang === 'bn' ? 'প্রোফাইল পরিচালনা' : 'Manage My Profile'}
               className="flex items-center gap-2.5 overflow-hidden hover:opacity-90 transition-opacity flex-1 min-w-0"
             >
               <div className="w-8 h-8 rounded-full bg-[#B62A35]/20 text-[#F1AD1A] border border-[#F1AD1A]/40 flex items-center justify-center shrink-0 font-bold text-xs">
@@ -353,9 +411,9 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
 
             <button
               onClick={handleLogout}
-              title="Log out"
+              title={lang === 'bn' ? 'লগআউট' : 'Log out'}
               aria-label="Log out"
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors shrink-0"
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors shrink-0 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
