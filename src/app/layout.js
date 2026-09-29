@@ -1,37 +1,43 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Hind_Siliguri, Poppins } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
+import AppShell from "@/Components/AppShell";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const hindSiliguri = Hind_Siliguri({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["bengali", "latin"],
+  variable: "--font-hind-siliguri",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
 });
 
 export const metadata = {
-  title: "We Can Change (WCC) | Membership & Finance Portal",
-  description: "Official enterprise membership directory, activity cost accounting, and treasury management system for We Can Change (WCC), Jhalokathi, Bangladesh.",
+  title: "We Can Change (WCC) | Youth & Community Welfare",
+  description: "Official organizational portal for We Can Change (WCC), Jhalokathi, Bangladesh.",
   icons: {
     icon: "/wcc_logo.png"
   }
 };
 
-import AppShell from "@/Components/AppShell";
-
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="bn"
+      className={`${hindSiliguri.variable} ${poppins.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-[#F8FAFC] text-slate-900" suppressHydrationWarning>
-        <AppShell>
-          {children}
-        </AppShell>
+      <body className="min-h-full bg-[#F8FAFC] text-slate-900 lang-bn" suppressHydrationWarning>
+        <LanguageProvider>
+          <AppShell>
+            {children}
+          </AppShell>
+        </LanguageProvider>
       </body>
     </html>
   );
