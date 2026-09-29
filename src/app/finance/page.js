@@ -20,7 +20,11 @@ import {
   BarChart3,
   PieChart,
   Sparkles,
-  Layers
+  Layers,
+  User,
+  DollarSign,
+  ShieldCheck,
+  ExternalLink
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import StatusBadge from '@/Components/StatusBadge';
@@ -49,50 +53,66 @@ export default function FinanceDashboardPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-16 text-center">
         <div className="w-8 h-8 border-2 border-[#B62A35] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-        <p className="text-xs font-semibold text-slate-500">Loading financial intelligence dashboard...</p>
+        <p className="text-xs font-semibold text-slate-500">
+          {tx('আর্থিক তথ্যাবলি লোড হচ্ছে...', 'Loading financial intelligence dashboard...')}
+        </p>
       </div>
     );
   }
 
   const navCards = [
     {
-      title: 'Event & Program Expenses',
-      desc: 'Submit and inspect detailed multi-item event costs with submitter tracking.',
+      title: tx('ইভেন্ট ও প্রোগ্রামের খরচ', 'Event & Program Expenses'),
+      desc: tx('লিডারদের দাখিলকৃত বিভিন্ন ইভেন্টের আইটেমভিত্তিক খরচের নিরীক্ষা ও নতুন খরচ এন্ট্রি।', 'Submit and inspect detailed multi-item event costs with submitter tracking.'),
       href: '/finance/event-expenses',
       icon: Receipt,
       color: 'bg-rose-50 text-[#B62A35]'
     },
     {
-      title: 'Central Ledger',
-      desc: 'Master chronological double-entry transaction record.',
+      title: tx('কেন্দ্রীয় মাস্টার লেজার', 'Central Master Ledger'),
+      desc: tx('সংগঠনের সকল আয় ও ব্যয়ের সম্পূর্ণ কালানুক্রমিক ও স্বয়ংক্রিয় ডাবল-এন্ট্রি খতিয়ান।', 'Master chronological double-entry transaction record.'),
       href: '/finance/transactions',
       icon: FileText,
       color: 'bg-blue-50 text-blue-700'
     },
     {
-      title: 'Activity Accounts',
-      desc: 'Event & health camp budgets and statements.',
+      title: tx('আয় ও অনুদান ট্র্যাকার', 'Income & Inflows'),
+      desc: tx('প্রকল্পের অনুদান, দাতার অবদান, স্পনসরশিপ ও সংগৃহীত সদস্য ফি ট্র্যাকিং।', 'Grants, donor sponsorships, and collected membership contributions.'),
+      href: '/finance/income',
+      icon: ArrowDownRight,
+      color: 'bg-sky-50 text-sky-700'
+    },
+    {
+      title: tx('ব্যয় ব্যবস্থাপনা', 'Expense Management'),
+      desc: tx('মাঠ পর্যায়ের খরচ, সরঞ্জাম ক্রয় এবং সাধারণ অপারেশনাল ব্যয়ের খতিয়ান।', 'Field operations, material procurements, and general expense records.'),
+      href: '/finance/expenses',
+      icon: ArrowUpRight,
+      color: 'bg-rose-50 text-rose-700'
+    },
+    {
+      title: tx('কর্মসূচিভিত্তিক হিসাব', 'Activity Accounts'),
+      desc: tx('স্বাস্থ্য ক্যাম্প ও প্রকল্পভিত্তিক বাজেট বরাদ্দ, প্রকৃত ব্যয় ও স্টেটমেন্ট।', 'Event & health camp budgets, variance analysis, and financial statements.'),
       href: '/finance/activities',
       icon: Activity,
       color: 'bg-emerald-50 text-emerald-700'
     },
     {
-      title: 'Member Claims',
-      desc: 'Reimbursement workflows with zero double-counting.',
+      title: tx('সদস্যদের ব্যয় দাবি', 'Member Reimbursement Claims'),
+      desc: tx('সদস্যদের ব্যক্তিগত খরচের রিইমবার্সমেন্ট আবেদন ও অনুমোদন প্রক্রিয়া।', 'Member expense claim workflows without double-counting liabilities.'),
       href: '/finance/reimbursements',
       icon: UserCheck,
       color: 'bg-purple-50 text-purple-700'
     },
     {
-      title: 'Field Advances',
-      desc: 'Operational requisitions & settlement reconciler.',
+      title: tx('মাঠ পর্যায়ের অগ্রিম', 'Field Advances'),
+      desc: tx('জরুরি মাঠ পর্যায়ের কাজের অগ্রিম গ্রহণ ও সমন্বয়ের রিকনসিলিয়েশন।', 'Operational requisitions & settlement reconciler.'),
       href: '/finance/advances',
       icon: TrendingUp,
       color: 'bg-amber-50 text-amber-700'
     },
     {
-      title: 'Vaults & Banks',
-      desc: 'Cash in hand, BRAC, DBBL, bKash & Nagad accounts.',
+      title: tx('ভল্ট ও ব্যাংক অ্যাকাউন্ট', 'Vaults & Bank Accounts'),
+      desc: tx('ক্যাশ ইন হ্যান্ড, ব্র্যাক ব্যাংক, নগদ ও বিকাশ মার্চেন্ট অ্যাকাউন্টের ব্যালেন্স।', 'Cash in hand vaults, BRAC, DBBL, bKash & Nagad accounts.'),
       href: '/finance/accounts',
       icon: Building,
       color: 'bg-indigo-50 text-indigo-700'
@@ -105,13 +125,18 @@ export default function FinanceDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Finance & Accounting Hub</h1>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              {tx('অর্থ ও হিসাব তহবিল হাব', 'Finance & Accounting Hub')}
+            </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#A6772A]/15 text-[#A6772A]">
               Live Double-Entry
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            We Can Change (WCC) Executive Treasury, Event Cost Allocations & Financial Analytics.
+            {tx(
+              'উই ক্যান চেঞ্জ (WCC) নির্বাহী কোষাগার, ইভেন্ট খরচ বরাদ্দ ও রিয়েল-টাইম এনালিটিক্স।',
+              'We Can Change (WCC) Executive Treasury, Event Cost Allocations & Financial Analytics.'
+            )}
           </p>
         </div>
 
@@ -128,7 +153,14 @@ export default function FinanceDashboardPage() {
             className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Record Transaction</span>
+            <span>{tx('লেনদেন খতিয়ান', 'Record Transaction')}</span>
+          </Link>
+          <Link
+            href="/finance/income"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
+          >
+            <ArrowDownRight className="w-4 h-4" />
+            <span>{tx('আয় যুক্ত করুন', 'Add Income')}</span>
           </Link>
         </div>
       </div>
@@ -136,85 +168,125 @@ export default function FinanceDashboardPage() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Liquidity */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2">
+        <Link
+          href="/finance/accounts"
+          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2 hover:border-emerald-300 hover:shadow-md transition-all group block"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Liquidity</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-700 transition-colors">
+              {tx('মোট নগদ ও ব্যাংক তহবিল', 'Total Liquidity')}
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Wallet className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900">
+          <h3 className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
             ৳ {(data?.totalLiquidity || 0).toLocaleString()}
           </h3>
-          <p className="text-[11px] text-slate-400">Available across all cash vaults & bank accounts</p>
-        </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span>{tx('সকল নগদ ভল্ট ও ব্যাংক ব্যালেন্স', 'Available across all vaults & banks')}</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+          </div>
+        </Link>
 
         {/* Total Income */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2">
+        <Link
+          href="/finance/income"
+          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2 hover:border-blue-300 hover:shadow-md transition-all group block"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Inflows</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-blue-700 transition-colors">
+              {tx('মোট সংগৃহীত আয়', 'Total Inflows')}
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <ArrowDownRight className="w-4 h-4" />
             </div>
           </div>
           <h3 className="text-2xl font-black text-blue-600">
             ৳ {(data?.totalIncome || 0).toLocaleString()}
           </h3>
-          <p className="text-[11px] text-slate-400">Grants, donor support & membership fees</p>
-        </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span>{tx('অনুদান, স্পনসর ও সদস্য ফি', 'Grants, donor support & membership fees')}</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+          </div>
+        </Link>
 
         {/* Total Expense */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2">
+        <Link
+          href="/finance/expenses"
+          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2 hover:border-rose-300 hover:shadow-md transition-all group block"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Incurred Outflows</span>
-            <div className="w-8 h-8 rounded-lg bg-rose-50 text-[#B62A35] flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-[#B62A35] transition-colors">
+              {tx('মোট ব্যয় ও খরচ', 'Incurred Outflows')}
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-rose-50 text-[#B62A35] flex items-center justify-center group-hover:scale-110 transition-transform">
               <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
           <h3 className="text-2xl font-black text-[#B62A35]">
             ৳ {(data?.totalExpense || 0).toLocaleString()}
           </h3>
-          <p className="text-[11px] text-slate-400">Field camps, materials & operational expenses</p>
-        </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span>{tx('ক্যাম্প, লজিস্টিক ও কার্যক্রম ব্যয়', 'Field camps, materials & operational costs')}</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#B62A35] group-hover:translate-x-0.5 transition-all" />
+          </div>
+        </Link>
 
         {/* Pending Claims */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2">
+        <Link
+          href="/finance/reimbursements"
+          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2 hover:border-amber-300 hover:shadow-md transition-all group block"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Claims</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-amber-700 transition-colors">
+              {tx('অমীমাংসিত ব্যয় দাবি', 'Pending Claims')}
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <h3 className="text-2xl font-black text-amber-600">
             ৳ {(data?.pendingClaims || 0).toLocaleString()}
           </h3>
-          <p className="text-[11px] text-slate-400">Unsettled personal member expense claims</p>
-        </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span>{tx('সদস্যদের ব্যক্তিগত খরচের দাবি', 'Unsettled member reimbursement claims')}</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
+          </div>
+        </Link>
       </div>
 
       {/* Sub-module Navigation Grid */}
       <div className="space-y-3">
-        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Financial Sub-Modules</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          {tx('আর্থিক মডিউলসমূহ', 'Financial Sub-Modules')}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {navCards.map((card) => {
             const Icon = card.icon;
             return (
               <Link
-                key={card.title}
+                key={card.href}
                 href={card.href}
-                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#B62A35]/30 transition-all space-y-3 group"
+                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#B62A35]/30 transition-all space-y-3 group flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between">
-                  <div className={`w-10 h-10 rounded-xl ${card.color} flex items-center justify-center`}>
-                    <Icon className="w-5 h-5" />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className={`w-10 h-10 rounded-xl ${card.color} flex items-center justify-center`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#B62A35] group-hover:translate-x-1 transition-all" />
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#B62A35] group-hover:translate-x-1 transition-all" />
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#B62A35] transition-colors">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{card.desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#B62A35] transition-colors">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{card.desc}</p>
+                <div className="pt-2 border-t border-slate-100 text-[11px] font-bold text-[#B62A35] group-hover:underline flex items-center gap-1">
+                  <span>{tx('প্রবেশ করুন', 'Open Module')}</span>
+                  <ArrowRight className="w-3 h-3" />
                 </div>
               </Link>
             );
@@ -227,59 +299,79 @@ export default function FinanceDashboardPage() {
         {/* Accounts Summary */}
         <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="font-bold text-sm text-slate-900">Vaults & Bank Balances</h3>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900">{tx('ভল্ট ও ব্যাংক ব্যালেন্স', 'Vaults & Bank Balances')}</h3>
+              <p className="text-[11px] text-slate-400">{tx('সক্রিয় হিসাব ও নগদ জমা', 'Active accounts & vaults')}</p>
+            </div>
             <Link href="/finance/accounts" className="text-xs font-bold text-[#B62A35] hover:underline">
-              Manage
+              {tx('ব্যবস্থাপনা →', 'Manage →')}
             </Link>
           </div>
 
           <div className="space-y-3">
-            {(data?.accountsSummary || []).map((acc) => (
-              <div
-                key={acc.id}
-                className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between"
-              >
-                <div>
-                  <h4 className="font-bold text-xs text-slate-800">{acc.name}</h4>
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase">{acc.type}</span>
+            {(data?.accountsSummary || []).length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">{tx('কোন ব্যাংক হিসাব পাওয়া যায়নি।', 'No accounts found.')}</p>
+            ) : (
+              (data?.accountsSummary || []).map((acc) => (
+                <div
+                  key={acc.id}
+                  className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between"
+                >
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-800">{acc.name}</h4>
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase">{acc.type}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-black text-sm text-slate-900">
+                      ৳ {(acc.balance || 0).toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-emerald-600 block font-semibold">Active</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="font-black text-sm text-slate-900">৳ {acc.balance.toLocaleString()}</span>
-                  <span className="text-[10px] text-emerald-600 block font-semibold">Active</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
         {/* Category Spend Distribution */}
         <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="font-bold text-sm text-slate-900">Expense Allocation by Category</h3>
-            <span className="text-xs text-slate-400 font-medium">Categorized Outflows</span>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900">
+                {tx('খাতভিত্তিক ব্যয় বণ্টন', 'Expense Allocation by Category')}
+              </h3>
+              <p className="text-[11px] text-slate-400">{tx('কোন খাতে কত শতাংশ খরচ হয়েছে', 'Categorized outflows distribution')}</p>
+            </div>
+            <Link href="/finance/expenses" className="text-xs font-bold text-[#B62A35] hover:underline">
+              {tx('বিস্তারিত →', 'View All →')}
+            </Link>
           </div>
 
           <div className="space-y-3">
-            {Object.entries(data?.categorySpend || {}).map(([cat, amount]) => {
-              const totalExp = data?.totalExpense || 1;
-              const percent = Math.round((amount / totalExp) * 100);
-              return (
-                <div key={cat} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-slate-700">{cat}</span>
-                    <span className="text-slate-900 font-mono">
-                      ৳ {amount.toLocaleString()} ({percent}%)
-                    </span>
+            {Object.keys(data?.categorySpend || {}).length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">{tx('কোন খরচের তথ্য পাওয়া যায়নি।', 'No categorized spend recorded yet.')}</p>
+            ) : (
+              Object.entries(data?.categorySpend || {}).map(([cat, amount]) => {
+                const totalExp = data?.totalExpense || 1;
+                const percent = Math.min(Math.round(((amount || 0) / totalExp) * 100), 100);
+                return (
+                  <div key={cat} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-slate-700">{cat}</span>
+                      <span className="text-slate-900 font-mono">
+                        ৳ {(amount || 0).toLocaleString()} ({percent}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-[#B62A35] to-[#E08A00] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${percent}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-[#B62A35] to-[#E08A00] h-full rounded-full transition-all duration-500"
-                      style={{ width: `${percent}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -293,7 +385,7 @@ export default function FinanceDashboardPage() {
             </div>
             <div>
               <h3 className="font-black text-base text-slate-900">
-                {tx('আর্থিক প্রবাহ এনালিটিক্স (Monthly Income vs Expense Trend)', 'Monthly Cash Flow Analytics (Income vs Expense)')}
+                {tx('আর্থিক প্রবাহ এনালিটিক্স (Monthly Cash Flow Analytics)', 'Monthly Cash Flow Analytics (Income vs Expense)')}
               </h3>
               <p className="text-xs text-slate-500">
                 {tx('মাসভিত্তিক মোট আয় এবং ব্যয়ের তুলনামূলক রিয়েল-টাইম বার গ্রাফ ও অনুপাত', 'Monthly comparative trend of total inflows and outflows')}
@@ -317,16 +409,16 @@ export default function FinanceDashboardPage() {
         <div className="space-y-4">
           {(() => {
             const trends = data?.monthlyTrends || [];
-            const activeMonths = trends.filter(m => m.income > 0 || m.expense > 0);
+            const activeMonths = trends.filter(m => (m.income || 0) > 0 || (m.expense || 0) > 0);
             const displayMonths = activeMonths.length > 0 ? activeMonths : trends.slice(0, 6);
-            const maxVal = Math.max(...displayMonths.map(m => Math.max(m.income, m.expense)), 1);
+            const maxVal = Math.max(...displayMonths.map(m => Math.max(m.income || 0, m.expense || 0)), 1);
 
             return (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {displayMonths.map((m) => {
-                  const incHeight = Math.max(Math.round((m.income / maxVal) * 100), m.income > 0 ? 8 : 2);
-                  const expHeight = Math.max(Math.round((m.expense / maxVal) * 100), m.expense > 0 ? 8 : 2);
-                  const net = m.income - m.expense;
+                  const incHeight = Math.max(Math.round(((m.income || 0) / maxVal) * 100), (m.income || 0) > 0 ? 8 : 2);
+                  const expHeight = Math.max(Math.round(((m.expense || 0) / maxVal) * 100), (m.expense || 0) > 0 ? 8 : 2);
+                  const net = (m.income || 0) - (m.expense || 0);
 
                   return (
                     <div
@@ -345,31 +437,31 @@ export default function FinanceDashboardPage() {
                         {/* Income Bar */}
                         <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                           <span className="text-[9px] font-mono font-bold text-blue-700 truncate">
-                            {m.income > 0 ? `${Math.round(m.income / 1000)}k` : '0'}
+                            {(m.income || 0) > 0 ? `${Math.round((m.income || 0) / 1000)}k` : '0'}
                           </span>
                           <div
                             className="w-full bg-blue-500 rounded-t-md transition-all duration-500 hover:brightness-110"
                             style={{ height: `${incHeight}%` }}
-                            title={`Income: ৳ ${m.income.toLocaleString()}`}
+                            title={`Income: ৳ ${(m.income || 0).toLocaleString()}`}
                           />
                         </div>
 
                         {/* Expense Bar */}
                         <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                           <span className="text-[9px] font-mono font-bold text-[#B62A35] truncate">
-                            {m.expense > 0 ? `${Math.round(m.expense / 1000)}k` : '0'}
+                            {(m.expense || 0) > 0 ? `${Math.round((m.expense || 0) / 1000)}k` : '0'}
                           </span>
                           <div
                             className="w-full bg-[#B62A35] rounded-t-md transition-all duration-500 hover:brightness-110"
                             style={{ height: `${expHeight}%` }}
-                            title={`Expense: ৳ ${m.expense.toLocaleString()}`}
+                            title={`Expense: ৳ ${(m.expense || 0).toLocaleString()}`}
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 text-center text-[10px] pt-1 border-t border-slate-200/60">
-                        <div className="text-blue-600 font-bold">{tx('আয়:', 'In:')} ৳{m.income.toLocaleString()}</div>
-                        <div className="text-[#B62A35] font-bold">{tx('ব্যয়:', 'Out:')} ৳{m.expense.toLocaleString()}</div>
+                        <div className="text-blue-600 font-bold">{tx('আয়:', 'In:')} ৳{(m.income || 0).toLocaleString()}</div>
+                        <div className="text-[#B62A35] font-bold">{tx('ব্যয়:', 'Out:')} ৳{(m.expense || 0).toLocaleString()}</div>
                       </div>
                     </div>
                   );
@@ -445,7 +537,7 @@ export default function FinanceDashboardPage() {
                       </div>
                     </td>
                     <td className="py-3 px-3 text-right font-mono font-black text-sm text-[#B62A35]">
-                      ৳ {evt.totalAmount.toLocaleString()}
+                      ৳ {(evt.totalAmount || 0).toLocaleString()}
                     </td>
                     <td className="py-3 px-3 text-center">
                       <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -464,11 +556,13 @@ export default function FinanceDashboardPage() {
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h3 className="font-bold text-sm text-slate-900">Recent Double-Entry Transactions</h3>
-            <p className="text-xs text-slate-400">Master chronological ledger activity</p>
+            <h3 className="font-bold text-sm text-slate-900">
+              {tx('সাম্প্রতিক ডাবল-এন্ট্রি লেনদেনসমূহ', 'Recent Double-Entry Transactions')}
+            </h3>
+            <p className="text-xs text-slate-400">{tx('সেন্ট্রাল মাস্টার লেজারের সাম্প্রতিক কার্যবিবরণী', 'Master chronological ledger activity')}</p>
           </div>
           <Link href="/finance/transactions" className="text-xs font-bold text-[#B62A35] hover:underline">
-            View Full Ledger →
+            {tx('সম্পূর্ণ খতিয়ান দেখুন →', 'View Full Ledger →')}
           </Link>
         </div>
 
@@ -476,47 +570,55 @@ export default function FinanceDashboardPage() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-3">Type</th>
-                <th className="py-2.5 px-3">Description</th>
-                <th className="py-2.5 px-3">Account</th>
-                <th className="py-2.5 px-3 text-right">Amount</th>
-                <th className="py-2.5 px-3 text-center">Status</th>
+                <th className="py-2.5 px-3">{tx('তারিখ', 'Date')}</th>
+                <th className="py-2.5 px-3">{tx('ধরন', 'Type')}</th>
+                <th className="py-2.5 px-3">{tx('বিবরণ', 'Description')}</th>
+                <th className="py-2.5 px-3">{tx('অ্যাকাউন্ট', 'Account')}</th>
+                <th className="py-2.5 px-3 text-right">{tx('পরিমাণ', 'Amount')}</th>
+                <th className="py-2.5 px-3 text-center">{tx('স্ট্যাটাস', 'Status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {(data?.recentTransactions || []).map((txn) => {
-                const isIncome = txn.type === 'Income';
-                return (
-                  <tr key={txn.transactionId || txn._id} className="hover:bg-slate-50">
-                    <td className="py-2.5 px-3 font-mono text-slate-500">{txn.date}</td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                          isIncome ? 'bg-blue-50 text-blue-700' : 'bg-rose-50 text-rose-700'
+              {(data?.recentTransactions || []).length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-6 text-center text-slate-400">
+                    {tx('কোন সাম্প্রতিক লেনদেন পাওয়া যায়নি।', 'No recent transactions recorded.')}
+                  </td>
+                </tr>
+              ) : (
+                (data?.recentTransactions || []).map((txn) => {
+                  const isIncome = txn.type === 'Income';
+                  return (
+                    <tr key={txn.transactionId || txn._id} className="hover:bg-slate-50">
+                      <td className="py-2.5 px-3 font-mono text-slate-500">{txn.date}</td>
+                      <td className="py-2.5 px-3">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                            isIncome ? 'bg-blue-50 text-blue-700' : 'bg-rose-50 text-rose-700'
+                          }`}
+                        >
+                          {txn.type}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div className="font-semibold text-slate-800">{txn.description}</div>
+                        <div className="text-[10px] text-slate-400">{txn.category}</div>
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600">{txn.accountName || 'Cash Vault'}</td>
+                      <td
+                        className={`py-2.5 px-3 text-right font-mono font-bold ${
+                          isIncome ? 'text-blue-600' : 'text-[#B62A35]'
                         }`}
                       >
-                        {txn.type}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <div className="font-semibold text-slate-800">{txn.description}</div>
-                      <div className="text-[10px] text-slate-400">{txn.category}</div>
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-600">{txn.accountName || 'Cash Vault'}</td>
-                    <td
-                      className={`py-2.5 px-3 text-right font-mono font-bold ${
-                        isIncome ? 'text-blue-600' : 'text-[#B62A35]'
-                      }`}
-                    >
-                      {isIncome ? '+' : '-'} ৳ {txn.amount.toLocaleString()}
-                    </td>
-                    <td className="py-2.5 px-3 text-center">
-                      <StatusBadge status={txn.status} />
-                    </td>
-                  </tr>
-                );
-              })}
+                        {isIncome ? '+' : '-'} ৳ {(txn.amount || 0).toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <StatusBadge status={txn.status} />
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

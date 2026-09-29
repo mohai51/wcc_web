@@ -53,7 +53,7 @@ export default function AppShell({ children }) {
     pathname === '/vision-mission' ||
     pathname === '/programs' ||
     pathname.startsWith('/events') ||
-    pathname.startsWith('/finance') ||
+    (pathname.startsWith('/finance') && !user) ||
     pathname === '/report-issue';
   const isAuthPage =
     pathname === '/login' ||
