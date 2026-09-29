@@ -9,6 +9,7 @@ import {
   Droplets,
   Ambulance,
   PhoneCall,
+  Phone,
   MessageSquare,
   Users,
   Calendar,
