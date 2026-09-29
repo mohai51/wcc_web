@@ -101,13 +101,23 @@ export default function ExpensesPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-lg shadow-xs transition-colors self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Record Expense</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/finance/event-expenses"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
+          >
+            <Receipt className="w-4 h-4 text-[#F1AD1A]" />
+            <span>ইভেন্ট খরচ ফর্ম (Multi-Row)</span>
+          </Link>
+
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Record Expense</span>
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -149,7 +159,12 @@ export default function ExpensesPage() {
 
                     <td className="py-3 px-4">
                       <div className="font-semibold text-slate-900 leading-snug">{e.description}</div>
-                      {e.activityName && (
+                      {e.eventTitle && (
+                        <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded bg-rose-50 text-[#B62A35] text-[10px] font-bold border border-rose-200">
+                          ইভেন্ট: {e.eventTitle}
+                        </span>
+                      )}
+                      {!e.eventTitle && e.activityName && (
                         <span className="text-[10px] text-[#B62A35] block">{e.activityName}</span>
                       )}
                       {e.isPersonalExpense && (
@@ -160,7 +175,12 @@ export default function ExpensesPage() {
                     </td>
 
                     <td className="py-3 px-4 text-slate-600">
-                      <div>{e.paidBy || e.vendorOrMember || 'General'}</div>
+                      <div className="font-bold text-slate-800">{e.paidBy || e.vendorOrMember || 'General'}</div>
+                      {e.submittedByName && (
+                        <span className="text-[10px] text-slate-400 block font-medium">
+                          লিডার: {e.submittedByName} ({e.submittedByRole || 'leader'})
+                        </span>
+                      )}
                     </td>
 
                     <td className="py-3 px-4 text-slate-600">
