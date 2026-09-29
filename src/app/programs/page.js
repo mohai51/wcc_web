@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   FolderOpen,
   Calendar,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function PublicProgramsPage() {
+  const { lang, tx, t } = useLanguage();
   const [programs, setPrograms] = useState([]);
   const [wings, setWings] = useState([]);
   const [selectedWing, setSelectedWing] = useState('');
@@ -57,14 +59,14 @@ export default function PublicProgramsPage() {
       } catch (err) {
         if (!ignore) {
           console.error('Error fetching programs:', err);
-          setError(err.message || 'Failed to load programs. Please try again.');
+          setError(err.message || tx('প্রকল্পসমূহ লোড করতে ব্যর্থ হয়েছে।', 'Failed to load programs. Please try again.'));
           setLoading(false);
         }
       }
     }
     loadPrograms();
     return () => { ignore = true; };
-  }, [selectedWing, selectedStatus]);
+  }, [selectedWing, selectedStatus, tx]);
 
   const handleRetry = async () => {
     setLoading(true);
@@ -77,17 +79,17 @@ export default function PublicProgramsPage() {
       setPrograms(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error fetching programs:', err);
-      setError(err.message || 'Failed to load programs. Please try again.');
+      setError(err.message || tx('প্রকল্প লোড করতে ব্যর্থ হয়েছে।', 'Failed to load programs. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return 'TBA';
+    if (!dateStr) return tx('তারিখ নির্ধারণাধীন', 'TBA');
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString('en-US', {
+      return d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
@@ -97,17 +99,17 @@ export default function PublicProgramsPage() {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusDisplay = (status) => {
     switch (status?.toLowerCase()) {
       case 'published':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return { text: tx('চলমান / প্রকাশিত', 'Published'), color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
       case 'completed':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return { text: tx('সম্পন্ন হয়েছে', 'Completed'), color: 'bg-blue-50 text-blue-700 border-blue-200' };
       case 'cancelled':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return { text: tx('স্থগিত', 'Cancelled'), color: 'bg-rose-50 text-rose-700 border-rose-200' };
       case 'draft':
       default:
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return { text: tx('পরিকল্পনাধীন', 'Draft'), color: 'bg-amber-50 text-amber-700 border-amber-200' };
     }
   };
 
@@ -122,25 +124,28 @@ export default function PublicProgramsPage() {
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
             <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Home</span>
+              <span>{tx('মূল ওয়েবসাইটে ফিরুন', 'Back to Home')}</span>
             </Link>
             <span>/</span>
-            <span className="text-[#F1AD1A]">Programs</span>
+            <span className="text-[#F1AD1A]">{tx('প্রকল্পসমূহ', 'Programs')}</span>
           </div>
 
           <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur text-xs font-bold text-[#F1AD1A]">
               <FolderOpen className="w-4 h-4 text-[#F1AD1A]" />
-              <span>WCC IMPACT INITIATIVES</span>
+              <span>{tx('WCC উন্নয়ন ও সমাজকল্যাণ প্রকল্প', 'WCC IMPACT INITIATIVES')}</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              Community Programs & <br />
-              <span className="text-[#F1AD1A]">Development Drives</span>
+              {tx('কমিউনিটি প্রকল্প ও', 'Community Programs &')} <br />
+              <span className="text-[#F1AD1A]">{tx('উন্নয়নমূলক কর্মসূচি', 'Development Drives')}</span>
             </h1>
 
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              ঝালকাঠি জেলার তৃণমূল পর্যায়ে শিক্ষাবৃত্তি, স্বাস্থ্য ক্যাম্প, যুব উন্নয়ন ও ঐতিহ্য সংরক্ষণে আমাদের চলমান ও সম্পন্নকৃত সমাজকল্যাণমূলক কর্মসূচি।
+              {tx(
+                'ঝালকাঠি জেলার তৃণমূল পর্যায়ে শিক্ষাবৃত্তি, স্বাস্থ্য ক্যাম্প, যুব উন্নয়ন ও ঐতিহ্য সংরক্ষণে আমাদের চলমান ও সম্পন্নকৃত সমাজকল্যাণমূলক কর্মসূচি।',
+                'Ongoing and completed grassroots initiatives across educational scholarships, medical camps, youth leadership, and heritage preservation in Jhalakathi.'
+              )}
             </p>
           </div>
         </div>
@@ -154,7 +159,7 @@ export default function PublicProgramsPage() {
           <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-thin">
             <span className="text-xs font-bold text-slate-400 flex items-center gap-1 shrink-0 mr-1">
               <Filter className="w-3.5 h-3.5" />
-              <span>Wing:</span>
+              <span>{tx('উইং:', 'Wing:')}</span>
             </span>
             <button
               onClick={() => setSelectedWing('')}
@@ -164,7 +169,7 @@ export default function PublicProgramsPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              All Wings
+              {tx('সকল উইং', 'All Wings')}
             </button>
             {wings.map((wing) => (
               <button
@@ -176,24 +181,24 @@ export default function PublicProgramsPage() {
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                {wing.nameEn}
+                {lang === 'bn' ? (wing.nameBn || wing.nameEn) : (wing.nameEn || wing.nameBn)}
               </button>
             ))}
           </div>
 
           {/* Status Filter Dropdown */}
           <div className="flex items-center gap-2 shrink-0">
-            <label htmlFor="status-filter" className="text-xs font-bold text-slate-500">Status:</label>
+            <label htmlFor="status-filter" className="text-xs font-bold text-slate-500">{tx('স্ট্যাটাস:', 'Status:')}</label>
             <select
               id="status-filter"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-[#B62A35]"
             >
-              <option value="all">All Statuses</option>
-              <option value="published">Published</option>
-              <option value="completed">Completed</option>
-              <option value="draft">Draft</option>
+              <option value="all">{tx('সকল স্ট্যাটাস', 'All Statuses')}</option>
+              <option value="published">{tx('প্রকাশিত / চলমান', 'Published')}</option>
+              <option value="completed">{tx('সম্পন্ন হয়েছে', 'Completed')}</option>
+              <option value="draft">{tx('পরিকল্পনাধীন', 'Draft')}</option>
             </select>
           </div>
         </div>
@@ -222,14 +227,14 @@ export default function PublicProgramsPage() {
             <div className="w-12 h-12 rounded-2xl bg-rose-100 text-[#B62A35] flex items-center justify-center mx-auto">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">Failed to Load Programs</h3>
+            <h3 className="text-lg font-bold text-slate-900">{tx('প্রকল্প লোড করা যায়নি', 'Failed to Load Programs')}</h3>
             <p className="text-xs text-slate-600">{error}</p>
             <button
               onClick={handleRetry}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>Retry</span>
+              <span>{tx('পুনরায় চেষ্টা করুন', 'Retry')}</span>
             </button>
           </div>
         )}
@@ -240,16 +245,19 @@ export default function PublicProgramsPage() {
             <div className="w-14 h-14 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto">
               <FolderOpen className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">No Programs Found</h3>
+            <h3 className="text-lg font-bold text-slate-900">{tx('কোনো প্রকল্প পাওয়া যায়নি', 'No Programs Found')}</h3>
             <p className="text-xs sm:text-sm text-slate-500">
-              No programs match the selected filter criteria. Try selecting &ldquo;All Wings&rdquo; or check back shortly.
+              {tx(
+                'নির্বাচিত ফিল্টারে কোনো কর্মসূচি খুঁজে পাওয়া যায়নি। "সকল উইং" নির্বাচন করে আবার দেখুন।',
+                'No programs match the selected filter criteria. Try selecting "All Wings" or check back shortly.'
+              )}
             </p>
             {selectedWing && (
               <button
                 onClick={() => setSelectedWing('')}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >
-                <span>Clear Wing Filter</span>
+                <span>{tx('ফিল্টার রিসেট করুন', 'Clear Wing Filter')}</span>
               </button>
             )}
           </div>
@@ -260,6 +268,7 @@ export default function PublicProgramsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {programs.map((prog) => {
               const wingInfo = prog.wingId && typeof prog.wingId === 'object' ? prog.wingId : null;
+              const statusObj = getStatusDisplay(prog.status);
               return (
                 <div
                   key={prog._id}
@@ -278,7 +287,7 @@ export default function PublicProgramsPage() {
                         {wingInfo && (
                           <div className="absolute bottom-3 left-3">
                             <span className="px-2.5 py-1 bg-white/90 backdrop-blur text-slate-900 text-[10px] font-bold rounded-lg shadow-xs">
-                              {wingInfo.nameEn} Wing
+                              {lang === 'bn' ? (wingInfo.nameBn || wingInfo.nameEn) : `${wingInfo.nameEn} Wing`}
                             </span>
                           </div>
                         )}
@@ -292,8 +301,8 @@ export default function PublicProgramsPage() {
                     {/* Content */}
                     <div className="p-6 space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase ${getStatusColor(prog.status)}`}>
-                          {prog.status || 'Active'}
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase ${statusObj.color}`}>
+                          {statusObj.text}
                         </span>
                         {(prog.startDate || prog.endDate) && (
                           <span className="text-[11px] text-slate-400 flex items-center gap-1">
@@ -308,12 +317,12 @@ export default function PublicProgramsPage() {
                       </h3>
 
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                        {prog.description || 'Program details and objectives are being actively organized.'}
+                        {prog.description || tx('কর্মসূচির বিস্তারিত কার্যক্রম ও লক্ষ্যসমূহ সাজানো হচ্ছে।', 'Program details and objectives are being actively organized.')}
                       </p>
 
                       <div className="pt-2 text-xs text-slate-500 flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-[#B62A35]" />
-                        <span>Timeline: {formatDate(prog.startDate)} - {formatDate(prog.endDate)}</span>
+                        <span>{tx('সময়সীমা:', 'Timeline:')} {formatDate(prog.startDate)} - {formatDate(prog.endDate)}</span>
                       </div>
                     </div>
                   </div>
@@ -325,11 +334,11 @@ export default function PublicProgramsPage() {
                         href={`/wings/${wingInfo.slug}`}
                         className="text-[#B62A35] hover:underline font-bold inline-flex items-center gap-1"
                       >
-                        <span>View Wing Hub</span>
+                        <span>{tx('উইং হাবে যান', 'View Wing Hub')}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     ) : (
-                      <span className="text-slate-400">Official WCC Drive</span>
+                      <span className="text-slate-400">{tx('WCC অফিসিয়াল উদ্যোগ', 'Official WCC Drive')}</span>
                     )}
                   </div>
                 </div>

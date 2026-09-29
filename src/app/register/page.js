@@ -18,9 +18,12 @@ import {
 import { api } from '@/lib/api';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/Components/LanguageToggle';
 
 function RegisterForm() {
   const router = useRouter();
+  const { lang, tx, t } = useLanguage();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -50,11 +53,11 @@ function RegisterForm() {
       if (res.token) {
         localStorage.setItem('wcc_token', res.token);
         localStorage.setItem('wcc_user', JSON.stringify(res.user));
-        alert('Congratulations! You have successfully registered as an Official Member with WCC! Your digital ID has been generated.');
+        alert(tx('অভিনন্দন! আপনি সফলভাবে WCC-এর অফিসিয়াল সদস্য হিসেবে নিবন্ধিত হয়েছেন!', 'Congratulations! You have successfully registered as an Official Member with WCC! Your digital ID has been generated.'));
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      setError(err.message || tx('নিবন্ধন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +68,7 @@ function RegisterForm() {
     setGoogleLoading(true);
     try {
       if (!auth || !googleProvider) {
-        throw new Error('Firebase authentication is not ready.');
+        throw new Error(tx('গুগল অথেনটিকেশন প্রস্তুত নয়।', 'Firebase authentication is not ready.'));
       }
       const result = await signInWithPopup(auth, googleProvider);
       const fbUser = result.user;
@@ -85,20 +88,34 @@ function RegisterForm() {
     } catch (err) {
       console.error('Google Sign Up Error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
-        setError('Google registration popup was closed before completing.');
+        setError(tx('গুগল নিবন্ধন উইন্ডো বন্ধ করা হয়েছে।', 'Google registration popup was closed before completing.'));
       } else {
-        setError(err.message || 'Google registration failed. Please try again.');
+        setError(err.message || tx('গুগল নিবন্ধন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'Google registration failed. Please try again.'));
       }
     } finally {
       setGoogleLoading(false);
     }
   };
 
-  const upazilas = ['ঝালকাঠি সদর', 'নলছিটি', 'রাজাপুর', 'কাঠালিয়া'];
+  const upazilas = [
+    { bn: 'ঝালকাঠি সদর', en: 'Jhalokathi Sadar' },
+    { bn: 'নলছিটি', en: 'Nalchity' },
+    { bn: 'রাজাপুর', en: 'Rajapur' },
+    { bn: 'কাঠালিয়া', en: 'Kathalia' }
+  ];
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 bg-slate-50">
       <div className="max-w-xl mx-auto space-y-6">
+        {/* Top Header with Back link and Language Switcher */}
+        <div className="flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#B62A35] transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            <span>{tx('মূল ওয়েবসাইটে ফিরুন', 'Back to Home')}</span>
+          </Link>
+          <LanguageToggle />
+        </div>
+
         {/* Header Branding */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block">
@@ -107,10 +124,13 @@ function RegisterForm() {
             </div>
           </Link>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Join We Can Change (WCC)
+            {tx('উই ক্যান চেঞ্জ (WCC)-এ যোগ দিন', 'Join We Can Change (WCC)')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            Sign up below to receive your official WCC membership ID and access services.
+            {tx(
+              'নিচের ফর্মটি পূরণ করে আপনার অফিসিয়াল WCC সদস্য পরিচয়পত্র ও পোর্টাল সুবিধা গ্রহণ করুন।',
+              'Sign up below to receive your official WCC membership ID and access services.'
+            )}
           </p>
         </div>
 
@@ -118,10 +138,10 @@ function RegisterForm() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-5">
           <div className="border-b border-slate-100 pb-3">
             <h2 className="text-base font-bold text-slate-900">
-              Official Membership Registration
+              {tx('অফিসিয়াল সদস্যপদ নিবন্ধন', 'Official Membership Registration')}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Receive your official WCC Digital ID card and member portal access.
+              {tx('ডিজিটাল আইডি কার্ড এবং মেম্বার পোর্টাল অ্যাক্সেস লাভ করুন।', 'Receive your official WCC Digital ID card and member portal access.')}
             </p>
           </div>
 
@@ -134,25 +154,27 @@ function RegisterForm() {
 
           <form onSubmit={handleRegister} className="space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Full Name (সম্পূর্ণ নাম)</label>
+              <label className="block font-semibold text-slate-700 mb-1">{tx('সম্পূর্ণ নাম', 'Full Name')}</label>
               <input
                 type="text"
                 required
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Tanvir Ahmed or সুমাইয়া আক্তার"
+                placeholder={tx('যেমন: তানভীর আহমেদ বা সুমাইয়া আক্তার', 'e.g. Tanvir Ahmed or Sumaiya Akter')}
                 className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
+                <label className="block font-semibold text-slate-700 mb-1">{tx('ইমেইল ঠিকানা', 'Email Address')}</label>
                 <div className="relative">
                   <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="email"
                     required
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="yourname@example.com"
@@ -162,16 +184,17 @@ function RegisterForm() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Password</label>
+                <label className="block font-semibold text-slate-700 mb-1">{tx('পাসওয়ার্ড', 'Password')}</label>
                 <div className="relative">
                   <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="password"
                     required
+                    autoComplete="new-password"
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
+                    placeholder={tx('কমপক্ষে ৬ অক্ষরের', 'At least 6 characters')}
                     className="w-full pl-8 pr-3 py-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
                   />
                 </div>
@@ -180,12 +203,13 @@ function RegisterForm() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Mobile Phone (মোবাইল নম্বর)</label>
+                <label className="block font-semibold text-slate-700 mb-1">{tx('মোবাইল নম্বর', 'Mobile Phone')}</label>
                 <div className="relative">
                   <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="tel"
                     required
+                    autoComplete="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="017XXXXXXXX"
@@ -195,15 +219,15 @@ function RegisterForm() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Upazila (উপজেলা)</label>
+                <label className="block font-semibold text-slate-700 mb-1">{tx('উপজেলা', 'Upazila')}</label>
                 <select
                   value={upazila}
                   onChange={(e) => setUpazila(e.target.value)}
                   className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
                 >
                   {upazilas.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
+                    <option key={u.bn} value={u.bn}>
+                      {lang === 'bn' ? u.bn : u.en}
                     </option>
                   ))}
                 </select>
@@ -213,7 +237,10 @@ function RegisterForm() {
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-start gap-2">
               <Sparkles className="w-4 h-4 text-[#F1AD1A] shrink-0 mt-0.5" />
               <span>
-                <strong>Official Membership ID:</strong> Upon registration, your official WCC Digital ID card is immediately provisioned. You can request wing assignments or volunteer roles from your portal dashboard.
+                <strong>{tx('অফিসিয়াল সদস্য আইডি:', 'Official Membership ID:')}</strong> {tx(
+                  'নিবন্ধনের সাথে সাথেই আপনার ডিজিটাল আইডি কার্ড স্বয়ংক্রিয়ভাবে তৈরি হবে। পরবর্তীতে ড্যাশবোর্ড থেকে উইং বা ভলান্টিয়ার কাজের আবেদন করতে পারবেন।',
+                  'Upon registration, your official WCC Digital ID card is immediately provisioned. You can request wing assignments or volunteer roles from your portal dashboard.'
+                )}
               </span>
             </div>
 
@@ -223,7 +250,7 @@ function RegisterForm() {
               className="w-full py-3 px-4 font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 mt-4 bg-[#B62A35] hover:bg-[#9E1F2A] text-white cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
-              <span>{loading ? 'Generating Membership ID...' : 'Complete Registration & Get ID'}</span>
+              <span>{loading ? tx('আইডি তৈরি হচ্ছে...', 'Generating Membership ID...') : tx('নিবন্ধন সম্পন্ন করুন ও আইডি নিন', 'Complete Registration & Get ID')}</span>
             </button>
           </form>
 
@@ -232,7 +259,7 @@ function RegisterForm() {
             <div className="relative flex py-1 items-center">
               <div className="grow border-t border-slate-200"></div>
               <span className="shrink mx-3 text-slate-400 text-[11px] uppercase font-bold tracking-wider">
-                Or continue with
+                {tx('অথবা সরাসরি যুক্ত হোন', 'Or continue with')}
               </span>
               <div className="grow border-t border-slate-200"></div>
             </div>
@@ -261,27 +288,27 @@ function RegisterForm() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{googleLoading ? 'Connecting to Google...' : 'Sign up with Google'}</span>
+              <span>{googleLoading ? tx('গুগল সংযোগ হচ্ছে...', 'Connecting to Google...') : tx('গুগল দিয়ে নিবন্ধন করুন', 'Sign up with Google')}</span>
             </button>
           </div>
 
           <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100 space-y-2">
             <div>
-              Already have an account or ID?{' '}
+              {tx('ইতিমধ্যে অ্যাকাউন্ট বা আইডি আছে?', 'Already have an account or ID?')}{' '}
               <Link href="/login" className="font-bold text-[#B62A35] hover:underline">
-                Sign in to WCC
+                {tx('লগইন করুন', 'Sign in to WCC')}
               </Link>
             </div>
             <div>
-              Forgot your password?{' '}
+              {tx('পাসওয়ার্ড ভুলে গেছেন?', 'Forgot your password?')}{' '}
               <Link href="/forgot-password" className="font-bold text-[#B62A35] hover:underline">
-                Reset it here
+                {tx('রিসেট করুন', 'Reset it here')}
               </Link>
             </div>
             <div>
               <Link href="/" className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-[#B62A35]">
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Guest Site</span>
+                <span>{tx('মূল ওয়েবসাইটে ফিরুন', 'Back to Guest Site')}</span>
               </Link>
             </div>
           </div>

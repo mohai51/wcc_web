@@ -21,12 +21,14 @@ import {
   ExternalLink,
   ChevronDown
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/Components/LanguageToggle';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { lang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [joinDropdownOpen, setJoinDropdownOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -52,29 +54,32 @@ export default function Navbar() {
     router.push('/');
   };
 
-  // Unified public guest navigation links (always accessible across the guest site)
+  // Dynamic public guest navigation links
   const navLinks = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Vision & Mission', href: '/vision-mission', icon: null },
-    { name: 'Our Wings', href: '/wings', icon: null },
-    { name: 'Programs', href: '/programs', icon: null },
-    { name: 'Events', href: '/events', icon: null },
-    { name: 'Report Issue', href: '/report-issue', icon: null },
-    { name: 'Verify ID', href: '/verify', icon: ShieldCheck }
+    { name: t('nav.home'), href: '/', icon: Home },
+    { name: t('nav.visionMission'), href: '/vision-mission', icon: null },
+    { name: t('nav.wings'), href: '/wings', icon: null },
+    { name: t('nav.programs'), href: '/programs', icon: null },
+    { name: t('nav.events'), href: '/events', icon: null },
+    { name: t('nav.reportIssue'), href: '/report-issue', icon: null },
+    { name: t('nav.verifyId'), href: '/verify', icon: ShieldCheck }
   ];
 
   const getRoleBadge = (role) => {
+    const roleName = t(`roles.${role}`, role);
     switch (role) {
       case 'admin':
-        return { text: 'Admin', color: 'bg-rose-100 text-rose-700 border-rose-200' };
+        return { text: roleName, color: 'bg-rose-100 text-rose-700 border-rose-200' };
       case 'coordinator':
-        return { text: 'Coordinator', color: 'bg-purple-100 text-purple-700 border-purple-200' };
+        return { text: roleName, color: 'bg-purple-100 text-purple-700 border-purple-200' };
+      case 'wing_leader':
+        return { text: roleName, color: 'bg-amber-100 text-amber-800 border-amber-200' };
       case 'volunteer':
-        return { text: 'Volunteer', color: 'bg-amber-100 text-amber-800 border-amber-200' };
+        return { text: roleName, color: 'bg-amber-100 text-amber-800 border-amber-200' };
       case 'finance_officer':
-        return { text: 'Finance', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+        return { text: roleName, color: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
       default:
-        return { text: 'Member', color: 'bg-blue-100 text-blue-700 border-blue-200' };
+        return { text: roleName, color: 'bg-blue-100 text-blue-700 border-blue-200' };
     }
   };
 
@@ -83,70 +88,73 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#F1AD1A] bg-white p-0.5 shadow-xs group-hover:scale-105 transition-transform shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-[#F1AD1A] bg-white p-0.5 shadow-xs group-hover:scale-105 transition-transform shrink-0">
               <img
                 src="/landing/wcc.png"
                 alt="We Can Change Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <div>
+            <div className="shrink-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-lg text-[#B62A35] tracking-tight">WCC</span>
-                <span className="text-[10px] bg-[#F1AD1A]/20 text-[#A6772A] font-extrabold px-1.5 py-0.5 rounded">
-                  {user ? `${user.role.toUpperCase()} PORTAL` : 'OFFICIAL'}
+                <span className="font-black text-base sm:text-lg text-[#B62A35] tracking-tight whitespace-nowrap">{t('brand.shortName')}</span>
+                <span className="text-[10px] bg-[#F1AD1A]/20 text-[#A6772A] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap">
+                  {user ? `${user.role.toUpperCase()} PORTAL` : (lang === 'bn' ? 'অফিসিয়াল' : 'OFFICIAL')}
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500 font-medium hidden sm:block">
-                We Can Change • আমরাই আনব পরিবর্তন
+              <p className="text-[10px] text-slate-500 font-medium hidden 2xl:block truncate max-w-[220px]">
+                {t('brand.tagline')}
               </p>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop Navigation (Protected against wrapping) */}
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
                     isActive
                       ? 'bg-[#B62A35] text-white shadow-xs'
                       : 'text-slate-600 hover:text-[#B62A35] hover:bg-slate-100'
                   }`}
                 >
-                  {Icon && <Icon className="w-3.5 h-3.5" />}
-                  <span>{item.name}</span>
+                  {Icon && <Icon className="w-3.5 h-3.5 shrink-0 hidden 2xl:block" />}
+                  <span className="whitespace-nowrap">{item.name}</span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Action / Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Right Action & Language Switcher */}
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-3 shrink-0">
+            {/* Language Toggle Pill */}
+            <LanguageToggle />
+
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 xl:gap-3 shrink-0">
                 {/* Switch to Portal Workspace */}
                 <Link
                   href="/dashboard"
                   title="Go to My Portal Workspace"
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                  className="flex items-center gap-1 px-2.5 py-1.5 xl:px-3.5 xl:py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-[11px] xl:text-xs font-bold rounded-xl transition-all shadow-xs whitespace-nowrap shrink-0"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Go to Portal</span>
+                  <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">{t('nav.portal')}</span>
                 </Link>
 
-                <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-                  <div className="flex flex-col text-right">
-                    <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[120px]">
+                <div className="flex items-center gap-1.5 xl:gap-2 pl-1.5 xl:pl-2 border-l border-slate-200 shrink-0">
+                  <div className="hidden xl:flex flex-col text-right shrink-0">
+                    <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[100px] xl:max-w-[130px] whitespace-nowrap">
                       {user.name}
                     </span>
                     <div className="flex items-center justify-end">
-                      <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded border font-bold ${getRoleBadge(user.role).color}`}>
+                      <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded border font-bold whitespace-nowrap ${getRoleBadge(user.role).color}`}>
                         {getRoleBadge(user.role).text}
                       </span>
                     </div>
@@ -154,39 +162,40 @@ export default function Navbar() {
 
                   <Link
                     href="/profile"
-                    className="p-1.5 text-slate-500 hover:text-[#B62A35] hover:bg-rose-50 rounded-lg transition-colors"
-                    title="My Profile"
+                    className="p-1.5 text-slate-500 hover:text-[#B62A35] hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                    title={lang === 'bn' ? 'প্রোফাইল' : 'Profile'}
                   >
                     <User className="w-4 h-4" />
                   </Link>
 
                   <button
                     onClick={handleLogout}
-                    title="Log out"
-                    className="p-1.5 text-slate-400 hover:text-[#B62A35] hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                    title={t('nav.logout')}
+                    className="p-1.5 text-slate-400 hover:text-[#B62A35] hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <Link
                   href="/login"
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-[#B62A35] hover:bg-[#9E1F2A] text-white transition-all shadow-xs"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 xl:px-4 xl:py-2 text-[11px] xl:text-xs font-bold rounded-xl bg-[#B62A35] hover:bg-[#9E1F2A] text-white transition-all shadow-xs whitespace-nowrap shrink-0"
                 >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Sign In / Join WCC</span>
+                  <LogIn className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">{t('nav.login')}</span>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile menu button & Mobile Lang Switch */}
+          <div className="flex lg:hidden items-center gap-2">
+            <LanguageToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer"
+              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer shrink-0"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -197,13 +206,13 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
+        <div className="lg:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold ${
@@ -235,7 +244,7 @@ export default function Navbar() {
                     onClick={handleLogout}
                     className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
                   >
-                    Log out
+                    {t('nav.logout')}
                   </button>
                 </div>
                 <Link
@@ -244,7 +253,7 @@ export default function Navbar() {
                   className="flex items-center justify-center gap-2 w-full py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Go to Portal Workspace</span>
+                  <span>{t('nav.portal')}</span>
                 </Link>
               </div>
             ) : (
@@ -255,7 +264,7 @@ export default function Navbar() {
                   className="flex items-center justify-center gap-2 w-full py-2.5 text-center text-xs font-bold bg-[#B62A35] hover:bg-[#9E1F2A] text-white rounded-xl shadow-xs transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span>Sign In / Join WCC</span>
+                  <span>{t('nav.login')}</span>
                 </Link>
               </div>
             )}

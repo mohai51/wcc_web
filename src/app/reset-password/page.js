@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/Components/LanguageToggle';
 import {
   Lock,
   Eye,
@@ -21,6 +23,8 @@ function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams ? searchParams.get('token') : null;
+  const { lang } = useLanguage();
+  const isBn = lang === 'bn';
 
   const [verifying, setVerifying] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
@@ -40,7 +44,11 @@ function ResetPasswordForm() {
       if (!token) {
         setVerifying(false);
         setTokenValid(false);
-        setVerifyError('No security reset token was found in the link. Please request a new one.');
+        setVerifyError(
+          isBn
+            ? 'লিংকে কোনো সিকিউরিটি টোকেন পাওয়া যায়নি। অনুগ্রহ করে নতুন লিংকের জন্য অনুরোধ করুন।'
+            : 'No security reset token was found in the link. Please request a new one.'
+        );
         return;
       }
 
@@ -52,30 +60,48 @@ function ResetPasswordForm() {
           setUserEmail(res.email || '');
         } else {
           setTokenValid(false);
-          setVerifyError(res.error || 'Password reset link is invalid or has expired.');
+          setVerifyError(
+            res.error ||
+              (isBn
+                ? 'পাসওয়ার্ড রিসেট লিংকটি ভুল অথবা মেয়াদোত্তীর্ণ হয়ে গেছে।'
+                : 'Password reset link is invalid or has expired.')
+          );
         }
       } catch (err) {
         setTokenValid(false);
-        setVerifyError(err.message || 'Password reset link is invalid or has expired.');
+        setVerifyError(
+          err.message ||
+            (isBn
+              ? 'পাসওয়ার্ড রিসেট লিংকটি ভুল অথবা মেয়াদোত্তীর্ণ হয়ে গেছে।'
+              : 'Password reset link is invalid or has expired.')
+        );
       } finally {
         setVerifying(false);
       }
     }
 
     checkToken();
-  }, [token]);
+  }, [token, isBn]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
 
     if (newPassword.length < 6) {
-      setSubmitError('New password must be at least 6 characters long.');
+      setSubmitError(
+        isBn
+          ? 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।'
+          : 'New password must be at least 6 characters long.'
+      );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setSubmitError('Passwords do not match. Please verify both fields.');
+      setSubmitError(
+        isBn
+          ? 'উভয় পাসওয়ার্ড মিলছে না। অনুগ্রহ করে যাচাই করুন।'
+          : 'Passwords do not match. Please verify both fields.'
+      );
       return;
     }
 
@@ -84,14 +110,23 @@ function ResetPasswordForm() {
       await api.resetPassword(token, newPassword);
       setSubmitSuccess(true);
     } catch (err) {
-      setSubmitError(err.message || 'Failed to reset password. Please try again.');
+      setSubmitError(
+        err.message ||
+          (isBn
+            ? 'পাসওয়ার্ড রিসেট করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।'
+            : 'Failed to reset password. Please try again.')
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
+    <div className="min-h-[85vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 relative">
+      <div className="absolute top-6 right-6">
+        <LanguageToggle />
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
         <Link href="/" className="inline-block">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#F1AD1A] bg-white p-1 mx-auto shadow-md">
@@ -100,13 +135,15 @@ function ResetPasswordForm() {
         </Link>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>SECURE CREDENTIAL RESET</span>
+          <span>{isBn ? 'নিরাপদ পাসওয়ার্ড পরিবর্তন' : 'SECURE CREDENTIAL RESET'}</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Set New Password
+          {isBn ? 'নতুন পাসওয়ার্ড নির্ধারণ' : 'Set New Password'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-          Please enter a strong new password for your We Can Change account.
+          {isBn
+            ? 'আপনার উই ক্যান চেইঞ্জ অ্যাকাউন্টের জন্য একটি শক্তিশালী নতুন পাসওয়ার্ড প্রদান করুন।'
+            : 'Please enter a strong new password for your We Can Change account.'}
         </p>
       </div>
 
@@ -115,7 +152,9 @@ function ResetPasswordForm() {
           {verifying ? (
             <div className="py-12 text-center space-y-3">
               <RefreshCw className="w-8 h-8 text-[#B62A35] animate-spin mx-auto" />
-              <p className="text-xs font-semibold text-slate-600">Verifying security token...</p>
+              <p className="text-xs font-semibold text-slate-600">
+                {isBn ? 'টোকেন যাচাই করা হচ্ছে...' : 'Verifying security token...'}
+              </p>
             </div>
           ) : !tokenValid ? (
             <div className="space-y-5 text-center">
@@ -123,7 +162,9 @@ function ResetPasswordForm() {
                 <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-xs">
                   <AlertCircle className="w-6 h-6" />
                 </div>
-                <h2 className="text-sm font-bold text-rose-950">Invalid or Expired Link</h2>
+                <h2 className="text-sm font-bold text-rose-950">
+                  {isBn ? 'অবৈধ অথবা মেয়াদোত্তীর্ণ লিংক' : 'Invalid or Expired Link'}
+                </h2>
                 <p className="text-xs text-rose-800">{verifyError}</p>
               </div>
 
@@ -132,7 +173,7 @@ function ResetPasswordForm() {
                 className="w-full py-2.5 px-4 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 text-xs"
               >
                 <KeyRound className="w-4 h-4" />
-                <span>Request New Reset Link</span>
+                <span>{isBn ? 'নতুন রিসেট লিংকের অনুরোধ করুন' : 'Request New Reset Link'}</span>
               </Link>
             </div>
           ) : submitSuccess ? (
@@ -141,9 +182,13 @@ function ResetPasswordForm() {
                 <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h2 className="text-base font-bold text-emerald-950">Password Reset Complete!</h2>
+                <h2 className="text-base font-bold text-emerald-950">
+                  {isBn ? 'পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!' : 'Password Reset Complete!'}
+                </h2>
                 <p className="text-xs text-emerald-800">
-                  Your password has been successfully updated. You can now log in to your account with your new credentials.
+                  {isBn
+                    ? 'আপনার পাসওয়ার্ড সফলভাবে আপডেট হয়েছে। এখন আপনি নতুন পাসওয়ার্ড দিয়ে অ্যাকাউন্টে প্রবেশ করতে পারেন।'
+                    : 'Your password has been successfully updated. You can now log in to your account with your new credentials.'}
                 </p>
               </div>
 
@@ -152,7 +197,7 @@ function ResetPasswordForm() {
                 className="w-full py-2.5 px-4 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 text-xs"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Sign In Now</span>
+                <span>{isBn ? 'এখনই সাইন ইন করুন' : 'Sign In Now'}</span>
               </Link>
             </div>
           ) : (
@@ -166,12 +211,15 @@ function ResetPasswordForm() {
 
               {userEmail && (
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 text-xs">
-                  Resetting password for: <strong className="font-semibold text-slate-800">{userEmail}</strong>
+                  {isBn ? 'পাসওয়ার্ড পরিবর্তন হচ্ছে: ' : 'Resetting password for: '}
+                  <strong className="font-semibold text-slate-800">{userEmail}</strong>
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">New Password</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  {isBn ? 'নতুন পাসওয়ার্ড' : 'New Password'}
+                </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
@@ -180,7 +228,7 @@ function ResetPasswordForm() {
                     minLength={6}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="At least 6 characters"
+                    placeholder={isBn ? 'কমপক্ষে ৬ অক্ষর' : 'At least 6 characters'}
                     className="w-full pl-9 pr-10 py-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden text-slate-900"
                   />
                   <button
@@ -194,7 +242,9 @@ function ResetPasswordForm() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Confirm New Password</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  {isBn ? 'নতুন পাসওয়ার্ড নিশ্চিত করুন' : 'Confirm New Password'}
+                </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
@@ -203,8 +253,8 @@ function ResetPasswordForm() {
                     minLength={6}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter your new password"
-                    className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden text-slate-900"
+                    placeholder={isBn ? 'পাসওয়ার্ডটি পুনরায় লিখুন' : 'Re-enter your new password'}
+                    className="w-full pl-9 pr-10 py-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden text-slate-900"
                   />
                 </div>
               </div>
@@ -217,12 +267,12 @@ function ResetPasswordForm() {
                 {submitting ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Updating Password...</span>
+                    <span>{isBn ? 'পাসওয়ার্ড আপডেট হচ্ছে...' : 'Updating Password...'}</span>
                   </>
                 ) : (
                   <>
                     <ArrowRight className="w-4 h-4" />
-                    <span>Save New Password</span>
+                    <span>{isBn ? 'নতুন পাসওয়ার্ড সংরক্ষণ করুন' : 'Save New Password'}</span>
                   </>
                 )}
               </button>
@@ -231,7 +281,7 @@ function ResetPasswordForm() {
 
           <div className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
             <Link href="/login" className="font-bold text-[#B62A35] hover:underline">
-              Return to Sign In
+              {isBn ? 'সাইন ইনে ফিরে যান' : 'Return to Sign In'}
             </Link>
           </div>
         </div>
