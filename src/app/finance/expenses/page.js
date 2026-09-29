@@ -12,8 +12,10 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import StatusBadge from '@/Components/StatusBadge';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ExpensesPage() {
+  const { tx, lang } = useLanguage();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -107,7 +109,7 @@ export default function ExpensesPage() {
             className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
           >
             <Receipt className="w-4 h-4 text-[#F1AD1A]" />
-            <span>ইভেন্ট খরচ ফর্ম (Multi-Row)</span>
+            <span>{tx('ইভেন্ট খরচ ফর্ম (Multi-Row)', 'Event Expense Form (Multi-Row)')}</span>
           </Link>
 
           <button
@@ -161,7 +163,7 @@ export default function ExpensesPage() {
                       <div className="font-semibold text-slate-900 leading-snug">{e.description}</div>
                       {e.eventTitle && (
                         <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded bg-rose-50 text-[#B62A35] text-[10px] font-bold border border-rose-200">
-                          ইভেন্ট: {e.eventTitle}
+                          {tx('ইভেন্ট:', 'Event:')} {e.eventTitle}
                         </span>
                       )}
                       {!e.eventTitle && e.activityName && (
@@ -178,7 +180,7 @@ export default function ExpensesPage() {
                       <div className="font-bold text-slate-800">{e.paidBy || e.vendorOrMember || 'General'}</div>
                       {e.submittedByName && (
                         <span className="text-[10px] text-slate-400 block font-medium">
-                          লিডার: {e.submittedByName} ({e.submittedByRole || 'leader'})
+                          {tx('লিডার:', 'Leader:')} {e.submittedByName} ({e.submittedByRole || 'leader'})
                         </span>
                       )}
                     </td>

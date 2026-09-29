@@ -1,8 +1,10 @@
 'use client';
 
 import { Printer, ShieldCheck, QrCode } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function DigitalIdCard({ member }) {
+  const { lang, tx } = useLanguage();
   if (!member) return null;
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://wecanchange.org';
@@ -11,6 +13,16 @@ export default function DigitalIdCard({ member }) {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const formatWing = (w) => {
+    if (!w || w === 'সাধারণ উইং' || w === 'General Wing') return lang === 'bn' ? 'সাধারণ উইং' : 'General Wing';
+    if (w.includes('শিক্ষা') || w.toLowerCase().includes('education')) return lang === 'bn' ? 'শিক্ষা উইং' : 'Education Wing';
+    if (w.includes('স্বাস্থ্য') || w.toLowerCase().includes('health')) return lang === 'bn' ? 'স্বাস্থ্য উইং' : 'Health Wing';
+    if (w.includes('খেলাধুলা') || w.toLowerCase().includes('sports')) return lang === 'bn' ? 'খেলাধুলা উইং' : 'Sports Wing';
+    if (w.includes('সংস্কৃতি') || w.toLowerCase().includes('cultural')) return lang === 'bn' ? 'সংস্কৃতি উইং' : 'Cultural Wing';
+    if (w.includes('পরিবেশ') || w.toLowerCase().includes('environment')) return lang === 'bn' ? 'পরিবেশ উইং' : 'Environment Wing';
+    return w;
   };
 
   return (
@@ -83,19 +95,19 @@ export default function DigitalIdCard({ member }) {
           {/* Key Attributes Grid */}
           <div className="w-full grid grid-cols-2 gap-2 text-left bg-[#202530] p-3 rounded-lg border border-slate-800 text-xs mb-4">
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Assigned Wing</span>
-              <span className="font-semibold text-slate-200 truncate block">{member.wing || 'সাধারণ উইং'}</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">{tx('নির্ধারিত উইং', 'Assigned Wing')}</span>
+              <span className="font-semibold text-slate-200 truncate block">{formatWing(member.wing)}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Blood Group</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">{tx('রক্তের গ্রুপ', 'Blood Group')}</span>
               <span className="font-bold text-rose-400 block">{member.blood || 'Unknown'}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Profession</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">{tx('পেশা', 'Profession')}</span>
               <span className="font-semibold text-slate-200 truncate block">{member.profession || 'N/A'}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Status</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">{tx('স্ট্যাটাস', 'Status')}</span>
               <span className="font-bold text-emerald-400 block">{member.status || 'Active'}</span>
             </div>
           </div>
@@ -103,8 +115,8 @@ export default function DigitalIdCard({ member }) {
           {/* Bottom QR Code & Verification Note */}
           <div className="w-full flex items-center justify-between pt-2 border-t border-slate-800">
             <div className="text-left">
-              <p className="text-[10px] text-slate-400 leading-tight">Official Verification QR</p>
-              <p className="text-[9px] text-slate-500">Scan to verify legitimacy</p>
+              <p className="text-[10px] text-slate-400 leading-tight">{tx('অফিসিয়াল ভেরিফিকেশন কিউআর', 'Official Verification QR')}</p>
+              <p className="text-[9px] text-slate-500">{tx('সদস্যপদ যাচাই করতে স্ক্যান করুন', 'Scan to verify legitimacy')}</p>
               <p className="text-[9px] text-[#F1AD1A] font-semibold mt-1">Jhalokathi, Bangladesh</p>
             </div>
             <div className="w-14 h-14 bg-white p-1 rounded-md shadow shrink-0">
@@ -125,7 +137,7 @@ export default function DigitalIdCard({ member }) {
           className="flex items-center gap-2 px-4 py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
         >
           <Printer className="w-4 h-4" />
-          <span>Print / Save ID Card (PDF)</span>
+          <span>{tx('আইডি কার্ড প্রিন্ট / সংরক্ষণ (PDF)', 'Print / Save ID Card (PDF)')}</span>
         </button>
         <a
           href={verifyUrl}
@@ -134,7 +146,7 @@ export default function DigitalIdCard({ member }) {
           className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
         >
           <QrCode className="w-4 h-4" />
-          <span>Test QR Link</span>
+          <span>{tx('কিউআর লিংক যাচাই', 'Test QR Link')}</span>
         </a>
       </div>
     </div>

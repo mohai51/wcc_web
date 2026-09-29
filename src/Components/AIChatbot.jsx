@@ -38,20 +38,32 @@ const QUICK_PROMPTS_EN = [
 
 export default function AIChatbot() {
   const { lang, tx } = useLanguage();
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
       sender: 'bot',
-      text: lang === 'bn'
-        ? 'আসসালামু আলাইকুম! আমি উই ক্যান চেঞ্জ (WCC)-এর স্মার্ট এআই সহকারী। WCC-এর কার্যক্রম, ৫টি উইং, ফ্রি স্বাস্থ্য ক্যাম্প, ব্লাড ব্যাংক বা আসন্ন ইভেন্ট সম্পর্কিত যে কোনো প্রশ্ন করতে পারেন।'
-        : 'Hello! I am the official AI Assistant for We Can Change (WCC). Ask me anything about our 5 wings, upcoming events, health camps, blood bank, or volunteer registration!'
+      text: ''
     }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setMounted(true);
+    setMessages(prev => {
+      const welcomeText = lang === 'bn'
+        ? 'আসসালামু আলাইকুম! আমি উই ক্যান চেঞ্জ (WCC)-এর স্মার্ট এআই সহকারী। WCC-এর কার্যক্রম, ৫টি উইং, ফ্রি স্বাস্থ্য ক্যাম্প, ব্লাড ব্যাংক বা আসন্ন ইভেন্ট সম্পর্কিত যে কোনো প্রশ্ন করতে পারেন।'
+        : 'Hello! I am the official AI Assistant for We Can Change (WCC). Ask me anything about our 5 wings, upcoming events, health camps, blood bank, or volunteer registration!';
+      if (prev.length === 1 && prev[0].id === 'welcome') {
+        return [{ id: 'welcome', sender: 'bot', text: welcomeText }];
+      }
+      return prev;
+    });
+  }, [lang]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -63,6 +75,8 @@ export default function AIChatbot() {
       setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [isOpen, messages]);
+
+  if (!mounted) return null;
 
   const handleSend = async (messageToSend) => {
     const text = (messageToSend || input).trim();

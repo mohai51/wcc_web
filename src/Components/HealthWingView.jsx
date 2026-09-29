@@ -643,7 +643,7 @@ export default function HealthWingView({
                     <Ambulance className="w-6 h-6" />
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-rose-600 text-white text-[10px] font-black tracking-wider uppercase animate-pulse">
-                    ২৪/৭ জরুরি সেল
+                    {tx('২৪/৭ জরুরি সেল', '24/7 Emergency Cell')}
                   </span>
                 </div>
                 <h3 className="text-lg font-black text-white">
@@ -710,14 +710,14 @@ export default function HealthWingView({
                 className="px-4 py-2.5 bg-white text-rose-700 hover:bg-rose-50 font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
               >
                 <Phone className="w-3.5 h-3.5" />
-                <span>০১৭১৫-৬৭৮৯০১</span>
+                <span>{lang === 'bn' ? '০১৭১৫-৬৭৮৯০১' : '01715-678901'}</span>
               </a>
               <a
                 href="tel:01711333444"
                 className="px-4 py-2.5 bg-rose-950/40 hover:bg-rose-950/60 text-white border border-white/20 font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
               >
                 <Phone className="w-3.5 h-3.5" />
-                <span>০১৭১১-৩৩৩৪৪৪</span>
+                <span>{lang === 'bn' ? '০১৭১১-৩৩৩৪৪৪' : '01711-333444'}</span>
               </a>
               <button
                 type="button"
@@ -785,7 +785,7 @@ export default function HealthWingView({
                   <span>{tx('স্বাস্থ্য উইং লিডার ও মেডিকেল ডিরেক্টর', 'Health Wing Leader & Medical Director')}</span>
                 </div>
                 <h3 className="text-xl font-black text-white">
-                  {wing?.leader?.name || 'ডা. মোস্তাফিজুর রহমান (Dr. Mostafizur Rahman)'}
+                  {wing?.leader?.name || tx('ডা. মোস্তাফিজুর রহমান', 'Dr. Mostafizur Rahman')}
                 </h3>
                 <p className="text-xs text-slate-300">
                   {tx('মেডিসিন বিশেষজ্ঞ (MBBS, FCPS) • উই ক্যান চেঞ্জ স্বাস্থ্য ও চিকিৎসা উইং তত্ত্বাবধায়ক', 'Consultant Physician (MBBS, FCPS) • Supervisor of WCC Health & Medical Wing')}
@@ -793,7 +793,7 @@ export default function HealthWingView({
                 <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-300">
                   <a href="tel:01715678901" className="flex items-center gap-1.5 hover:text-white transition-colors">
                     <Phone className="w-3.5 h-3.5 text-rose-400" />
-                    <span>০১৭১৫-৬৭৮৯০১</span>
+                    <span>{lang === 'bn' ? '০১৭১৫-৬৭৮৯০১' : '01715-678901'}</span>
                   </a>
                   <a href="mailto:coordinator.health@wecanchange.org" className="flex items-center gap-1.5 hover:text-white transition-colors">
                     <Send className="w-3.5 h-3.5 text-rose-400" />
@@ -842,7 +842,7 @@ export default function HealthWingView({
                   <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
                     <strong className="block text-slate-900">{tx('তারিখ ও সময়:', 'Date & Time:')}</strong>
-                    <span>{camps[0].date} ({camps[0].time || 'সকাল ৯:০০ - বিকাল ৪:০০'})</span>
+                    <span>{camps[0].date} ({camps[0].time || tx('সকাল ৯:০০ - বিকাল ৪:০০', '9:00 AM - 4:00 PM')})</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-slate-600">
@@ -856,7 +856,7 @@ export default function HealthWingView({
                   <Users className="w-4 h-4 text-purple-600 shrink-0" />
                   <div>
                     <strong className="block text-slate-900">{tx('লক্ষ্য ও সেবা:', 'Target Beneficiaries:')}</strong>
-                    <span>{camps[0].targetBeneficiaries || '৫০০+ সুবিধাবঞ্চিত মানুষ'}</span>
+                    <span>{camps[0].targetBeneficiaries || tx('৫০০+ সুবিধাবঞ্চিত মানুষ', '500+ underprivileged people')}</span>
                   </div>
                 </div>
               </div>
@@ -935,7 +935,7 @@ export default function HealthWingView({
                           FREE
                         </span>
                         <span className="px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur text-white font-bold text-[10px]">
-                          {camp.district || 'ঝালকাঠি'}
+                          {camp.district || tx('ঝালকাঠি', 'Jhalakathi')}
                         </span>
                       </div>
                       {isLeaderOrAdmin && (
@@ -964,7 +964,7 @@ export default function HealthWingView({
                           <span>{formatDate(camp.date)}</span>
                           <span className="text-slate-300">•</span>
                           <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{camp.time || 'সকাল ৯:০০ - বিকাল ৪:০০'}</span>
+                          <span>{camp.time || tx('সকাল ৯:০০ - বিকাল ৪:০০', '9:00 AM - 4:00 PM')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -1146,7 +1146,7 @@ export default function HealthWingView({
                       </div>
                       <p className="text-xs text-slate-500 flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{donor.location || 'ঝালকাঠি সদর'}, {donor.district || 'ঝালকাঠি'}</span>
+                        <span>{donor.location || tx('ঝালকাঠি সদর', 'Jhalakathi Sadar')}, {donor.district || tx('ঝালকাঠি', 'Jhalakathi')}</span>
                       </p>
                       {donor.lastDonationDate && (
                         <p className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1">
@@ -1265,7 +1265,7 @@ export default function HealthWingView({
                           {req.urgency === 'critical' ? tx('অতি জরুরি', 'Critical') : tx('জরুরি', 'Urgent')}
                         </span>
                         <h4 className="text-base font-black text-slate-900 mt-1">{req.patientName}</h4>
-                        <p className="text-xs text-slate-500">{req.hospital} • {req.ward || 'সাধারণ বিভাগ'}</p>
+                        <p className="text-xs text-slate-500">{req.hospital} • {req.ward || tx('সাধারণ বিভাগ', 'General Ward')}</p>
                       </div>
 
                       <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold ${
@@ -1360,12 +1360,12 @@ export default function HealthWingView({
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700">
-                              {req.urgency === 'critical' ? '🔴 অতি জরুরি' : '🟠 জরুরি'}
+                              {req.urgency === 'critical' ? tx('🔴 অতি জরুরি', '🔴 Critical') : tx('🟠 জরুরি', '🟠 Urgent')}
                             </span>
                             <h4 className="text-base font-black text-slate-900 mt-1">{req.patientName}</h4>
                             <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
                               <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                              <span>{req.hospital} • {req.ward || 'সাধারণ ওয়ার্ড'}</span>
+                              <span>{req.hospital} • {req.ward || tx('সাধারণ ওয়ার্ড', 'General Ward')}</span>
                             </p>
                           </div>
 
@@ -1376,7 +1376,7 @@ export default function HealthWingView({
                                 ? 'bg-amber-100 text-amber-800 animate-pulse'
                                 : 'bg-slate-100 text-slate-700'
                           }`}>
-                            {req.status === 'resolved' ? '✓ সমাধান হয়েছে' : req.status === 'in_progress' ? '⏳ প্রসেসিং' : '⚠️ নতুন আবেদন'}
+                            {req.status === 'resolved' ? tx('✓ সমাধান হয়েছে', '✓ Resolved') : req.status === 'in_progress' ? tx('⏳ প্রসেসিং', '⏳ In Progress') : tx('⚠️ নতুন আবেদন', '⚠️ New Request')}
                           </span>
                         </div>
 
@@ -1413,14 +1413,14 @@ export default function HealthWingView({
                           {req.status !== 'resolved' ? (
                             <button
                               type="button"
-                              onClick={() => handleUpdateEmergencyStatus(req._id, 'resolved', null, 'WCC টিম দ্বারা হাসপাতালে রোগীর সহায়তা সম্পন্ন হয়েছে।')}
+                              onClick={() => handleUpdateEmergencyStatus(req._id, 'resolved', null, tx('WCC টিম দ্বারা হাসপাতালে রোগীর সহায়তা সম্পন্ন হয়েছে।', 'Hospital patient assistance marked as completed by WCC team.'))}
                               className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
                             >
                               <CheckCircle className="w-3.5 h-3.5" />
                               <span>{tx('সম্পন্ন চিহ্নিত করুন', 'Mark Resolved')}</span>
                             </button>
                           ) : (
-                            <span className="text-[11px] text-emerald-600 font-bold">✓ সহায়তা সম্পন্ন</span>
+                            <span className="text-[11px] text-emerald-600 font-bold">{tx('✓ সহায়তা সম্পন্ন', '✓ Assistance Complete')}</span>
                           )}
                         </div>
                       </div>
@@ -1457,7 +1457,7 @@ export default function HealthWingView({
                 <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span>{tx('ফুল কন্ট্রোল সচল', 'Full Access Active')}</span>
-                  <span className="text-[11px] font-normal text-emerald-700">({user?.name || 'ডা. মোস্তাফিজুর রহমান'})</span>
+                  <span className="text-[11px] font-normal text-emerald-700">({user?.name || tx('ডা. মোস্তাফিজুর রহমান', 'Dr. Mostafizur Rahman')})</span>
                 </div>
               </div>
               <h2 className="text-2xl font-black text-slate-900 mt-2">
@@ -1547,7 +1547,7 @@ export default function HealthWingView({
                   <label className="text-xs font-bold text-slate-700">{tx('সময়সীমা', 'Time')}</label>
                   <input
                     type="text"
-                    placeholder="সকাল ৯:০০ - বিকাল ৪:০০"
+                    placeholder={tx('সকাল ৯:০০ - বিকাল ৪:০০', '9:00 AM - 4:00 PM')}
                     value={newCampForm.time}
                     onChange={e => setNewCampForm({ ...newCampForm, time: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-purple-600 bg-white"
@@ -1561,7 +1561,7 @@ export default function HealthWingView({
                   <input
                     type="text"
                     required
-                    placeholder="ঝালকাঠি সদর হাসপাতাল সড়ক / পৌরসভা চত্বর"
+                    placeholder={tx('ঝালকাঠি সদর হাসপাতাল সড়ক / পৌরসভা চত্বর', 'Jhalakathi Sadar Hospital Road / Pourashava Square')}
                     value={newCampForm.location}
                     onChange={e => setNewCampForm({ ...newCampForm, location: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-purple-600 bg-white"
@@ -1571,7 +1571,7 @@ export default function HealthWingView({
                   <label className="text-xs font-bold text-slate-700">{tx('টার্গেট রোগী', 'Target Beneficiaries')}</label>
                   <input
                     type="text"
-                    placeholder="৫০০+ মানুষ"
+                    placeholder={tx('৫০০+ মানুষ', '500+ people')}
                     value={newCampForm.targetBeneficiaries}
                     onChange={e => setNewCampForm({ ...newCampForm, targetBeneficiaries: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-purple-600 bg-white"
@@ -1594,7 +1594,7 @@ export default function HealthWingView({
                 <label className="text-xs font-bold text-slate-700">{tx('উপস্থিত ডাক্তার (নাম ও ডিগ্রি)', 'Doctor Name & Degree')}</label>
                 <input
                   type="text"
-                  placeholder="ডা. মোস্তাফিজুর রহমান (MBBS, মেডিসিন বিশেষজ্ঞ)"
+                  placeholder={tx('ডা. মোস্তাফিজুর রহমান (MBBS, মেডিসিন বিশেষজ্ঞ)', 'Dr. Mostafizur Rahman (MBBS, Medicine Specialist)')}
                   value={newCampForm.doctors[0]?.name || ''}
                   onChange={e => {
                     const docs = [...newCampForm.doctors];
@@ -1658,7 +1658,7 @@ export default function HealthWingView({
                           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                             task.priority === 'urgent' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
                           }`}>
-                            {task.priority === 'urgent' ? 'জরুরি' : 'সাধারণ'}
+                            {task.priority === 'urgent' ? tx('জরুরি', 'Urgent') : tx('সাধারণ', 'Normal')}
                           </span>
                           <h4 className="text-base font-black text-slate-900 mt-1">{task.title}</h4>
                           <p className="text-xs text-slate-600">{task.description}</p>
@@ -1746,7 +1746,7 @@ export default function HealthWingView({
                           <span>{member.phone}</span>
                         </p>
                         <p className="text-xs text-slate-500">
-                          {tx('দায়িত্ব:', 'Role:')} {member.roleTitle || 'ইমার্জেন্সি সেল ভলান্টিয়ার'}
+                          {tx('দায়িত্ব:', 'Role:')} {member.roleTitle || tx('ইমার্জেন্সি সেল ভলান্টিয়ার', 'Emergency Cell Volunteer')}
                         </p>
                       </div>
 
@@ -1778,7 +1778,7 @@ export default function HealthWingView({
                   <input
                     type="text"
                     required
-                    placeholder="নাম"
+                    placeholder={tx('নাম', 'Name')}
                     value={donorForm.name}
                     onChange={e => setDonorForm({ ...donorForm, name: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white"
@@ -1831,7 +1831,7 @@ export default function HealthWingView({
                     <input
                       type="text"
                       required
-                      placeholder="ঝালকাঠি সদর"
+                      placeholder={tx('ঝালকাঠি সদর', 'Jhalakathi Sadar')}
                       value={donorForm.location}
                       onChange={e => setDonorForm({ ...donorForm, location: e.target.value })}
                       className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white"
@@ -1880,8 +1880,8 @@ export default function HealthWingView({
                 🩺
               </div>
               <div>
-                <h4 className="font-bold text-slate-900">ডা. মোস্তাফিজুর রহমান (Dr. Mostafizur Rahman)</h4>
-                <p className="text-[11px] text-slate-600">মেডিসিন বিশেষজ্ঞ (MBBS, FCPS) • স্বাস্থ্য উইং লিডার</p>
+                <h4 className="font-bold text-slate-900">{tx('ডা. মোস্তাফিজুর রহমান', 'Dr. Mostafizur Rahman')}</h4>
+                <p className="text-[11px] text-slate-600">{tx('মেডিসিন বিশেষজ্ঞ (MBBS, FCPS) • স্বাস্থ্য উইং লিডার', 'Medicine Specialist (MBBS, FCPS) • Health Wing Leader')}</p>
               </div>
             </div>
             <div className="flex justify-between items-center text-[11px] text-slate-600">
@@ -1936,7 +1936,7 @@ export default function HealthWingView({
                 <input
                   type="text"
                   required
-                  placeholder="রোগীর পুরো নাম"
+                  placeholder={tx('রোগীর পুরো নাম', "Patient's Full Name")}
                   value={campRegisterForm.name}
                   onChange={e => setCampRegisterForm({ ...campRegisterForm, name: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600"
@@ -1959,7 +1959,7 @@ export default function HealthWingView({
                   <label className="text-xs font-bold text-slate-700">{tx('বয়স', 'Age')}</label>
                   <input
                     type="number"
-                    placeholder="যেমন: ৩২"
+                    placeholder={tx('যেমন: ৩২', 'e.g. 32')}
                     value={campRegisterForm.age}
                     onChange={e => setCampRegisterForm({ ...campRegisterForm, age: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600"
@@ -2019,7 +2019,7 @@ export default function HealthWingView({
                 <input
                   type="text"
                   required
-                  placeholder="পুরো নাম"
+                  placeholder={tx('পুরো নাম', 'Full Name')}
                   value={donorForm.name}
                   onChange={e => setDonorForm({ ...donorForm, name: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-600"
@@ -2047,7 +2047,7 @@ export default function HealthWingView({
                     required
                     min={18}
                     max={65}
-                    placeholder="যেমন: ২৫"
+                    placeholder={tx('যেমন: ২৫', 'e.g. 25')}
                     value={donorForm.age}
                     onChange={e => setDonorForm({ ...donorForm, age: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-600"
@@ -2073,7 +2073,7 @@ export default function HealthWingView({
                   <input
                     type="text"
                     required
-                    placeholder="ঝালকাঠি সদর / নলছিটি / বরিশাল"
+                    placeholder={tx('ঝালকাঠি সদর / নলছিটি / বরিশাল', 'Jhalakathi Sadar / Nalchhiti / Barishal')}
                     value={donorForm.location}
                     onChange={e => setDonorForm({ ...donorForm, location: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-600"
@@ -2144,7 +2144,7 @@ export default function HealthWingView({
                 <input
                   type="text"
                   required
-                  placeholder="রোগীর পুরো নাম"
+                  placeholder={tx('রোগীর পুরো নাম', "Patient's Full Name")}
                   value={emergencyForm.patientName}
                   onChange={e => setEmergencyForm({ ...emergencyForm, patientName: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-600"
@@ -2169,7 +2169,7 @@ export default function HealthWingView({
                   <label className="text-xs font-bold text-slate-700">{tx('ওয়ার্ড / কেবিন (যদি থাকে)', 'Ward / Cabin / Dept')}</label>
                   <input
                     type="text"
-                    placeholder="জরুরি বিভাগ / মেডিসিন ওয়ার্ড"
+                    placeholder={tx('জরুরি বিভাগ / মেডিসিন ওয়ার্ড', 'Emergency / Medicine Ward')}
                     value={emergencyForm.ward}
                     onChange={e => setEmergencyForm({ ...emergencyForm, ward: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-600"
@@ -2196,7 +2196,7 @@ export default function HealthWingView({
                   <input
                     type="text"
                     required
-                    placeholder="আপনার নাম"
+                    placeholder={tx('আপনার নাম', 'Your Name')}
                     value={emergencyForm.contactName}
                     onChange={e => setEmergencyForm({ ...emergencyForm, contactName: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-rose-600"
@@ -2265,10 +2265,10 @@ export default function HealthWingView({
 
             <div className="space-y-1">
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">
-                {selectedEmergency.urgency === 'critical' ? '🔴 অতি জরুরি' : '🟠 জরুরি'}
+                {selectedEmergency.urgency === 'critical' ? tx('🔴 অতি জরুরি', '🔴 Critical') : tx('🟠 জরুরি', '🟠 Urgent')}
               </span>
               <h3 className="text-xl font-black text-slate-900 mt-1">{selectedEmergency.patientName}</h3>
-              <p className="text-xs text-slate-500">{selectedEmergency.hospital} • {selectedEmergency.ward || 'সাধারণ বিভাগ'}</p>
+              <p className="text-xs text-slate-500">{selectedEmergency.hospital} • {selectedEmergency.ward || tx('সাধারণ বিভাগ', 'General Ward')}</p>
             </div>
 
             <div className="bg-slate-50 p-4 rounded-2xl space-y-2 text-xs">
@@ -2512,7 +2512,7 @@ export default function HealthWingView({
                 <input
                   type="text"
                   required
-                  placeholder="পুরো নাম"
+                  placeholder={tx('পুরো নাম', 'Full Name')}
                   value={teamMemberForm.name}
                   onChange={e => setTeamMemberForm({ ...teamMemberForm, name: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600"

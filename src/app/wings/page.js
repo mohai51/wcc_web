@@ -16,7 +16,8 @@ import {
   Droplets,
   Ambulance,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  LogIn
 } from 'lucide-react';
 
 export default function WingsPublicPage() {
@@ -329,26 +330,12 @@ export default function WingsPublicPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href={user ? '/dashboard?tab=requests' : '/register'}
-              className="px-6 py-3 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold text-xs rounded-xl shadow-lg transition-all"
+              href={user ? '/dashboard' : '/login'}
+              className="px-6 py-3 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
             >
-              {user ? tx('উইং সদস্যপদ আবেদন', 'Request Wing / Volunteer Assignment') : tx('মেম্বার হিসেবে যুক্ত হোন', 'Join as Member')}
+              <LogIn className="w-4 h-4" />
+              <span>{user ? tx('ড্যাশবোর্ডে যান', 'Go to My Dashboard') : tx('মেম্বার সাইন ইন', 'Sign In to Member Portal')}</span>
             </Link>
-            {!user ? (
-              <Link
-                href="/login"
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs rounded-xl transition-all"
-              >
-                {tx('মেম্বার লগইন', 'Sign In to Member Portal')}
-              </Link>
-            ) : (
-              <Link
-                href="/dashboard"
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs rounded-xl transition-all"
-              >
-                {tx('ড্যাশবোর্ডে যান', 'Go to My Dashboard')}
-              </Link>
-            )}
           </div>
         </div>
       </section>

@@ -24,8 +24,10 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import StatusBadge from '@/Components/StatusBadge';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function FinanceDashboardPage() {
+  const { tx, lang } = useLanguage();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -119,7 +121,7 @@ export default function FinanceDashboardPage() {
             className="flex items-center gap-1.5 px-3.5 py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
           >
             <Receipt className="w-4 h-4" />
-            <span>ইভেন্ট খরচ এন্ট্রি (Leader Form)</span>
+            <span>{tx('ইভেন্ট খরচ এন্ট্রি (Leader Form)', 'Event Expense Entry (Leader Form)')}</span>
           </Link>
           <Link
             href="/finance/transactions"
@@ -291,10 +293,10 @@ export default function FinanceDashboardPage() {
             </div>
             <div>
               <h3 className="font-black text-base text-slate-900">
-                আর্থিক প্রবাহ এনালিটিক্স (Monthly Income vs Expense Trend)
+                {tx('আর্থিক প্রবাহ এনালিটিক্স (Monthly Income vs Expense Trend)', 'Monthly Cash Flow Analytics (Income vs Expense)')}
               </h3>
               <p className="text-xs text-slate-500">
-                মাসভিত্তিক মোট আয় এবং ব্যয়ের তুলনামূলক রিয়েল-টাইম বার গ্রাফ ও অনুপাত
+                {tx('মাসভিত্তিক মোট আয় এবং ব্যয়ের তুলনামূলক রিয়েল-টাইম বার গ্রাফ ও অনুপাত', 'Monthly comparative trend of total inflows and outflows')}
               </p>
             </div>
           </div>
@@ -302,11 +304,11 @@ export default function FinanceDashboardPage() {
           <div className="flex items-center gap-4 text-xs font-bold">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-sm bg-blue-500" />
-              <span className="text-slate-700">Inflows (আয়)</span>
+              <span className="text-slate-700">{tx('Inflows (আয়)', 'Inflows (Income)')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-sm bg-[#B62A35]" />
-              <span className="text-slate-700">Outflows (ব্যয়)</span>
+              <span className="text-slate-700">{tx('Outflows (ব্যয়)', 'Outflows (Expense)')}</span>
             </div>
           </div>
         </div>
@@ -366,8 +368,8 @@ export default function FinanceDashboardPage() {
                       </div>
 
                       <div className="grid grid-cols-2 text-center text-[10px] pt-1 border-t border-slate-200/60">
-                        <div className="text-blue-600 font-bold">আয়: ৳{m.income.toLocaleString()}</div>
-                        <div className="text-[#B62A35] font-bold">ব্যয়: ৳{m.expense.toLocaleString()}</div>
+                        <div className="text-blue-600 font-bold">{tx('আয়:', 'In:')} ৳{m.income.toLocaleString()}</div>
+                        <div className="text-[#B62A35] font-bold">{tx('ব্যয়:', 'Out:')} ৳{m.expense.toLocaleString()}</div>
                       </div>
                     </div>
                   );
@@ -387,10 +389,10 @@ export default function FinanceDashboardPage() {
             </div>
             <div>
               <h3 className="font-black text-base text-slate-900">
-                ইভেন্ট ও প্রোগ্রামভিত্তিক খরচের খতিয়ান (Leader Cost Submissions)
+                {tx('ইভেন্ট ও প্রোগ্রামভিত্তিক খরচের খতিয়ান (Leader Cost Submissions)', 'Event & Program Cost Submissions (Leader Audits)')}
               </h3>
               <p className="text-xs text-slate-500">
-                কোন লিডার কোন ইভেন্টের জন্য কত খরচ জমা দিয়েছেন তার পুঙ্খানুপুঙ্খ বিবরণ
+                {tx('কোন লিডার কোন ইভেন্টের জন্য কত খরচ জমা দিয়েছেন তার পুঙ্খানুপুঙ্খ বিবরণ', 'Itemized record of event budgets submitted by wing leaders')}
               </p>
             </div>
           </div>
@@ -400,7 +402,7 @@ export default function FinanceDashboardPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl shadow-xs transition-colors self-start sm:self-auto"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>নতুন খরচ যোগ করুন</span>
+            <span>{tx('নতুন খরচ যোগ করুন', 'Add New Expense')}</span>
           </Link>
         </div>
 
@@ -408,18 +410,18 @@ export default function FinanceDashboardPage() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
-                <th className="py-3 px-3">ইভেন্ট / কর্মসূচির নাম</th>
-                <th className="py-3 px-3">খরচের আইটেম সংখ্যা</th>
-                <th className="py-3 px-3">দাখিলকারী লিডার / অ্যাডমিন</th>
-                <th className="py-3 px-3 text-right">মোট খরচের পরিমাণ</th>
-                <th className="py-3 px-3 text-center">স্ট্যাটাস</th>
+                <th className="py-3 px-3">{tx('ইভেন্ট / কর্মসূচির নাম', 'Event / Program Name')}</th>
+                <th className="py-3 px-3">{tx('খরচের আইটেম সংখ্যা', 'Item Count')}</th>
+                <th className="py-3 px-3">{tx('দাখিলকারী লিডার / অ্যাডমিন', 'Submitted By Leader / Admin')}</th>
+                <th className="py-3 px-3 text-right">{tx('মোট খরচের পরিমাণ', 'Total Cost')}</th>
+                <th className="py-3 px-3 text-center">{tx('স্ট্যাটাস', 'Status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {(data?.eventWiseExpenses || []).length === 0 ? (
                 <tr>
                   <td colSpan="5" className="py-6 text-center text-slate-400">
-                    কোন ইভেন্টভিত্তিক খরচ এখনও জমা দেওয়া হয়নি।
+                    {tx('কোন ইভেন্টভিত্তিক খরচ এখনও জমা দেওয়া হয়নি।', 'No event expenses submitted yet.')}
                   </td>
                 </tr>
               ) : (
@@ -433,7 +435,7 @@ export default function FinanceDashboardPage() {
                     </td>
                     <td className="py-3 px-3">
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                        {evt.itemCount} টি আইটেম
+                        {evt.itemCount} {tx('টি আইটেম', 'items')}
                       </span>
                     </td>
                     <td className="py-3 px-3">

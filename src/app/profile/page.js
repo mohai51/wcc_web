@@ -34,9 +34,15 @@ import {
   Check,
   X
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-const UPAZILAS = ['ঝালকাঠি সদর', 'নলছিটি', 'রাজাপুর', 'কাঠালিয়া'];
+const UPAZILAS = [
+  { bn: 'ঝালকাঠি সদর', en: 'Jhalokathi Sadar' },
+  { bn: 'নলছিটি', en: 'Nalchity' },
+  { bn: 'রাজাপুর', en: 'Rajapur' },
+  { bn: 'কাঠালিয়া', en: 'Kathalia' }
+];
 const VOLUNTEER_INTEREST_OPTIONS = [
   'জরুরি রক্তদান ও ব্লাড ক্যাম্প',
   'ফ্রি স্বাস্থ্য ও চক্ষু ক্যাম্প',
@@ -47,6 +53,7 @@ const VOLUNTEER_INTEREST_OPTIONS = [
 ];
 
 export default function ProfilePage() {
+  const { tx, lang } = useLanguage();
   const router = useRouter();
 
   const [user, setUser] = useState(null);
@@ -642,7 +649,7 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Mobile Phone (মোবাইল নম্বর)</label>
+              <label className="block font-semibold text-slate-700 mb-1">{tx('মোবাইল নম্বর', 'Mobile Phone')}</label>
               <div className="relative">
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
@@ -656,13 +663,13 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Blood Group (রক্তের গ্রুপ)</label>
+              <label className="block font-semibold text-slate-700 mb-1">{tx('রক্তের গ্রুপ', 'Blood Group')}</label>
               <select
                 value={blood}
                 onChange={(e) => setBlood(e.target.value)}
                 className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden font-semibold"
               >
-                <option value="">Select Blood Group</option>
+                <option value="">{tx('রক্তের গ্রুপ নির্বাচন করুন', 'Select Blood Group')}</option>
                 {BLOOD_GROUPS.map((bg) => (
                   <option key={bg} value={bg}>
                     {bg}
@@ -672,27 +679,27 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Upazila (উপজেলা)</label>
+              <label className="block font-semibold text-slate-700 mb-1">{tx('উপজেলা', 'Upazila')}</label>
               <select
                 value={upazila}
                 onChange={(e) => setUpazila(e.target.value)}
                 className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
               >
                 {UPAZILAS.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
+                  <option key={u.bn} value={u.bn}>
+                    {lang === 'bn' ? u.bn : u.en}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">District (জেলা)</label>
+              <label className="block font-semibold text-slate-700 mb-1">{tx('জেলা', 'District')}</label>
               <input
                 type="text"
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
-                placeholder="ঝালকাঠি"
+                placeholder={tx('ঝালকাঠি', 'Jhalokathi')}
                 className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
               />
             </div>
@@ -971,7 +978,17 @@ export default function ProfilePage() {
                         onChange={() => {}}
                         className="w-4 h-4 text-[#B62A35] rounded focus:ring-0"
                       />
-                      <span>{interest}</span>
+                      <span>
+                        {(() => {
+                          if (interest.includes('রক্তদান') || interest.toLowerCase().includes('blood')) return tx('জরুরি রক্তদান ও ব্লাড ক্যাম্প', 'Emergency Blood Donation & Camps');
+                          if (interest.includes('স্বাস্থ্য') || interest.toLowerCase().includes('health')) return tx('ফ্রি স্বাস্থ্য ও চক্ষু ক্যাম্প', 'Free Health & Eye Camps');
+                          if (interest.includes('ত্রাণ') || interest.toLowerCase().includes('relief')) return tx('বন্যা ও দুর্যোগে জরুরি ত্রাণ', 'Disaster Relief & Emergency Aid');
+                          if (interest.includes('আইটি') || interest.toLowerCase().includes('it')) return tx('আইটি, ওয়েব ও ডিজিটাল কমিউনিটি', 'IT, Web & Digital Community');
+                          if (interest.includes('পরিবেশ') || interest.toLowerCase().includes('tree') || interest.toLowerCase().includes('environment')) return tx('পরিবেশ রক্ষা ও বৃক্ষরোপণ কর্মসূচি', 'Environmental Protection & Tree Plantation');
+                          if (interest.includes('যুব সম্মেলন') || interest.toLowerCase().includes('youth')) return tx('যুব সম্মেলন ও সমাজ সচেতনতামূলক কাজ', 'Youth Conferences & Social Awareness');
+                          return interest;
+                        })()}
+                      </span>
                     </label>
                   );
                 })}
@@ -1172,7 +1189,9 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <span className="text-[9px] uppercase font-bold text-slate-500 block">Location</span>
-                  <span className="font-bold text-slate-200 truncate block">{upazila || 'ঝালকাঠি'}</span>
+                  <span className="font-bold text-slate-200 truncate block">
+                    {upazila === 'ঝালকাঠি সদর' ? (lang === 'bn' ? 'ঝালকাঠি সদর' : 'Jhalokathi Sadar') : (upazila || (lang === 'bn' ? 'ঝালকাঠি' : 'Jhalokathi'))}
+                  </span>
                 </div>
                 <div>
                   <span className="text-[9px] uppercase font-bold text-slate-500 block">Role</span>
@@ -1186,7 +1205,7 @@ export default function ProfilePage() {
 
               {/* Card Footer */}
               <div className="text-center text-[9px] text-slate-500 pt-1 border-t border-slate-800/80">
-                আমরাই আনব পরিবর্তন — We Can Change Registry
+                {tx('আমরাই আনব পরিবর্তন — We Can Change Registry', 'We Bring The Change — We Can Change Registry')}
               </div>
             </div>
           </div>

@@ -321,7 +321,7 @@ export default function EventExpensesPage() {
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-rose-50 text-[#B62A35] flex items-center justify-center font-black text-xs">
-                ১
+                {tx('১', '1')}
               </div>
               <h3 className="font-black text-sm text-slate-900">
                 {tx('ইভেন্ট / প্রোগ্রাম নির্বাচন ও প্রাথমিক তথ্য', 'Event / Program Selection & Basics')}
@@ -458,11 +458,11 @@ export default function EventExpensesPage() {
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-[#B62A35] focus:bg-white transition-all cursor-pointer"
               >
-                <option value="Cash">Cash (নগদ)</option>
-                <option value="bKash">bKash (বিকাশ)</option>
-                <option value="Nagad">Nagad (নগদ ওয়ালেট)</option>
-                <option value="Bank Transfer">Bank Transfer (ব্যাংক ট্রান্সফার)</option>
-                <option value="Cheque">Cheque (চেক)</option>
+                <option value="Cash">{tx('Cash (নগদ)', 'Cash (In-hand)')}</option>
+                <option value="bKash">{tx('bKash (বিকাশ)', 'bKash (Mobile Banking)')}</option>
+                <option value="Nagad">{tx('Nagad (নগদ ওয়ালেট)', 'Nagad (Mobile Banking)')}</option>
+                <option value="Bank Transfer">{tx('Bank Transfer (ব্যাংক ট্রান্সফার)', 'Bank Transfer')}</option>
+                <option value="Cheque">{tx('Cheque (চেক)', 'Cheque')}</option>
               </select>
             </div>
           </div>
@@ -473,7 +473,7 @@ export default function EventExpensesPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-amber-50 text-[#F1AD1A] flex items-center justify-center font-black text-xs">
-                ২
+                {tx('২', '2')}
               </div>
               <div>
                 <h3 className="font-black text-sm text-slate-900">
@@ -607,7 +607,7 @@ export default function EventExpensesPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#F1AD1A]">মোট:</span>
+              <span className="text-xs font-bold text-[#F1AD1A]">{tx('মোট:', 'Total:')}</span>
               <h3 className="text-2xl sm:text-3xl font-black font-mono text-white tracking-tight">
                 ৳ {totalCalculatedAmount.toLocaleString()}
               </h3>
@@ -620,7 +620,7 @@ export default function EventExpensesPage() {
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs">
-                ৩
+                {tx('৩', '3')}
               </div>
               <h3 className="font-black text-sm text-slate-900">
                 {tx('দাখিলকারীর তথ্য ও চূড়ান্ত সংরক্ষণ', 'Submitter Verification & Final Record')}

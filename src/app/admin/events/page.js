@@ -26,6 +26,7 @@ import {
   Receipt
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 
 const STATUS_CONFIG = {
   draft: { label: 'Draft', color: 'bg-slate-100 text-slate-700 border-slate-200' },
@@ -35,6 +36,7 @@ const STATUS_CONFIG = {
 };
 
 export default function AdminEventsPage() {
+  const { tx, lang } = useLanguage();
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -432,7 +434,7 @@ export default function AdminEventsPage() {
             className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
           >
             <Receipt className="w-4 h-4 text-[#F1AD1A]" />
-            <span>ইভেন্ট খরচ এন্ট্রি</span>
+            <span>{tx('ইভেন্ট খরচ এন্ট্রি', 'Event Expenses Entry')}</span>
           </Link>
 
           <button

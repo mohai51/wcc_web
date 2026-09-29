@@ -1039,7 +1039,7 @@ function WingDetailPageInner({ params }) {
         </div>
         <h2 className="text-2xl font-black text-slate-900">{tx('উইং খুঁজে পাওয়া যায়নি', 'Wing Not Found')}</h2>
         <p className="text-sm text-slate-500 max-w-md">
-          অনুরোধ করা উইংটি বিদ্যমান নেই অথবা এর নাম পরিবর্তন করা হয়েছে।
+          {tx('অনুরোধ করা উইংটি বিদ্যমান নেই অথবা এর নাম পরিবর্তন করা হয়েছে।', 'The requested wing does not exist or has been renamed.')}
         </p>
         <Link
           href="/wings"
@@ -1100,11 +1100,11 @@ function WingDetailPageInner({ params }) {
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
             <Link href="/" className="hover:text-white transition-colors">
-              হোম
+              {tx('হোম', 'Home')}
             </Link>
             <span>/</span>
             <Link href="/wings" className="hover:text-white transition-colors">
-              উইংসমূহ
+              {tx('উইংসমূহ', 'Wings')}
             </Link>
             <span>/</span>
             <span className="text-[#F1AD1A] font-bold">{lang === 'bn' ? (wing.nameBn || wing.nameEn) : (wing.nameEn || wing.nameBn)}</span>
@@ -1339,7 +1339,7 @@ function WingDetailPageInner({ params }) {
                 <Ambulance className="w-4 h-4" />
                 <span>{tx('জরুরি হাসপাতাল সেল', 'Hospital Emergency Cell')}</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black animate-pulse">
-                  ২৪/৭
+                  {lang === 'bn' ? '২৪/৭' : '24/7'}
                 </span>
               </button>
 
@@ -1357,7 +1357,7 @@ function WingDetailPageInner({ params }) {
                 <span>{tx('উইং লিডার প্যানেল', 'Wing Leader Panel')}</span>
                 {!isLeaderOrAdmin && (
                   <span className="px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">
-                    ১-ক্লিক
+                    {tx('১-ক্লিক', '1-Click')}
                   </span>
                 )}
               </button>
@@ -1367,7 +1367,7 @@ function WingDetailPageInner({ params }) {
                   type="button"
                   onClick={handleHealthLeaderAutoLogin}
                   className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white text-xs font-black shadow-xs transition-all cursor-pointer whitespace-nowrap"
-                  title="১-ক্লিকে হেলথ উইং লিডার হিসেবে লগইন করুন"
+                  title={tx('১-ক্লিকে হেলথ উইং লিডার হিসেবে লগইন করুন', 'Login as Health Wing Leader in 1-Click')}
                 >
                   <span className="text-sm">🩺</span>
                   <span>{tx('১-ক্লিক লিডার লগইন', '1-Click Leader Login')}</span>
@@ -1766,10 +1766,10 @@ function WingDetailPageInner({ params }) {
                               }`}
                             >
                               {b.status === 'approved'
-                                ? 'অনুমোদিত'
+                                ? tx('অনুমোদিত', 'Approved')
                                 : b.status === 'rejected'
-                                ? 'বাতিল'
-                                : 'যাচাইাধীন'}
+                                ? tx('বাতিল', 'Rejected')
+                                : tx('যাচাইাধীন', 'Pending')}
                             </span>
                           </div>
                         ))}
@@ -1793,7 +1793,7 @@ function WingDetailPageInner({ params }) {
                             className="p-3 bg-slate-50 rounded-xl flex items-center justify-between text-xs"
                           >
                             <div>
-                              <p className="font-bold text-slate-800">{r.book?.title || 'বই'}</p>
+                              <p className="font-bold text-slate-800">{r.book?.title || tx('বই', 'Book')}</p>
                               <span className="text-[11px] text-slate-500">{tx('ঠিকানা:', 'Address:')} {r.deliveryAddress}</span>
                             </div>
                             <span
@@ -1806,10 +1806,10 @@ function WingDetailPageInner({ params }) {
                               }`}
                             >
                               {r.status === 'approved'
-                                ? 'অনুমোদিত'
+                                ? tx('অনুমোদিত', 'Approved')
                                 : r.status === 'rejected'
-                                ? 'বাতিল'
-                                : 'যাচাইাধীন'}
+                                ? tx('বাতিল', 'Rejected')
+                                : tx('যাচাইাধীন', 'Pending')}
                             </span>
                           </div>
                         ))}
@@ -1866,7 +1866,7 @@ function WingDetailPageInner({ params }) {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-[#B62A35] text-white font-bold text-xs rounded-xl shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>বই দান করুন</span>
+                  <span>{tx('বই দান করুন', 'Donate Book')}</span>
                 </button>
               </div>
             ) : (
@@ -1910,7 +1910,7 @@ function WingDetailPageInner({ params }) {
                       <button
                         onClick={() => {
                           if (!user) {
-                            showFeedback('error', 'বই রিকোয়েস্ট করতে অনুগ্রহ করে লগইন করুন।');
+                            showFeedback('error', tx('বই রিকোয়েস্ট করতে অনুগ্রহ করে লগইন করুন।', 'Please login to request a book.'));
                             return;
                           }
                           setRequestModalBook(b);
@@ -2074,7 +2074,7 @@ function WingDetailPageInner({ params }) {
                             <strong>{tx('প্রয়োজনের কারণ:', 'Reason for Request:')}</strong> {r.reason}
                           </p>
                           <p className="text-[11px] text-slate-500">
-                            ঠিকানা: {r.deliveryAddress}
+                            {tx('ঠিকানা:', 'Address:')} {r.deliveryAddress}
                           </p>
                         </div>
 
@@ -2092,7 +2092,7 @@ function WingDetailPageInner({ params }) {
                               className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 cursor-pointer flex items-center gap-1.5"
                             >
                               <XCircle className="w-3.5 h-3.5" />
-                              <span>বাতিল</span>
+                              <span>{tx('বাতিল', 'Reject')}</span>
                             </button>
                           </div>
                         )}
@@ -2335,17 +2335,17 @@ function WingDetailPageInner({ params }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">ক্যাটাগরি</label>
+                  <label className="text-xs font-bold text-slate-700">{tx('ক্যাটাগরি', 'Category')}</label>
                   <select
                     value={donateForm.category}
                     onChange={e => setDonateForm({ ...donateForm, category: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-[#B62A35]"
                   >
-                    <option value="Academic">স্কুল ও কলেজ পাঠ্যবই</option>
-                    <option value="BCS & Competitive Exams">বিসিএস ও চাকরি প্রস্তুতি</option>
-                    <option value="Science & Technology">বিজ্ঞান ও প্রযুক্তি</option>
-                    <option value="Literature & Novels">সাহিত্য ও উপন্যাস</option>
-                    <option value="Self Development">আত্মউন্নয়ন ও অন্যান্য</option>
+                    <option value="Academic">{tx('স্কুল ও কলেজ পাঠ্যবই', 'School & College Textbooks')}</option>
+                    <option value="BCS & Competitive Exams">{tx('বিসিএস ও চাকরি প্রস্তুতি', 'BCS & Competitive Exams')}</option>
+                    <option value="Science & Technology">{tx('বিজ্ঞান ও প্রযুক্তি', 'Science & Technology')}</option>
+                    <option value="Literature & Novels">{tx('সাহিত্য ও উপন্যাস', 'Literature & Fiction')}</option>
+                    <option value="Self Development">{tx('আত্মউন্নয়ন ও অন্যান্য', 'Self Development & Others')}</option>
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -2403,7 +2403,7 @@ function WingDetailPageInner({ params }) {
                   onClick={() => setDonateModalOpen(false)}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
                 >
-                  বাতিল
+                  {tx('বাতিল', 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -2484,7 +2484,7 @@ function WingDetailPageInner({ params }) {
                   onClick={() => setRequestModalBook(null)}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
                 >
-                  বাতিল
+                  {tx('বাতিল', 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -2509,7 +2509,7 @@ function WingDetailPageInner({ params }) {
             <div className="p-4 sm:p-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
               <div className="space-y-1">
                 <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] uppercase">
-                  WCC ফ্রি কোর্স
+                  {tx('WCC ফ্রি কোর্স', 'WCC Free Course')}
                 </span>
                 <h3 className="text-base sm:text-lg font-black">{selectedCourse.title}</h3>
               </div>
@@ -2650,7 +2650,7 @@ function WingDetailPageInner({ params }) {
                 onClick={() => setRejectModalItem(null)}
                 className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
               >
-                বন্ধ
+                {tx('বন্ধ', 'Close')}
               </button>
               <button
                 onClick={() => {
@@ -2725,7 +2725,7 @@ export default function WingDetailPage(props) {
       fallback={
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center space-y-4">
           <div className="w-10 h-10 border-4 border-slate-200 border-t-[#B62A35] rounded-full animate-spin"></div>
-          <p className="text-xs font-bold text-slate-500">উইং পোর্টাল লোড হচ্ছে...</p>
+          <p className="text-xs font-bold text-slate-500">Loading wing portal...</p>
         </div>
       }
     >

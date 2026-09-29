@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -41,9 +41,17 @@ import {
   Shield,
   Phone,
   Mail,
-  ArrowUpRight
+  ArrowUpRight,
+  GraduationCap,
+  Stethoscope,
+  Trophy,
+  Palette,
+  Leaf,
+  ShieldAlert,
+  Cpu
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 
 const DEFAULT_VOLUNTEER_AREAS = [
   'জরুরি রক্তদান ও ব্লাড ডোনেশন ক্যাম্প (Blood Donation Drives)',
@@ -54,10 +62,181 @@ const DEFAULT_VOLUNTEER_AREAS = [
   'যুব সম্মেলন ও সমাজ সচেতনতামূলক কাজ (Youth Seminars & Outreach)'
 ];
 
+const OFFICIAL_WINGS_FALLBACK = [
+  {
+    _id: 'wing_edu_def',
+    slug: 'education',
+    nameBn: 'শিক্ষা উইং',
+    nameEn: 'Education Wing',
+    badge: 'Education & Skills',
+    description: 'মেধাবী ও অসচ্ছল শিক্ষার্থীদের শিক্ষাবৃত্তি, স্কিল কোর্স, বই অনুদান ও ক্যারিয়ার মেন্টরশিপ।',
+    descriptionEn: 'Student scholarships, free skill courses, book bank donations, and career mentorship.',
+    placeholder: 'যেমন: আমি শিক্ষার্থীদের বিনামূল্যে গণিত বা আইটি শেখাতে পারি এবং বই সংগ্রহের কাজে অবদান রাখতে আগ্রহী...',
+    placeholderEn: 'e.g. I have experience in tutoring or skill training, and want to support free courses and the book bank...'
+  },
+  {
+    _id: 'wing_hlth_def',
+    slug: 'health',
+    nameBn: 'স্বাস্থ্য উইং',
+    nameEn: 'Health Wing',
+    badge: 'Health & Blood Drives',
+    description: 'বিনামূল্যে স্বাস্থ্য ও চক্ষু ক্যাম্প, স্বেচ্ছায় রক্তদান নেটওয়ার্ক এবং জরুরি টেলিমেডিসিন সেবা।',
+    descriptionEn: 'Free medical and eye camps, voluntary blood donation network, and telemedicine.',
+    placeholder: 'যেমন: আমি নিয়মিত রক্তদানে উদ্বুদ্ধকরণ, ফ্রি হেলথ ক্যাম্পে সহায়তা ও প্রাথমিক চিকিৎসা সেবায় ভূমিকা রাখতে চাই...',
+    placeholderEn: 'e.g. I want to assist in free health checkup camps, coordinate voluntary blood donations, and emergency care...'
+  },
+  {
+    _id: 'wing_sprt_def',
+    slug: 'sports',
+    nameBn: 'খেলাধুলা উইং',
+    nameEn: 'Sports Wing',
+    badge: 'Sports & Athletics',
+    description: 'মাদক ও ডিজিটাল আসক্তি মুক্ত সমাজ গঠনে তৃণমূল ফুটবল, ক্রিকেট ও যুব অ্যাথলেটিক্স প্রতিযোগিতা।',
+    descriptionEn: 'Grassroots football, cricket tournaments, and youth athletics for healthy living.',
+    placeholder: 'যেমন: আমি ফুটবল/ক্রিকেট টুর্নামেন্ট আয়োজন ও যুব সমাজকে সুস্থ ক্রীড়াচর্চায় সম্পৃক্ত করতে আগ্রহী...',
+    placeholderEn: 'e.g. I have organizing experience in grassroots football/cricket tournaments and youth physical fitness...'
+  },
+  {
+    _id: 'wing_cult_def',
+    slug: 'cultural',
+    nameBn: 'সংস্কৃতি উইং',
+    nameEn: 'Cultural Wing',
+    badge: 'Arts & Culture',
+    description: 'বাঙালি সংস্কৃতি, ভাষা ও মুক্তিযুদ্ধের ইতিহাস চর্চা, সাহিত্য সম্মেলন এবং সৃজনশীল নাট্যকর্ম।',
+    descriptionEn: 'Bengali heritage, language and liberation war history, literature, and creative arts.',
+    placeholder: 'যেমন: আমি সাহিত্য সম্মেলন, আবৃত্তি কর্মশালা ও সাংস্কৃতিক অনুষ্ঠান আয়োজনে যুক্ত হতে চাই...',
+    placeholderEn: 'e.g. I have passion for cultural events, theater, recitations, literature circles, and historical research...'
+  },
+  {
+    _id: 'wing_env_def',
+    slug: 'environment',
+    nameBn: 'পরিবেশ উইং',
+    nameEn: 'Environment Wing',
+    badge: 'Environment & Climate',
+    description: 'সুগন্ধা নদী রক্ষা, ব্যাপক বৃক্ষরোপণ, বর্জ্য নিষ্কাশন ও প্লাস্টিক দূষণ রোধে তরুণদের পরিবেশ আন্দোলন।',
+    descriptionEn: 'Sugandha river conservation, mass tree plantation, waste management, and plastic awareness.',
+    placeholder: 'যেমন: আমি সুগন্ধা নদী পরিচ্ছন্নতা অভিযান, বৃক্ষরোপণ কর্মসূচি ও পরিবেশ সচেতনতা তৈরিতে কাজ করতে আগ্রহী...',
+    placeholderEn: 'e.g. I want to actively lead environmental cleanups, tree plantation drives, and plastic recycling awareness...'
+  },
+  {
+    _id: 'wing_relf_def',
+    slug: 'disaster-relief',
+    nameBn: 'দুর্যোগ ব্যবস্থাপনা ও ত্রাণ উইং',
+    nameEn: 'Disaster Relief Wing',
+    badge: 'Emergency & Relief',
+    description: 'বন্যা, ঘুর্ণিঝড় ও জরুরি পরিস্থিতিতে দ্রুত ত্রাণ বিতরণ, পুনর্বাসন এবং উদ্ধার কার্যক্রম।',
+    descriptionEn: 'Rapid emergency relief, rehabilitation, and rescue operations during natural disasters.',
+    placeholder: 'যেমন: জরুরি দুর্যোগ পরিস্থিতিতে দ্রুত ত্রাণ বিতরণ ও ক্ষতিগ্রস্তদের পুনর্বাসন সহায়তায় কাজ করতে প্রস্তুত...',
+    placeholderEn: 'e.g. I am trained/prepared to deploy for emergency relief distribution, rescue operations, and rehabilitation...'
+  },
+  {
+    _id: 'wing_ict_def',
+    slug: 'ict',
+    nameBn: 'তথ্য ও যোগাযোগ প্রযুক্তি উইং',
+    nameEn: 'IT & Communications Wing',
+    badge: 'Tech & Digital Outreach',
+    description: 'সংগঠনের ওয়েবসাইট ও ডিজিটাল প্ল্যাটফর্ম পরিচালনা, সোশ্যাল মিডিয়া প্রচারণা ও যুবদের আইটি প্রশিক্ষণ।',
+    descriptionEn: 'Platform management, social media outreach, web development, and youth digital literacy.',
+    placeholder: 'যেমন: আমি ওয়েব ডেভেলপমেন্ট, গ্রাফিক ডিজাইন বা সোশ্যাল মিডিয়া ক্যাম্পেইন পরিচালনায় দক্ষ...',
+    placeholderEn: 'e.g. I have skills in software development, web management, graphics, or digital media communications...'
+  },
+  {
+    _id: 'wing_gen_def',
+    slug: 'general',
+    nameBn: 'সাধারণ উইং (General Corps)',
+    nameEn: 'General Wing (General Corps)',
+    badge: 'General Voluntary Corps',
+    description: 'সংগঠনের সার্বিক সাংগঠনিক দায়িত্ব, সাধারণ স্বেচ্ছাসেবক কার্যক্রম ও কেন্দ্রীয় কর্মসূচি বাস্তবায়ন।',
+    descriptionEn: 'Core volunteer corps supporting general organization, member drives, and multi-wing initiatives.',
+    placeholder: 'যেমন: আমি সংগঠনের সাধারণ সেবামূলক কার্যক্রম ও কেন্দ্রীয় যেকোনো কর্মসূচিতে স্বেচ্ছাসেবক হিসেবে প্রস্তুত...',
+    placeholderEn: 'e.g. I am ready to support overall organizational tasks, general community drives, and central campaigns...'
+  }
+];
+
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedTab = searchParams ? searchParams.get('tab') : null;
+  const { lang, tx } = useLanguage();
+
+  const getWingIcon = (slug = '') => {
+    const s = String(slug).toLowerCase();
+    if (s.includes('edu')) return <GraduationCap className="w-5 h-5 text-blue-600 shrink-0" />;
+    if (s.includes('health') || s.includes('স্বাস্থ')) return <Stethoscope className="w-5 h-5 text-rose-600 shrink-0" />;
+    if (s.includes('sport') || s.includes('খেলা')) return <Trophy className="w-5 h-5 text-amber-600 shrink-0" />;
+    if (s.includes('cultur') || s.includes('সংস্কৃতি')) return <Palette className="w-5 h-5 text-purple-600 shrink-0" />;
+    if (s.includes('env') || s.includes('পরিবেশ')) return <Leaf className="w-5 h-5 text-emerald-600 shrink-0" />;
+    if (s.includes('relief') || s.includes('ত্রাণ')) return <ShieldAlert className="w-5 h-5 text-orange-600 shrink-0" />;
+    if (s.includes('ict') || s.includes('প্রযুক্তি') || s.includes('tech')) return <Cpu className="w-5 h-5 text-cyan-600 shrink-0" />;
+    return <Layers className="w-5 h-5 text-slate-600 shrink-0" />;
+  };
+
+  const formatWing = (wing) => {
+    if (!wing) return lang === 'bn' ? 'সাধারণ উইং' : 'General Wing';
+    if (wing === 'স্বাস্থ্য সেবা ও রক্তদান উইং' || wing === 'স্বাস্থ্য উইং' || wing.includes('স্বাস্থ্য') || wing.toLowerCase().includes('health')) {
+      return lang === 'bn' ? 'স্বাস্থ্য সেবা ও রক্তদান উইং' : 'Health & Blood Donation Wing';
+    }
+    if (wing === 'শিক্ষা ও পাঠাগার উইং' || wing === 'শিক্ষা উইং' || wing.includes('শিক্ষা') || wing.toLowerCase().includes('education')) {
+      return lang === 'bn' ? 'শিক্ষা ও পাঠাগার উইং' : 'Education & Library Wing';
+    }
+    if (wing.includes('খেলাধুলা') || wing.toLowerCase().includes('sports')) {
+      return lang === 'bn' ? 'খেলাধুলা উইং' : 'Sports Wing';
+    }
+    if (wing.includes('সংস্কৃতি') || wing.toLowerCase().includes('cultural')) {
+      return lang === 'bn' ? 'সংস্কৃতি উইং' : 'Cultural Wing';
+    }
+    if (wing === 'দুর্যোগ ব্যবস্থাপনা ও ত্রাণ উইং' || wing.includes('ত্রাণ') || wing.toLowerCase().includes('relief')) {
+      return lang === 'bn' ? 'দুর্যোগ ব্যবস্থাপনা ও ত্রাণ উইং' : 'Disaster Relief Wing';
+    }
+    if (wing === 'তথ্য ও যোগাযোগ প্রযুক্তি উইং' || wing.includes('প্রযুক্তি') || wing.toLowerCase().includes('ict')) {
+      return lang === 'bn' ? 'তথ্য ও যোগাযোগ প্রযুক্তি উইং' : 'IT & Communications Wing';
+    }
+    if (wing === 'পরিবেশ ও বৃক্ষরোপণ উইং' || wing === 'পরিবেশ উইং' || wing.includes('পরিবেশ') || wing.toLowerCase().includes('environment')) {
+      return lang === 'bn' ? 'পরিবেশ ও বৃক্ষরোপণ উইং' : 'Environment & Tree Plantation Wing';
+    }
+    if (wing === 'যুব উন্নয়ন ও সামাজিক উইং' || wing.includes('যুব')) {
+      return lang === 'bn' ? 'যুব উন্নয়ন ও সামাজিক উইং' : 'Youth Development Wing';
+    }
+    if (wing.includes('সাধারণ উইং') || wing.toLowerCase().includes('general')) {
+      return lang === 'bn' ? 'সাধারণ উইং (General Corps)' : 'General Wing (General Corps)';
+    }
+    return wing;
+  };
+
+  const formatUpazila = (upazila) => {
+    if (!upazila) return '';
+    const map = {
+      'ঝালকাঠি সদর': 'Jhalakathi Sadar',
+      'নলছিটি': 'Nalchhiti',
+      'রাজাপুর': 'Rajapur',
+      'কাঁঠালিয়া': 'Kathalia'
+    };
+    return lang === 'bn' ? upazila : (map[upazila] || upazila);
+  };
+
+  const formatDistrict = (district) => {
+    if (!district) return '';
+    const map = {
+      'ঝালকাঠি': 'Jhalakathi',
+      'বরিশাল': 'Barishal',
+      'পিরোজপুর': 'Pirojpur'
+    };
+    return lang === 'bn' ? district : (map[district] || district);
+  };
+
+  const formatVolunteerArea = (area) => {
+    if (!area) return '';
+    if (lang === 'bn') return area;
+    const map = {
+      'জরুরি রক্তদান ও ব্লাড ডোনেশন ক্যাম্প (Blood Donation Drives)': 'Blood Donation & Emergency Drives',
+      'ফ্রি স্বাস্থ্য ও চক্ষু ক্যাম্প সহায়তা (Free Medical Camp Support)': 'Free Medical & Eye Camp Support',
+      'বন্যা ও দুর্যোগে জরুরি ত্রাণ বিতরণ (Disaster Relief & Distribution)': 'Disaster Relief & Emergency Aid Distribution',
+      'আইটি, ওয়েব ও সোশ্যাল মিডিয়া (IT & Tech Volunteering)': 'IT, Web & Digital Media Support',
+      'পরিবেশ রক্ষা ও বৃক্ষরোপণ কর্মসূচি (Tree Plantation & Green Drives)': 'Environmental Action & Tree Plantation',
+      'যুব সম্মেলন ও সমাজ সচেতনতামূলক কাজ (Youth Seminars & Outreach)': 'Youth Seminars & Community Outreach'
+    };
+    return map[area] || area;
+  };
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -146,6 +325,7 @@ function DashboardContent() {
   const [volunteerModalOpen, setVolunteerModalOpen] = useState(false);
   const [selectedWing, setSelectedWing] = useState('');
   const [wingReason, setWingReason] = useState('');
+  const [wingReasonsMap, setWingReasonsMap] = useState({});
   const [selectedVolunteerInterests, setSelectedVolunteerInterests] = useState([]);
   const [volunteerReason, setVolunteerReason] = useState('');
   const [submittingRequest, setSubmittingRequest] = useState(false);
@@ -342,15 +522,17 @@ function DashboardContent() {
           setCoordinatorWingEvents(myWingEvents);
         } else if (currentUser.role === 'volunteer') {
           if (!requestedTab) setActiveTab('hub');
-          const [logs, acts, myReqs, events] = await Promise.all([
+          const [logs, acts, myReqs, events, wngs] = await Promise.all([
             api.getVolunteerLogs().catch(() => []),
             api.getActivities().catch(() => []),
             api.getMemberRequests({ userId: currentUser.id || currentUser._id, memberId: currentUser.memberId }).catch(() => []),
-            api.getEvents({ status: 'published' }).catch(() => [])
+            api.getEvents({ status: 'published' }).catch(() => []),
+            api.getWings().catch(() => [])
           ]);
           setVolunteerLogs(logs || []);
           setActivities(acts || []);
           setMyRequests(myReqs || []);
+          setWingsList(Array.isArray(wngs) ? wngs : []);
 
           // Load events and check my registrations for each
           const evList = Array.isArray(events) ? events : [];
@@ -376,14 +558,16 @@ function DashboardContent() {
             const mem = await api.getMember(currentUser.memberId).catch(() => null);
             setMemberRecord(mem);
           }
-          const [reims, acts, myReqs] = await Promise.all([
+          const [reims, acts, myReqs, wngs] = await Promise.all([
             api.getReimbursements().catch(() => []),
             api.getActivities().catch(() => []),
-            api.getMemberRequests({ userId: currentUser.id || currentUser._id, memberId: currentUser.memberId }).catch(() => [])
+            api.getMemberRequests({ userId: currentUser.id || currentUser._id, memberId: currentUser.memberId }).catch(() => []),
+            api.getWings().catch(() => [])
           ]);
           setMyReimbursements(reims || []);
           setActivities(acts || []);
           setMyRequests(myReqs || []);
+          setWingsList(Array.isArray(wngs) ? wngs : []);
         }
 
         // Check for pending role invitations for the logged-in user
@@ -672,12 +856,23 @@ function DashboardContent() {
   // Submit Wing Change Request
   const handleSubmitWingChange = async (e) => {
     e.preventDefault();
-    if (!selectedWing) return;
+    if (!selectedWing) {
+      alert(tx('অনুগ্রহ করে পছন্দের একটি উইং নির্বাচন করুন।', 'Please select a preferred wing.'));
+      return;
+    }
+    if (!wingReason || !wingReason.trim()) {
+      alert(tx('অনুগ্রহ করে এই উইংটি নির্বাচনের কারণ উল্লেখ করুন।', 'Please describe your reason for choosing this wing.'));
+      return;
+    }
     setSubmittingRequest(true);
     try {
-      const currentAssignedWing = memberRecord?.wing || user.volunteerWing || 'সাধারণ উইং';
-      if (selectedWing === currentAssignedWing) {
-        alert('আপনি ইতোমধ্যে এই উইংয়ে আছেন। অনুগ্রহ করে ভিন্ন একটি উইং নির্বাচন করুন।');
+      const currentAssignedWing = currentWingName;
+      if (
+        selectedWing === currentAssignedWing ||
+        (selectedWing.includes('সাধারণ') && currentAssignedWing.includes('সাধারণ')) ||
+        (selectedWing.toLowerCase().includes('general') && currentAssignedWing.toLowerCase().includes('general'))
+      ) {
+        alert(tx('আপনি ইতোমধ্যে এই উইংয়ে আছেন। অনুগ্রহ করে ভিন্ন একটি উইং নির্বাচন করুন।', 'You are already assigned to this wing. Please choose a different wing.'));
         setSubmittingRequest(false);
         return;
       }
@@ -689,15 +884,16 @@ function DashboardContent() {
         type: 'wing_change',
         currentWing: currentAssignedWing,
         requestedWing: selectedWing,
-        reason: wingReason
+        reason: wingReason.trim()
       });
       setMyRequests((prev) => [newReq, ...prev]);
       setWingModalOpen(false);
       setWingReason('');
-      setRequestSuccessMsg('উইং পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদন করার সাথে সাথে আপনার উইং আপডেট হবে।');
+      setSelectedWing('');
+      setRequestSuccessMsg(tx('উইং পরিবর্তনের আবেদন সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদন করার সাথে সাথে আপনার উইং আপডেট হবে।', 'Wing change request submitted successfully! Your wing will update once approved by an admin.'));
       setTimeout(() => setRequestSuccessMsg(''), 6000);
     } catch (err) {
-      alert('আবেদন পাঠাতে সমস্যা হয়েছে: ' + err.message);
+      alert(tx('আবেদন পাঠাতে সমস্যা হয়েছে: ', 'Failed to submit request: ') + err.message);
     } finally {
       setSubmittingRequest(false);
     }
@@ -714,7 +910,7 @@ function DashboardContent() {
   const handleSubmitVolunteerApp = async (e) => {
     e.preventDefault();
     if (selectedVolunteerInterests.length === 0) {
-      alert('অনুগ্রহ করে অন্তত একটি সেবামূলক কাজের ক্ষেত্র নির্বাচন করুন।');
+      alert(tx('অনুগ্রহ করে অন্তত একটি সেবামূলক কাজের ক্ষেত্র নির্বাচন করুন।', 'Please select at least one volunteer interest area.'));
       return;
     }
     setSubmittingRequest(true);
@@ -735,10 +931,10 @@ function DashboardContent() {
       setVolunteerModalOpen(false);
       setSelectedVolunteerInterests([]);
       setVolunteerReason('');
-      setRequestSuccessMsg('ভলান্টিয়ার হওয়ার আবেদন সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদন করলে আপনি ভলান্টিয়ার ব্যাজ ও উইং দায়িত্ব পাবেন।');
+      setRequestSuccessMsg(tx('ভলান্টিয়ার হওয়ার আবেদন সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদন করলে আপনি ভলান্টিয়ার ব্যাজ ও উইং দায়িত্ব পাবেন।', 'Volunteer application submitted successfully! You will receive your badge and wing assignments upon admin approval.'));
       setTimeout(() => setRequestSuccessMsg(''), 6000);
     } catch (err) {
-      alert('আবেদন পাঠাতে সমস্যা হয়েছে: ' + err.message);
+      alert(tx('আবেদন পাঠাতে সমস্যা হয়েছে: ', 'Failed to submit request: ') + err.message);
     } finally {
       setSubmittingRequest(false);
     }
@@ -802,9 +998,34 @@ function DashboardContent() {
     );
   }
 
-  if (!user) return null;
+  const currentWingName =
+    memberRecord?.wing ||
+    (typeof user.assignedWing === 'object' && (user.assignedWing?.nameBn || user.assignedWing?.nameEn)) ||
+    (typeof user.assignedWing === 'string' && user.assignedWing) ||
+    user.volunteerWing ||
+    'সাধারণ উইং';
 
-  const currentWingName = memberRecord?.wing || user.volunteerWing || 'সাধারণ উইং';
+  // Comprehensive merged operational wings list
+  const availableWings = (() => {
+    const map = new Map();
+    if (Array.isArray(wingsList) && wingsList.length > 0) {
+      wingsList.forEach((w) => {
+        const key = (w.slug || w.nameEn || w.nameBn || '').toLowerCase();
+        if (key) map.set(key, w);
+      });
+    }
+    OFFICIAL_WINGS_FALLBACK.forEach((def) => {
+      const key = def.slug.toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, def);
+      } else {
+        const existing = map.get(key);
+        map.set(key, { ...def, ...existing });
+      }
+    });
+    return Array.from(map.values());
+  })();
+
   const pendingAdminRequestsCount = adminRequests.filter((r) => r.status === 'pending').length;
 
   const filteredAdminRequests = adminRequests.filter((r) => {
@@ -1276,7 +1497,7 @@ function DashboardContent() {
                                       : 'bg-purple-100 text-purple-800 border border-purple-200'
                                   }`}
                                 >
-                                  {req.type === 'wing_change' ? 'উইং পরিবর্তন / Wing Change' : 'ভলান্টিয়ার আবেদন / Volunteer Application'}
+                                  {req.type === 'wing_change' ? tx('উইং পরিবর্তন', 'Wing Change') : tx('ভলান্টিয়ার আবেদন', 'Volunteer Application')}
                                 </span>
 
                                 <span
@@ -1450,7 +1671,7 @@ function DashboardContent() {
                     <div className="space-y-2 max-w-2xl">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-bold text-rose-300 border border-white/10">
                         <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>উইং কো-অর্ডিনেটর ও ভলান্টিয়ার নেতৃত্ব ব্যবস্থাপনা</span>
+                        <span>{tx('উইং কো-অর্ডিনেটর ও ভলান্টিয়ার নেতৃত্ব ব্যবস্থাপনা', 'Wing Coordinator & Volunteer Leadership Management')}</span>
                       </div>
                       <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
                         Wing Coordinators Hub & Volunteer Leadership
@@ -1514,7 +1735,7 @@ function DashboardContent() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-black text-slate-900">
-                          সকল উইং-এর ভলান্টিয়ার তালিকা (Volunteer Corps of All Wings)
+                          {tx('সকল উইং-এর ভলান্টিয়ার তালিকা (Volunteer Corps of All Wings)', 'Volunteer Corps Across All Wings')}
                         </h3>
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
                           {filteredVolunteers.length} Active Volunteers
@@ -1608,11 +1829,11 @@ function DashboardContent() {
                               <td className="py-3 px-4">
                                 <div className="space-y-1">
                                   <span className="inline-block px-2.5 py-0.5 bg-rose-50 text-[#B62A35] border border-rose-200 font-bold text-[10px] rounded-full">
-                                    {vol.volunteerWing || 'সাধারণ উইং (General Corps)'}
+                                    {formatWing(vol.volunteerWing)}
                                   </span>
                                   {Array.isArray(vol.volunteerInterests) && vol.volunteerInterests.length > 0 && (
                                     <p className="text-[10px] text-slate-500 truncate max-w-xs">
-                                      {vol.volunteerInterests.join(', ')}
+                                      {vol.volunteerInterests.map(formatVolunteerArea).join(', ')}
                                     </p>
                                   )}
                                 </div>
@@ -1620,7 +1841,7 @@ function DashboardContent() {
 
                               <td className="py-3 px-4">
                                 <div className="space-y-0.5">
-                                  <div className="text-slate-700 font-semibold">{vol.upazila || 'ঝালকাঠি সদর'}, {vol.district || 'ঝালকাঠি'}</div>
+                                  <div className="text-slate-700 font-semibold">{formatUpazila(vol.upazila || 'ঝালকাঠি সদর')}, {formatDistrict(vol.district || 'ঝালকাঠি')}</div>
                                   <div className="text-[11px] text-emerald-600 font-bold">
                                     {vol.totalHours || 0} Service Hours Logged
                                   </div>
@@ -1643,7 +1864,7 @@ function DashboardContent() {
                                   className="px-3.5 py-2 bg-[#B62A35] hover:bg-[#9E1F2A] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-md transition-all inline-flex items-center gap-1.5 cursor-pointer"
                                 >
                                   <UserCheck className="w-3.5 h-3.5" />
-                                  <span>উইং কো-অর্ডিনেটর নিযুক্ত করুন</span>
+                                  <span>{tx('উইং কো-অর্ডিনেটর নিযুক্ত করুন', 'Appoint Wing Coordinator')}</span>
                                 </button>
                               </td>
                             </tr>
@@ -1691,7 +1912,7 @@ function DashboardContent() {
                     <div className="space-y-2 max-w-2xl">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-bold text-amber-300 border border-white/10">
                         <HeartHandshake className="w-3.5 h-3.5 text-amber-300" />
-                        <span>উইং ভলান্টিয়ার কর্পস ও ফিল্ড অ্যাক্টিভিস্ট ব্যবস্থাপনা</span>
+                        <span>{tx('উইং ভলান্টিয়ার কর্পস ও ফিল্ড অ্যাক্টিভিস্ট ব্যবস্থাপনা', 'Wing Volunteer Corps & Field Activist Management')}</span>
                       </div>
                       <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
                         Volunteer Hub & Grassroots Action Corps
@@ -1770,7 +1991,7 @@ function DashboardContent() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-black text-slate-900">
-                          সক্রিয় ভলান্টিয়ার তালিকা (Active Volunteer Corps Directory)
+                          {tx('সক্রিয় ভলান্টিয়ার তালিকা (Active Volunteer Corps Directory)', 'Active Volunteer Corps Directory')}
                         </h3>
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
                           {filteredVolunteerHubList.length} Active Volunteers
@@ -1864,11 +2085,11 @@ function DashboardContent() {
                               <td className="py-3 px-4">
                                 <div className="space-y-1">
                                   <span className="inline-block px-2.5 py-0.5 bg-amber-50 text-amber-900 border border-amber-200 font-bold text-[10px] rounded-full">
-                                    {vol.volunteerWing || 'সাধারণ উইং (General Corps)'}
+                                    {formatWing(vol.volunteerWing)}
                                   </span>
                                   {Array.isArray(vol.volunteerInterests) && vol.volunteerInterests.length > 0 && (
                                     <p className="text-[10px] text-slate-500 truncate max-w-xs">
-                                      {vol.volunteerInterests.join(', ')}
+                                      {vol.volunteerInterests.map(formatVolunteerArea).join(', ')}
                                     </p>
                                   )}
                                 </div>
@@ -1876,7 +2097,7 @@ function DashboardContent() {
 
                               <td className="py-3 px-4">
                                 <div className="space-y-0.5">
-                                  <div className="text-slate-700 font-semibold">{vol.upazila || 'ঝালকাঠি সদর'}, {vol.district || 'ঝালকাঠি'}</div>
+                                  <div className="text-slate-700 font-semibold">{formatUpazila(vol.upazila || 'ঝালকাঠি সদর')}, {formatDistrict(vol.district || 'ঝালকাঠি')}</div>
                                   <div className="text-[11px] text-emerald-600 font-bold">
                                     {vol.totalHours || 0} Service Hours Logged
                                   </div>
@@ -1902,7 +2123,7 @@ function DashboardContent() {
                                     title="Promote to Wing Coordinator"
                                   >
                                     <ShieldCheck className="w-3 h-3" />
-                                    <span>কো-অর্ডিনেটর পদোন্নতি</span>
+                                    <span>{tx('কো-অর্ডিনেটর পদোন্নতি', 'Promote Lead')}</span>
                                   </button>
 
                                   {/* Change Wing */}
@@ -1921,7 +2142,7 @@ function DashboardContent() {
                                     className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[11px] transition-colors cursor-pointer"
                                     title="Reassign Wing"
                                   >
-                                    উইং পরিবর্তন
+                                    {tx('উইং পরিবর্তন', 'Change Wing')}
                                   </button>
 
                                   {/* Demote to Member */}
@@ -1933,7 +2154,7 @@ function DashboardContent() {
                                     className="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg font-bold text-[11px] transition-colors cursor-pointer"
                                     title="Demote to Member"
                                   >
-                                    সদস্য পদ
+                                    {tx('সদস্য পদ', 'Demote')}
                                   </button>
                                 </div>
                               </td>
@@ -1951,7 +2172,7 @@ function DashboardContent() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-black text-slate-900">
-                          ভলান্টিয়ার হিসেবে নিয়োগযোগ্য সাধারণ সদস্য তালিকা (Eligible General Members Pool)
+                          {tx('ভলান্টিয়ার হিসেবে নিয়োগযোগ্য সাধারণ সদস্য তালিকা (Eligible General Members Pool)', 'Eligible General Members Pool')}
                         </h3>
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
                           {filteredMembersRoster.length} General Members
@@ -2027,10 +2248,10 @@ function DashboardContent() {
                               <td className="py-3 px-4">
                                 <div className="space-y-1">
                                   <div className="text-slate-800 font-medium">
-                                    {mem.upazila ? `${mem.upazila}, ${mem.district || 'ঝালকাঠি'}` : 'ঝালকাঠি'}
+                                    {mem.upazila ? `${formatUpazila(mem.upazila)}, ${formatDistrict(mem.district || 'ঝালকাঠি')}` : formatDistrict('ঝালকাঠি')}
                                   </div>
                                   <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 font-semibold text-[10px] rounded">
-                                    {mem.volunteerWing || 'সাধারণ উইং'}
+                                    {formatWing(mem.volunteerWing)}
                                   </span>
                                 </div>
                               </td>
@@ -2052,7 +2273,7 @@ function DashboardContent() {
                                   className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-bold text-xs shadow-xs hover:shadow-md transition-all inline-flex items-center gap-1.5 cursor-pointer"
                                 >
                                   <UserPlus className="w-3.5 h-3.5" />
-                                  <span>+ ভলান্টিয়ার হিসেবে নিয়োগ দিন</span>
+                                  <span>{tx('+ ভলান্টিয়ার হিসেবে নিয়োগ দিন', '+ Appoint as Volunteer')}</span>
                                 </button>
                               </td>
                             </tr>
@@ -2078,13 +2299,13 @@ function DashboardContent() {
                 <div className="space-y-2 max-w-2xl">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-bold text-purple-300 border border-white/10">
                     <ShieldCheck className="w-3.5 h-3.5 text-purple-300" />
-                    <span>অফিসিয়াল উইং কো-অর্ডিনেটর কন্ট্রোল হাব</span>
+                    <span>{tx('অফিসিয়াল উইং কো-অর্ডিনেটর কন্ট্রোল হাব', 'Official Wing Coordinator Control Hub')}</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
                     {coordinatorWing?.nameEn || coordinatorWing?.name || 'Wing Coordinator Operations'}
                   </h2>
                   <p className="text-xs sm:text-sm text-purple-200 font-medium">
-                    {coordinatorWing?.nameBn} — {coordinatorWing?.description || 'Manage grassroots programs, volunteer drives, and community events for your assigned wing.'}
+                    {lang === 'bn' ? coordinatorWing?.nameBn : (coordinatorWing?.nameEn || coordinatorWing?.name)} — {coordinatorWing?.description || (lang === 'bn' ? 'আপনার দায়িত্বপ্রাপ্ত উইংয়ের কার্যক্রম পরিচালনা করুন।' : 'Manage grassroots programs, volunteer drives, and community events for your assigned wing.')}
                   </p>
                 </div>
 
@@ -2175,7 +2396,7 @@ function DashboardContent() {
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="text-base font-black text-slate-900">
-                    উইং-এর আসন্ন ইভেন্টসমূহ (Scheduled Drives & Events)
+                    {tx('উইং-এর আসন্ন ইভেন্টসমূহ (Scheduled Drives & Events)', 'Scheduled Drives & Events')}
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Community events scheduled under your wing. Click to create a new drive or manage attendance.
@@ -2306,7 +2527,7 @@ function DashboardContent() {
                       <span className="text-xs text-slate-300">Charter 2026</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                      Your Current Wing: <span className="text-[#F1AD1A]">{currentWingName}</span>
+                      Your Current Wing: <span className="text-[#F1AD1A]">{formatWing(currentWingName)}</span>
                     </h2>
                     <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
                       WCC is organized into 6 specialized wings. You can request a transfer to your preferred wing based on your skills, or apply to join the Youth Volunteer Corps. All requests are processed by the central administration committee.
@@ -2393,19 +2614,19 @@ function DashboardContent() {
                                       : 'bg-purple-100 text-purple-800'
                                   }`}
                                 >
-                                  {req.type === 'wing_change' ? 'উইং পরিবর্তন' : 'ভলান্টিয়ার আবেদন'}
+                                  {req.type === 'wing_change' ? tx('উইং পরিবর্তন', 'Wing Change') : tx('ভলান্টিয়ার আবেদন', 'Volunteer Application')}
                                 </span>
                               </td>
                               <td className="py-3 px-3">
                                 {req.type === 'wing_change' ? (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="text-slate-500">{req.currentWing}</span>
+                                    <span className="text-slate-500">{formatWing(req.currentWing)}</span>
                                     <ArrowRight className="w-3 h-3 text-[#B62A35]" />
-                                    <span className="font-bold text-blue-700">{req.requestedWing}</span>
+                                    <span className="font-bold text-blue-700">{formatWing(req.requestedWing)}</span>
                                   </div>
                                 ) : (
                                   <div className="text-slate-700">
-                                    {req.volunteerInterests?.length > 0 ? req.volunteerInterests.join(', ') : 'Youth Volunteer'}
+                                    {req.volunteerInterests?.length > 0 ? req.volunteerInterests.map(formatVolunteerArea).join(', ') : (lang === 'bn' ? 'সাধারণ ভলান্টিয়ার' : 'Youth Volunteer')}
                                   </div>
                                 )}
                               </td>
@@ -2426,9 +2647,9 @@ function DashboardContent() {
                                   {isApproved && <CheckCircle2 className="w-3 h-3" />}
                                   {isRejected && <AlertCircle className="w-3 h-3" />}
                                   <span>
-                                    {isPending && 'বিবেচনাধীন (Pending)'}
-                                    {isApproved && 'অনুমোদিত (Approved)'}
-                                    {isRejected && 'প্রত্যাখ্যাত (Rejected)'}
+                                    {isPending && tx('বিবেচনাধীন (Pending)', 'Pending')}
+                                    {isApproved && tx('অনুমোদিত (Approved)', 'Approved')}
+                                    {isRejected && tx('প্রত্যাখ্যাত (Rejected)', 'Rejected')}
                                   </span>
                                 </span>
                               </td>
@@ -2491,7 +2712,7 @@ function DashboardContent() {
                         <div className="space-y-1">
                           <h4 className="text-base font-black text-white">{user.name || 'Member'}</h4>
                           <p className="text-xs text-[#F1AD1A] font-bold">ID: {user.memberId || memberRecord?.memberId || 'Pending'}</p>
-                          <p className="text-xs text-slate-200">Wing: {currentWingName}</p>
+                          <p className="text-xs text-slate-200">Wing: {formatWing(currentWingName)}</p>
                           <p className="text-xs text-slate-200">Role: Registered Member</p>
                         </div>
                       </div>
@@ -2532,7 +2753,7 @@ function DashboardContent() {
                       </div>
                       <div className="p-3 bg-slate-50 rounded-xl">
                         <span className="text-slate-400 block mb-0.5">Assigned Wing</span>
-                        <span className="font-bold text-blue-700">{currentWingName}</span>
+                        <span className="font-bold text-blue-700">{formatWing(currentWingName)}</span>
                       </div>
                     </div>
                   </div>
@@ -2635,7 +2856,7 @@ function DashboardContent() {
                     Volunteer Assignment
                   </span>
                   <h3 className="text-base font-black text-slate-900 mt-1">
-                    Assigned Wing: <span className="text-[#B62A35]">{currentWingName}</span>
+                    Assigned Wing: <span className="text-[#B62A35]">{formatWing(currentWingName)}</span>
                   </h3>
                   <p className="text-xs text-slate-500">
                     Want to contribute to another operational wing? You can submit a wing transfer request for admin review.
@@ -2648,6 +2869,105 @@ function DashboardContent() {
                   <Layers className="w-4 h-4" />
                   <span>Request Wing Transfer</span>
                 </button>
+              </div>
+            )}
+
+            {/* Submitted Wing Transfer Requests Status Tracker for Volunteers */}
+            {activeTab === 'vol-requests' && (
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900">
+                      {tx('আমার উইং পরিবর্তনের আবেদনসমূহ', 'My Wing Transfer Requests')}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {tx('কেন্দ্রীয় অ্যাডমিন প্যানেলে পর্যালোচনার জন্য জমা দেওয়া আবেদনের লাইভ স্ট্যাটাস', 'Live status and admin review notes for your wing transfer requests')}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setWingModalOpen(true)}
+                    className="text-xs font-bold text-[#B62A35] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>{tx('নতুন আবেদন', 'New Request')}</span>
+                  </button>
+                </div>
+
+                {myRequests.filter((r) => r.type === 'wing_change').length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl space-y-2">
+                    <Layers className="w-8 h-8 text-slate-400 mx-auto" />
+                    <p className="font-semibold text-slate-700">
+                      {tx('কোনো উইং পরিবর্তনের আবেদন এখনো জমা দেওয়া হয়নি।', 'No wing transfer requests submitted yet.')}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      {tx('উপরের "Request Wing Transfer" বাটনে ক্লিক করে পছন্দের উইং নির্বাচন করে আবেদন করুন।', 'Click "Request Wing Transfer" above to select a wing and describe your reason.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                          <th className="py-2.5 px-3">Date</th>
+                          <th className="py-2.5 px-3">Previous Wing</th>
+                          <th className="py-2.5 px-3">Requested Wing</th>
+                          <th className="py-2.5 px-3">Your Reason</th>
+                          <th className="py-2.5 px-3">Admin Status</th>
+                          <th className="py-2.5 px-3">Admin Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {myRequests
+                          .filter((r) => r.type === 'wing_change')
+                          .map((req) => {
+                            const isPending = req.status === 'pending';
+                            const isApproved = req.status === 'approved';
+                            const isRejected = req.status === 'rejected';
+
+                            return (
+                              <tr key={req._id} className="hover:bg-slate-50">
+                                <td className="py-3 px-3 text-slate-500 whitespace-nowrap">
+                                  {new Date(req.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="py-3 px-3 font-medium text-slate-700">
+                                  {formatWing(req.currentWing)}
+                                </td>
+                                <td className="py-3 px-3 font-bold text-[#B62A35]">
+                                  {formatWing(req.requestedWing)}
+                                </td>
+                                <td className="py-3 px-3 text-slate-600 max-w-xs break-words">
+                                  {req.reason || '-'}
+                                </td>
+                                <td className="py-3 px-3">
+                                  <span
+                                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1 ${
+                                      isPending
+                                        ? 'bg-amber-100 text-amber-800'
+                                        : isApproved
+                                        ? 'bg-emerald-100 text-emerald-800'
+                                        : 'bg-rose-100 text-rose-800'
+                                    }`}
+                                  >
+                                    {isPending && <Clock className="w-3 h-3" />}
+                                    {isApproved && <CheckCircle2 className="w-3 h-3" />}
+                                    {isRejected && <AlertCircle className="w-3 h-3" />}
+                                    <span>
+                                      {isPending && tx('বিবেচনাধীন (Pending)', 'Pending')}
+                                      {isApproved && tx('অনুমোদিত (Approved)', 'Approved')}
+                                      {isRejected && tx('প্রত্যাখ্যাত (Rejected)', 'Rejected')}
+                                    </span>
+                                  </span>
+                                </td>
+                                <td className="py-3 px-3 text-slate-500 italic max-w-xs">
+                                  {req.adminNotes ? `"${req.adminNotes}"` : isApproved ? 'Accepted by admin' : isPending ? 'Review in progress' : '-'}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
@@ -2892,7 +3212,7 @@ function DashboardContent() {
                       <div className="space-y-1">
                         <h4 className="text-base font-black text-white">{user.name}</h4>
                         <p className="text-xs font-mono font-bold text-[#F1AD1A]">ID: {user.memberId || 'WCC-VOL-0001'}</p>
-                        <p className="text-xs text-slate-200">Wing: {currentWingName}</p>
+                        <p className="text-xs text-slate-200">Wing: {formatWing(currentWingName)}</p>
                         <p className="text-xs text-slate-200">Total Service Hours: <span className="font-bold text-[#F1AD1A]">{volunteerHours} hrs</span></p>
                       </div>
                     </div>
@@ -2940,7 +3260,7 @@ function DashboardContent() {
                           required
                           value={logDriveName}
                           onChange={(e) => setLogDriveName(e.target.value)}
-                          placeholder="e.g. ফ্রি হেলথ ক্যাম্প"
+                          placeholder={tx('e.g. ফ্রি হেলথ ক্যাম্প', 'e.g. Free Health Camp')}
                           className="w-full p-2.5 border border-slate-200 rounded-xl focus:border-[#B62A35] focus:outline-hidden"
                         />
                       </div>
@@ -3107,92 +3427,175 @@ function DashboardContent() {
       {/* ================================================================= */}
       {wingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl p-6 sm:p-8 space-y-6 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl p-6 sm:p-8 space-y-6 relative max-h-[92vh] overflow-y-auto">
             <button
               onClick={() => setWingModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800">
-                Official Wing Selection
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-[#B62A35]">
+                {tx('সাংগঠনিক উইং ট্রান্সফার', 'Official Wing Transfer')}
               </span>
-              <h3 className="text-lg font-black text-slate-900">
-                পছন্দের উইং পরিবর্তনের আবেদন (Request Wing Change)
+              <h3 className="text-xl font-black text-slate-900">
+                {tx('পছন্দের উইং পরিবর্তনের আবেদন', 'Request Wing Transfer')}
               </h3>
               <p className="text-xs text-slate-500">
-                বর্তমান উইং: <span className="font-bold text-slate-800">{currentWingName}</span>
+                {tx('বর্তমান উইং:', 'Current Wing:')}{' '}
+                <span className="font-bold text-[#B62A35] bg-rose-50 px-2 py-0.5 rounded-md">
+                  {formatWing(currentWingName)}
+                </span>
               </p>
             </div>
 
             <form onSubmit={handleSubmitWingChange} className="space-y-5 text-xs">
               <div className="space-y-2">
-                <label className="block font-bold text-slate-800">
-                  নতুন উইং নির্বাচন করুন / Choose Preferred Wing:
-                </label>
-                <div className="grid grid-cols-1 gap-2.5">
-                  {wingsList.map((wing) => {
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-slate-800">
+                    {tx('১. উইং নির্বাচন করুন (Choose One Wing):', '1. Choose Target Wing (Select One):')}
+                  </label>
+                  <span className="text-[11px] text-slate-500 font-semibold">
+                    {availableWings.length} {tx('টি উইং উপলব্ধ', 'Wings Available')}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  {tx('যেকোনো একটি উইং নির্বাচন করে সেই উইংয়ের জন্য আপনার সুনির্দিষ্ট কারণ উল্লেখ করুন। প্রতিটি উইংয়ের জন্য আলাদা কারণ সংরক্ষিত থাকবে।', 'Select any wing and explain your reason for that specific wing. Your reason is saved for every wing you select.')}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                  {availableWings.map((wing) => {
                     const wingTitleBn = wing.nameBn || wing.nameEn;
                     const wingTitleEn = wing.nameEn || wing.slug;
-                    const isCurrent = wingTitleBn === currentWingName || wing.slug === currentWingName;
-                    const isSelected = wingTitleBn === selectedWing || wing.slug === selectedWing;
+                    const primaryTitle = lang === 'bn' ? wingTitleBn : wingTitleEn;
+                    const secondaryTitle = lang === 'bn' ? wingTitleEn : wingTitleBn;
+                    const chosenVal = lang === 'bn' ? wingTitleBn : wingTitleEn;
+
+                    const isCurrent =
+                      wingTitleBn === currentWingName ||
+                      wingTitleEn === currentWingName ||
+                      wing.slug === currentWingName ||
+                      (currentWingName.includes('সাধারণ') && (wing.slug === 'general' || wingTitleBn.includes('সাধারণ'))) ||
+                      (currentWingName.toLowerCase().includes('general') && (wing.slug === 'general' || wingTitleEn.toLowerCase().includes('general')));
+
+                    const isSelected = selectedWing === chosenVal || selectedWing === wingTitleBn || selectedWing === wingTitleEn;
+
+                    const handleCardClick = () => {
+                      if (isCurrent) return;
+                      setSelectedWing(chosenVal);
+                      const savedReason =
+                        wingReasonsMap[chosenVal] ||
+                        wingReasonsMap[wing.slug] ||
+                        wingReasonsMap[wingTitleBn] ||
+                        wingReasonsMap[wingTitleEn] ||
+                        '';
+                      setWingReason(savedReason);
+                    };
 
                     return (
-                      <label
+                      <div
                         key={wing._id || wing.slug}
-                        className={`p-3.5 rounded-2xl border flex items-start gap-3 cursor-pointer transition-all ${
+                        onClick={handleCardClick}
+                        className={`p-3.5 rounded-2xl border flex items-start gap-3 cursor-pointer transition-all select-none ${
                           isSelected
-                            ? 'border-[#B62A35] bg-rose-50/50 shadow-xs ring-1 ring-[#B62A35]'
-                            : 'border-slate-200 hover:border-slate-300 bg-white'
-                        } ${isCurrent ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            ? 'border-[#B62A35] bg-rose-50/70 shadow-sm ring-2 ring-[#B62A35]/30'
+                            : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50'
+                        } ${isCurrent ? 'opacity-40 cursor-not-allowed bg-slate-50 border-dashed' : ''}`}
                       >
                         <input
                           type="radio"
                           name="selectedWing"
                           disabled={isCurrent}
-                          value={wingTitleBn}
+                          value={chosenVal}
                           checked={isSelected}
-                          onChange={() => setSelectedWing(wingTitleBn)}
-                          className="mt-1 text-[#B62A35] focus:ring-[#B62A35]"
+                          onChange={handleCardClick}
+                          className="mt-1 text-[#B62A35] focus:ring-[#B62A35] shrink-0"
                         />
+                        <div className="shrink-0 mt-0.5">
+                          {getWingIcon(wing.slug)}
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-900 text-xs">{wingTitleBn}</span>
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="font-bold text-slate-900 text-xs leading-tight">
+                              {primaryTitle}
+                            </span>
                             {isCurrent && (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-semibold">
-                                বর্তমান উইং
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 font-bold shrink-0">
+                                {tx('বর্তমান', 'Current')}
+                              </span>
+                            )}
+                            {isSelected && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold shrink-0">
+                                {tx('নির্বাচিত', 'Selected')}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-500">{wingTitleEn}</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">{wing.description}</p>
+                          <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{secondaryTitle}</p>
+                          <p className="text-[10px] text-slate-400 line-clamp-2 mt-1 leading-snug">
+                            {lang === 'bn' ? (wing.description || wing.descriptionEn) : (wing.descriptionEn || wing.description)}
+                          </p>
                         </div>
-                      </label>
+                      </div>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block font-bold text-slate-800">
-                  উইং পরিবর্তনের কারণ বা আপনার আগ্রহ (Reason for Choosing this Wing):
-                </label>
+              {/* Dynamic Wing-specific Reason Textarea */}
+              <div className="space-y-1.5 bg-slate-50/80 p-4 rounded-2xl border border-slate-200">
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-slate-800">
+                    {tx('২. নির্বাচিত উইংয়ের কারণ (Reason for this Wing):', '2. Reason for Choosing this Wing:')}
+                  </label>
+                  {selectedWing && (
+                    <span className="text-[11px] font-bold text-[#B62A35]">
+                      {tx('উইং: ', 'Target: ')} {selectedWing}
+                    </span>
+                  )}
+                </div>
                 <textarea
                   rows={3}
                   required
                   value={wingReason}
-                  onChange={(e) => setWingReason(e.target.value)}
-                  placeholder="যেমন: আমি আইটি ও সফটওয়্যার ডেভেলপমেন্টে দক্ষ, তাই তথ্য ও যোগাযোগ প্রযুক্তি উইংয়ে দায়িত্ব পালন করতে আগ্রহী..."
-                  className="w-full p-3 border border-slate-200 rounded-2xl focus:border-[#B62A35] focus:outline-hidden text-xs"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setWingReason(val);
+                    if (selectedWing) {
+                      setWingReasonsMap((prev) => ({ ...prev, [selectedWing]: val }));
+                    }
+                  }}
+                  placeholder={
+                    (() => {
+                      const curWingObj = availableWings.find(
+                        (w) => w.nameBn === selectedWing || w.nameEn === selectedWing || (lang === 'bn' ? w.nameBn : w.nameEn) === selectedWing
+                      );
+                      if (curWingObj) {
+                        return lang === 'bn'
+                          ? (curWingObj.placeholder || 'এই উইংয়ে কাজ করার কারণ ও আপনার আগ্রহ বর্ণনা করুন...')
+                          : (curWingObj.placeholderEn || 'Explain your reason and motivation for choosing this wing...');
+                      }
+                      return tx(
+                        'উপরে যেকোনো একটি উইং নির্বাচন করুন এবং সেই উইংয়ের জন্য আপনার কারণ লিখুন...',
+                        'Select a wing above and describe your reason for choosing it...'
+                      );
+                    })()
+                  }
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:border-[#B62A35] focus:ring-1 focus:ring-[#B62A35] focus:outline-hidden text-xs"
                 ></textarea>
+                <div className="flex items-center justify-between text-[10px] text-slate-500">
+                  <span>{tx('প্রতিটি উইংয়ের জন্য নিজস্ব কারণ লিখতে পারেন।', 'You can enter a customized reason for every wing.')}</span>
+                  <span>{wingReason.length} {tx('অক্ষর', 'characters')}</span>
+                </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-2.5 text-[11px] text-slate-600">
-                <AlertCircle className="w-4 h-4 text-[#B62A35] shrink-0 mt-0.5" />
+              <div className="p-3 bg-blue-50/60 rounded-2xl border border-blue-200/60 flex items-start gap-2.5 text-[11px] text-slate-600">
+                <AlertCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <p>
-                  আপনার আবেদনটি সাবমিট করার পর কেন্দ্রীয় অ্যাডমিন প্যানেলে যাচাই করা হবে। অ্যাডমিন অনুমোদন প্রদান করলে আপনার আইডি কার্ড এবং প্রোফাইল স্বয়ংক্রিয়ভাবে নতুন উইংয়ে আপডেট হয়ে যাবে।
+                  {tx(
+                    'আবেদন সাবমিট করার পর কেন্দ্রীয় অ্যাডমিন তা পর্যালোচনা করবেন। অনুমোদন সাপেক্ষে আপনার প্রোফাইল ও আইডি কার্ড নতুন উইংয়ে হালনাগাদ হবে।',
+                    'After submitting, admin will review your request. Upon approval, your profile and official badge will update to the requested wing.'
+                  )}
                 </p>
               </div>
 
@@ -3200,17 +3603,17 @@ function DashboardContent() {
                 <button
                   type="button"
                   onClick={() => setWingModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {tx('বাতিল', 'Cancel')}
                 </button>
                 <button
                   type="submit"
-                  disabled={submittingRequest}
+                  disabled={submittingRequest || !selectedWing}
                   className="px-5 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{submittingRequest ? 'Submitting Request...' : 'Submit Request'}</span>
+                  <span>{submittingRequest ? tx('জমা হচ্ছে...', 'Submitting...') : tx('উইং পরিবর্তনের আবেদন জমা দিন', 'Submit Wing Transfer')}</span>
                 </button>
               </div>
             </form>
@@ -3236,17 +3639,17 @@ function DashboardContent() {
                 Youth Volunteer Enlistment
               </span>
               <h3 className="text-lg font-black text-slate-900">
-                ভলান্টিয়ার হওয়ার আবেদন (Apply to Become a Volunteer)
+                {tx('ভলান্টিয়ার হওয়ার আবেদন (Apply to Become a Volunteer)', 'Apply to Become a Volunteer')}
               </h3>
               <p className="text-xs text-slate-500">
-                WCC-এর সামাজিক ও মানবিক উদ্যোগে ফিল্ড ভলান্টিয়ার হিসেবে যুক্ত হতে আপনার আগ্রহ প্রকাশ করুন।
+                {tx('WCC-এর সামাজিক ও মানবিক উদ্যোগে ফিল্ড ভলান্টিয়ার হিসেবে যুক্ত হতে আপনার আগ্রহ প্রকাশ করুন।', 'Express your interest to join WCC community initiatives and field operations as a volunteer.')}
               </p>
             </div>
 
             <form onSubmit={handleSubmitVolunteerApp} className="space-y-5 text-xs">
               <div className="space-y-2">
                 <label className="block font-bold text-slate-800">
-                  আপনি কোন কোন ক্ষেত্রে স্বেচ্ছাসেবা দিতে চান? (Select Volunteer Areas):
+                  {tx('আপনি কোন কোন ক্ষেত্রে স্বেচ্ছাসেবা দিতে চান? (Select Volunteer Areas):', 'Select Volunteer Interest Areas:')}
                 </label>
                 <div className="grid grid-cols-1 gap-2">
                   {(wingsList.length > 0
@@ -3274,7 +3677,7 @@ function DashboardContent() {
                           onChange={() => handleToggleInterest(area)}
                           className="rounded text-purple-600 focus:ring-purple-500"
                         />
-                        <span className="font-semibold text-slate-800 text-xs">{area}</span>
+                        <span className="font-semibold text-slate-800 text-xs">{formatVolunteerArea(area)}</span>
                       </label>
                     );
                   })}
@@ -3283,14 +3686,14 @@ function DashboardContent() {
 
               <div className="space-y-1.5">
                 <label className="block font-bold text-slate-800">
-                  আপনার অনুপ্রেরণা ও সেবামূলক কাজের অভিজ্ঞতা (Motivation & Prior Experience):
+                  {tx('আপনার অনুপ্রেরণা ও সেবামূলক কাজের অভিজ্ঞতা (Motivation & Prior Experience):', 'Motivation & Prior Community Service Experience:')}
                 </label>
                 <textarea
                   rows={3}
                   required
                   value={volunteerReason}
                   onChange={(e) => setVolunteerReason(e.target.value)}
-                  placeholder="যেমন: আমি ঝালকাঠির স্থানীয় যুবকদের সাথে সমাজসেবামূলক কাজে যুক্ত হতে আগ্রহী এবং জরুরি রক্তদান ও মেডিকেল ক্যাম্পে সক্রিয় ভূমিকা পালন করতে চাই..."
+                  placeholder={tx('যেমন: আমি ঝালকাঠির স্থানীয় যুবকদের সাথে সমাজসেবামূলক কাজে যুক্ত হতে আগ্রহী এবং জরুরি রক্তদান ও মেডিকেল ক্যাম্পে সক্রিয় ভূমিকা পালন করতে চাই...', 'e.g. I want to actively participate with local youth in community service and blood donation or health camps...')}
                   className="w-full p-3 border border-slate-200 rounded-2xl focus:border-purple-600 focus:outline-hidden text-xs"
                 ></textarea>
               </div>
@@ -3298,7 +3701,7 @@ function DashboardContent() {
               <div className="p-3 bg-purple-50 rounded-2xl border border-purple-200 flex items-start gap-2.5 text-[11px] text-purple-900">
                 <Sparkles className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
                 <p>
-                  অ্যাডমিন কর্তৃক আবেদন অনুমোদিত হলে আপনার অ্যাকাউন্ট স্বয়ংক্রিয়ভাবে ভলান্টিয়ার হিসেবে উন্নীত হবে এবং আপনি ভলান্টিয়ার ব্যাজ ও সার্ভিস আওয়ার লগ করার সুবিধা পাবেন।
+                  {tx('অ্যাডমিন কর্তৃক আবেদন অনুমোদিত হলে আপনার অ্যাকাউন্ট স্বয়ংক্রিয়ভাবে ভলান্টিয়ার হিসেবে উন্নীত হবে এবং আপনি ভলান্টিয়ার ব্যাজ ও সার্ভিস আওয়ার লগ করার সুবিধা পাবেন।', 'Once approved by an admin, your account will be upgraded to Volunteer with access to volunteer badges and service hour tracking.')}
                 </p>
               </div>
 
@@ -3335,7 +3738,7 @@ function DashboardContent() {
                 </div>
                 <div>
                   <h3 className="text-base font-black text-slate-900">
-                    উইং কো-অর্ডিনেটর হিসেবে নিয়োগ
+                    {tx('উইং কো-অর্ডিনেটর হিসেবে নিয়োগ', 'Appoint as Wing Coordinator')}
                   </h3>
                   <p className="text-[11px] text-slate-500">Appoint Volunteer to Wing Leadership</p>
                 </div>
@@ -3363,7 +3766,7 @@ function DashboardContent() {
               <div className="text-xs text-slate-500 font-mono">{selectedVolunteerToAssign.email}</div>
               {selectedVolunteerToAssign.volunteerWing && (
                 <div className="text-xs text-slate-600 pt-1 border-t border-slate-200">
-                  Preferred Wing: <strong>{selectedVolunteerToAssign.volunteerWing}</strong>
+                  Preferred Wing: <strong>{formatWing(selectedVolunteerToAssign.volunteerWing)}</strong>
                 </div>
               )}
             </div>
@@ -3371,7 +3774,7 @@ function DashboardContent() {
             {/* Wing Selector */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
-                দায়িত্বপ্রাপ্ত উইং নির্বাচন করুন (Select Target Wing) <span className="text-rose-500">*</span>
+                {tx('দায়িত্বপ্রাপ্ত উইং নির্বাচন করুন (Select Target Wing)', 'Select Target Wing')} <span className="text-rose-500">*</span>
               </label>
               <select
                 value={targetWingId}
@@ -3550,7 +3953,7 @@ function DashboardContent() {
                 </div>
                 <div>
                   <h3 className="text-base font-black text-slate-900">
-                    ভলান্টিয়ার হিসেবে নিয়োগ ও আমন্ত্রণ
+                    {tx('ভলান্টিয়ার হিসেবে নিয়োগ ও আমন্ত্রণ', 'Appoint & Invite Volunteer')}
                   </h3>
                   <p className="text-[11px] text-slate-500">Appoint Member to Volunteer Corps</p>
                 </div>
@@ -3579,7 +3982,7 @@ function DashboardContent() {
               <div className="text-xs text-slate-500 font-mono">{selectedMemberToNominate.email}</div>
               {selectedMemberToNominate.volunteerWing && (
                 <div className="text-xs text-slate-600 pt-1 border-t border-slate-200">
-                  Current Wing: <strong>{selectedMemberToNominate.volunteerWing}</strong>
+                  Current Wing: <strong>{formatWing(selectedMemberToNominate.volunteerWing)}</strong>
                 </div>
               )}
             </div>
@@ -3587,7 +3990,7 @@ function DashboardContent() {
             {/* Wing Selector */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
-                দায়িত্বপ্রাপ্ত উইং নির্বাচন করুন (Select Target Wing) <span className="text-rose-500">*</span>
+                {tx('দায়িত্বপ্রাপ্ত উইং নির্বাচন করুন (Select Target Wing)', 'Select Target Wing')} <span className="text-rose-500">*</span>
               </label>
               <select
                 value={targetVolWingId}
@@ -3617,7 +4020,7 @@ function DashboardContent() {
             {/* Invitation Note */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
-                আমন্ত্রণ বার্তা (Optional Invitation Message / Note)
+                {tx('আমন্ত্রণ বার্তা (Optional Invitation Message / Note)', 'Optional Invitation Note')}
               </label>
               <textarea
                 value={volInvitationNote}

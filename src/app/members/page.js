@@ -25,8 +25,10 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import StatusBadge from '@/Components/StatusBadge';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function MembersPage() {
+  const { tx, lang } = useLanguage();
   const [currentUser, setCurrentUser] = useState(null);
   const [members, setMembers] = useState([]);
   const [total, setTotal] = useState(0);
@@ -77,10 +79,33 @@ export default function MembersPage() {
     loadWings();
   }, []);
 
+  const formatWing = (w) => {
+    if (!w || w === 'সাধারণ উইং' || w === 'General Wing') return lang === 'bn' ? 'সাধারণ উইং' : 'General Wing';
+    if (w.includes('শিক্ষা') || w.toLowerCase().includes('education')) return lang === 'bn' ? 'শিক্ষা উইং' : 'Education Wing';
+    if (w.includes('স্বাস্থ্য') || w.toLowerCase().includes('health')) return lang === 'bn' ? 'স্বাস্থ্য উইং' : 'Health Wing';
+    if (w.includes('খেলাধুলা') || w.toLowerCase().includes('sports')) return lang === 'bn' ? 'খেলাধুলা উইং' : 'Sports Wing';
+    if (w.includes('সংস্কৃতি') || w.toLowerCase().includes('cultural')) return lang === 'bn' ? 'সংস্কৃতি উইং' : 'Cultural Wing';
+    if (w.includes('পরিবেশ') || w.toLowerCase().includes('environment')) return lang === 'bn' ? 'পরিবেশ উইং' : 'Environment Wing';
+    return w;
+  };
+
+  const formatUpazila = (u) => {
+    if (!u || u === 'ঝালকাঠি সদর') return lang === 'bn' ? 'ঝালকাঠি সদর' : 'Jhalokathi Sadar';
+    if (u === 'নলছিটি') return lang === 'bn' ? 'নলছিটি' : 'Nalchity';
+    if (u === 'রাজাপুর') return lang === 'bn' ? 'রাজাপুর' : 'Rajapur';
+    if (u === 'কাঠালিয়া' || u === 'কাঁঠালিয়া') return lang === 'bn' ? 'কাঠালিয়া' : 'Kathalia';
+    return u;
+  };
+
+  const formatDistrict = (d) => {
+    if (!d || d === 'ঝালকাঠি') return lang === 'bn' ? 'ঝালকাঠি' : 'Jhalokathi';
+    return d;
+  };
+
   const handleOpenAppointModal = (member) => {
     setSelectedMemberForAppoint(member);
     setAppointRole('volunteer');
-    setAppointWing(fullWings[0]?.nameBn || member.wing || 'সাধারণ উইং');
+    setAppointWing(fullWings[0]?.nameBn || member.wing || (lang === 'bn' ? 'সাধারণ উইং' : 'General Wing'));
     setAppointNote('');
     setAppointModalOpen(true);
   };
@@ -429,7 +454,7 @@ export default function MembersPage() {
                     </td>
 
                     <td className="py-3 px-4 font-semibold text-slate-700">
-                      {member.wing || 'সাধারণ উইং'}
+                      {formatWing(member.wing)}
                     </td>
 
                     <td className="py-3 px-4 text-slate-600">
@@ -438,8 +463,8 @@ export default function MembersPage() {
                     </td>
 
                     <td className="py-3 px-4 text-slate-600">
-                      <div>{member.upazila || 'ঝালকাঠি সদর'}</div>
-                      <div className="text-[10px] text-slate-400">{member.district || 'ঝালকাঠি'}</div>
+                      <div>{formatUpazila(member.upazila)}</div>
+                      <div className="text-[10px] text-slate-400">{formatDistrict(member.district)}</div>
                     </td>
 
                     <td className="py-3 px-4">
@@ -512,16 +537,16 @@ export default function MembersPage() {
                   <span className="font-bold text-rose-600">{member.blood || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Wing</span>
-                  <span className="font-semibold text-slate-700 truncate block">{member.wing}</span>
+                  <span className="text-slate-400 block text-[10px]">{tx('উইং', 'Wing')}</span>
+                  <span className="font-semibold text-slate-700 truncate block">{formatWing(member.wing)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Profession</span>
-                  <span className="font-semibold text-slate-700 truncate block">{member.profession}</span>
+                  <span className="text-slate-400 block text-[10px]">{tx('পেশা', 'Profession')}</span>
+                  <span className="font-semibold text-slate-700 truncate block">{member.profession || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">Upazila</span>
-                  <span className="font-semibold text-slate-700 truncate block">{member.upazila}</span>
+                  <span className="text-slate-400 block text-[10px]">{tx('উপজেলা', 'Upazila')}</span>
+                  <span className="font-semibold text-slate-700 truncate block">{formatUpazila(member.upazila)}</span>
                 </div>
               </div>
 

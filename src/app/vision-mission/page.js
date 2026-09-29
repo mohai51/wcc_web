@@ -15,13 +15,24 @@ import {
   ArrowLeft,
   HeartHandshake,
   CheckCircle2,
-  Users
+  Users,
+  LogIn
 } from 'lucide-react';
 
 export default function VisionMissionPage() {
   const { lang, tx, t } = useLanguage();
   const [wings, setWings] = useState([]);
   const [loadingWings, setLoadingWings] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('wcc_user');
+      if (stored) setUser(JSON.parse(stored));
+    } catch {
+      setUser(null);
+    }
+  }, []);
 
   useEffect(() => {
     async function loadWings() {
@@ -301,16 +312,11 @@ export default function VisionMissionPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/register"
-              className="px-5 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+              href={user ? '/dashboard' : '/login'}
+              className="px-6 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer"
             >
-              {tx('WCC-তে যুক্ত হোন', 'Join We Can Change')}
-            </Link>
-            <Link
-              href="/login"
-              className="px-5 py-2.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all shadow-xs"
-            >
-              {tx('মেম্বার সাইন ইন', 'Member Sign In')}
+              <LogIn className="w-4 h-4" />
+              <span>{user ? tx('ড্যাশবোর্ডে যান', 'Go to My Dashboard') : tx('মেম্বার সাইন ইন', 'Member Sign In')}</span>
             </Link>
           </div>
         </div>

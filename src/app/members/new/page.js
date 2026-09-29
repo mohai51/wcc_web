@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, UserPlus, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function NewMemberPage() {
+  const { tx, lang } = useLanguage();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -17,16 +19,16 @@ export default function NewMemberPage() {
       try {
         const data = await api.getWings();
         if (Array.isArray(data) && data.length > 0) {
-          const names = data.map((w) => w.nameBn);
+          const names = data.map((w) => lang === 'bn' ? w.nameBn : (w.nameEn || w.nameBn));
           setWings(names);
-          setFormData((prev) => ({ ...prev, wing: names[0] || 'শিক্ষা উইং' }));
+          setFormData((prev) => ({ ...prev, wing: names[0] || (lang === 'bn' ? 'শিক্ষা উইং' : 'Education Wing') }));
         }
       } catch (err) {
         console.error('Failed to load wings for new member:', err);
       }
     }
     loadWings();
-  }, []);
+  }, [lang]);
 
   const [formData, setFormData] = useState({
     nameBn: '',
@@ -45,7 +47,7 @@ export default function NewMemberPage() {
     currentlyStudying: 'না',
     classYear: '',
     currentInstitution: '',
-    lastPublicExam: 'HSC / সমমান',
+    lastPublicExam: 'HSC',
     publicExamResult: '',
     lastQualification: '',
     lastResult: '',
@@ -68,24 +70,28 @@ export default function NewMemberPage() {
     setError('');
 
     if (!formData.nameBn || !formData.nameEn || !formData.mobile) {
-      setError('দয়া করে নাম (বাংলা ও ইংরেজি) এবং মোবাইল নম্বর প্রদান করুন।');
+      setError(tx('দয়া করে নাম (বাংলা ও ইংরেজি) এবং মোবাইল নম্বর প্রদান করুন।', 'Please provide name (Bengali and English) and mobile number.'));
       return;
     }
 
     setSubmitting(true);
     try {
       const res = await api.createMember(formData);
-      alert('সদস্য আবেদন সফলভাবে গ্রহণ করা হয়েছে!');
+      alert(tx('সদস্য আবেদন সফলভাবে গ্রহণ করা হয়েছে!', 'Membership application submitted successfully!'));
       router.push(`/members/${res.member.memberId}`);
     } catch (err) {
-      setError(err.message || 'Error submitting membership application');
+      setError(err.message || tx('আবেদন পাঠাতে সমস্যা হয়েছে', 'Error submitting membership application'));
     } finally {
       setSubmitting(false);
     }
   };
 
-
-  const upazilas = ['ঝালকাঠি সদর', 'নলছিটি', 'রাজাপুর', 'কাঠালিয়া'];
+  const upazilas = [
+    { bn: 'ঝালকাঠি সদর', en: 'Jhalokathi Sadar' },
+    { bn: 'নলছিটি', en: 'Nalchity' },
+    { bn: 'রাজাপুর', en: 'Rajapur' },
+    { bn: 'কাঠালিয়া', en: 'Kathalia' }
+  ];
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   return (
@@ -96,7 +102,7 @@ export default function NewMemberPage() {
           className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#B62A35] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Members</span>
+          <span>{tx('সদস্য তালিকায় ফিরে যান', 'Back to Members')}</span>
         </Link>
       </div>
 
@@ -104,10 +110,10 @@ export default function NewMemberPage() {
         <div className="border-b border-slate-200 pb-4">
           <div className="flex items-center gap-2 text-[#B62A35]">
             <UserPlus className="w-6 h-6" />
-            <h1 className="text-xl font-black text-slate-900">Member Registration Form</h1>
+            <h1 className="text-xl font-black text-slate-900">{tx('সদস্য নিবন্ধন ফরম', 'Member Registration Form')}</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            উই ক্যান চেঞ্জ (WCC) সদস্যপদ নিবন্ধন ফরম (ঝালকাঠি জেলা)
+            {tx('উই ক্যান চেঞ্জ (WCC) সদস্যপদ নিবন্ধন ফরম (ঝালকাঠি জেলা)', 'We Can Change (WCC) Membership Registry Application (Jhalokathi District)')}
           </p>
         </div>
 
@@ -122,13 +128,13 @@ export default function NewMemberPage() {
           {/* Section 1: Basic Identity */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
-              ১. ব্যক্তিগত তথ্য (Personal Information)
+              {tx('১. ব্যক্তিগত তথ্য', '1. Personal Information')}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  পূর্ণ নাম (বাংলায়) *
+                  {tx('পূর্ণ নাম (বাংলায়) *', 'Full Name (in Bengali) *')}
                 </label>
                 <input
                   type="text"
@@ -136,14 +142,14 @@ export default function NewMemberPage() {
                   required
                   value={formData.nameBn}
                   onChange={handleChange}
-                  placeholder="যেমন: তানভীর আহমেদ চৌধুরী"
+                  placeholder={tx('যেমন: তানভীর আহমেদ চৌধুরী', 'e.g. Tanvir Ahmed')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Full Name (English in Capital) *
+                  {tx('পূর্ণ নাম (ইংরেজিতে বড় হাতের অক্ষর) *', 'Full Name (English in Capital) *')}
                 </label>
                 <input
                   type="text"
@@ -158,7 +164,7 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  জন্ম তারিখ (Date of Birth)
+                  {tx('জন্ম তারিখ', 'Date of Birth')}
                 </label>
                 <input
                   type="date"
@@ -171,7 +177,7 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  রক্তের গ্রুপ (Blood Group)
+                  {tx('রক্তের গ্রুপ', 'Blood Group')}
                 </label>
                 <select
                   name="blood"
@@ -189,7 +195,7 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  পিতার নাম (Father's Name)
+                  {tx('পিতার নাম', "Father's Name")}
                 </label>
                 <input
                   type="text"
@@ -202,7 +208,7 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  মাতার নাম (Mother's Name)
+                  {tx('মাতার নাম', "Mother's Name")}
                 </label>
                 <input
                   type="text"
@@ -215,21 +221,21 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন নম্বর (NID / BRN)
+                  {tx('জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন নম্বর', 'National ID / Birth Reg. No (NID / BRN)')}
                 </label>
                 <input
                   type="text"
                   name="nidBrn"
                   value={formData.nidBrn}
                   onChange={handleChange}
-                  placeholder="NID or Birth Certificate No"
+                  placeholder={tx('এনআইডি বা জন্ম নিবন্ধন নম্বর', 'NID or Birth Certificate No')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  মোবাইল নম্বর (Mobile Number) *
+                  {tx('মোবাইল নম্বর *', 'Mobile Number *')}
                 </label>
                 <input
                   type="tel"
@@ -244,7 +250,7 @@ export default function NewMemberPage() {
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  ইমেইল ঠিকানা (Email Address)
+                  {tx('ইমেইল ঠিকানা', 'Email Address')}
                 </label>
                 <input
                   type="email"
@@ -261,41 +267,41 @@ export default function NewMemberPage() {
           {/* Section 2: Address Information */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
-              ২. ঠিকানার বিবরণ (Address Details)
+              {tx('২. ঠিকানার বিবরণ', '2. Address Details')}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  বর্তমান ঠিকানা (Present Address)
+                  {tx('বর্তমান ঠিকানা', 'Present Address')}
                 </label>
                 <textarea
                   name="presentAddress"
                   rows={2}
                   value={formData.presentAddress}
                   onChange={handleChange}
-                  placeholder="বাসা নং, রোড, এলাকা/গ্রাম..."
+                  placeholder={tx('বাসা নং, রোড, এলাকা/গ্রাম...', 'House No, Road, Area/Village...')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  স্থায়ী ঠিকানা (Permanent Address)
+                  {tx('স্থায়ী ঠিকানা', 'Permanent Address')}
                 </label>
                 <textarea
                   name="permanentAddress"
                   rows={2}
                   value={formData.permanentAddress}
                   onChange={handleChange}
-                  placeholder="গ্রাম, ডাকঘর, উপজেলা, জেলা..."
+                  placeholder={tx('গ্রাম, ডাকঘর, উপজেলা, জেলা...', 'Village, Post Office, Upazila, District...')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  উপজেলা (Upazila)
+                  {tx('উপজেলা', 'Upazila')}
                 </label>
                 <select
                   name="upazila"
@@ -304,8 +310,8 @@ export default function NewMemberPage() {
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 >
                   {upazilas.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
+                    <option key={u.bn} value={u.bn}>
+                      {lang === 'bn' ? u.bn : u.en}
                     </option>
                   ))}
                 </select>
@@ -313,7 +319,7 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  জেলা (District)
+                  {tx('জেলা', 'District')}
                 </label>
                 <input
                   type="text"
@@ -329,13 +335,13 @@ export default function NewMemberPage() {
           {/* Section 3: Education & Career */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
-              ৩. শিক্ষা ও পেশা (Education & Profession)
+              {tx('৩. শিক্ষা ও পেশা', '3. Education & Profession')}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  বর্তমানে কি শিক্ষার্থী?
+                  {tx('বর্তমানে কি শিক্ষার্থী?', 'Currently Studying?')}
                 </label>
                 <select
                   name="currentlyStudying"
@@ -343,14 +349,14 @@ export default function NewMemberPage() {
                   onChange={handleChange}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 >
-                  <option value="হ্যাঁ">হ্যাঁ (Yes)</option>
-                  <option value="না">না (No)</option>
+                  <option value="হ্যাঁ">{tx('হ্যাঁ', 'Yes')}</option>
+                  <option value="না">{tx('না', 'No')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  শ্রেণি / বর্ষ (Class / Year)
+                  {tx('শ্রেণি / বর্ষ', 'Class / Year')}
                 </label>
                 <input
                   type="text"
@@ -364,42 +370,42 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  বর্তমান শিক্ষা প্রতিষ্ঠান
+                  {tx('বর্তমান শিক্ষা প্রতিষ্ঠান', 'Current Institution')}
                 </label>
                 <input
                   type="text"
                   name="currentInstitution"
                   value={formData.currentInstitution}
                   onChange={handleChange}
-                  placeholder="College / University"
+                  placeholder={tx('কলেজ / বিশ্ববিদ্যালয়', 'College / University')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  পেশা (Profession)
+                  {tx('পেশা', 'Profession')}
                 </label>
                 <input
                   type="text"
                   name="profession"
                   value={formData.profession}
                   onChange={handleChange}
-                  placeholder="e.g. সফটওয়্যার ইঞ্জিনিয়ার"
+                  placeholder={tx('যেমন: সফটওয়্যার ইঞ্জিনিয়ার', 'e.g. Software Engineer')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  কর্মস্থল / প্রতিষ্ঠান (Workplace)
+                  {tx('কর্মস্থল / প্রতিষ্ঠান', 'Workplace / Organization')}
                 </label>
                 <input
                   type="text"
                   name="workplace"
                   value={formData.workplace}
                   onChange={handleChange}
-                  placeholder="Company / Institution Name"
+                  placeholder={tx('কোম্পানি বা প্রতিষ্ঠানের নাম', 'Company / Institution Name')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
@@ -409,13 +415,13 @@ export default function NewMemberPage() {
           {/* Section 4: WCC Affiliation */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
-              ৪. উই ক্যান চেঞ্জ (WCC) সংশ্লিষ্টতা
+              {tx('৪. উই ক্যান চেঞ্জ (WCC) সংশ্লিষ্টতা', '4. WCC Affiliation & Wings')}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  পছন্দের উইং (Preferred Wing)
+                  {tx('পছন্দের উইং', 'Preferred Wing')}
                 </label>
                 <select
                   name="wing"
@@ -433,7 +439,7 @@ export default function NewMemberPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  সদস্যপদের ধরন (Membership Category)
+                  {tx('সদস্যপদের ধরন', 'Membership Category')}
                 </label>
                 <select
                   name="membership"
@@ -450,21 +456,21 @@ export default function NewMemberPage() {
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  সংগঠনে যুক্ত হওয়ার কারণ / উদ্দেশ্য (Reason for Joining)
+                  {tx('সংগঠনে যুক্ত হওয়ার কারণ / উদ্দেশ্য', 'Reason for Joining WCC')}
                 </label>
                 <textarea
                   name="reason"
                   rows={3}
                   value={formData.reason}
                   onChange={handleChange}
-                  placeholder="আপনি কীভাবে WCC-এর মাধ্যমে সমাজে ভূমিকা রাখতে চান..."
+                  placeholder={tx('আপনি কীভাবে WCC-এর মাধ্যমে সমাজে ভূমিকা রাখতে চান...', 'How you want to contribute through WCC...')}
                   className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:border-[#B62A35] focus:outline-hidden"
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  প্রোফাইল ছবির লিংক (Photo URL)
+                  {tx('প্রোফাইল ছবির লিংক (Photo URL)', 'Profile Photo URL')}
                 </label>
                 <input
                   type="url"
@@ -483,14 +489,14 @@ export default function NewMemberPage() {
               href="/members"
               className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              Cancel
+              {tx('বাতিল', 'Cancel')}
             </Link>
             <button
               type="submit"
               disabled={submitting}
               className="px-6 py-2.5 bg-[#B62A35] hover:bg-[#9E1F2A] text-white text-xs font-bold rounded-lg shadow-sm transition-colors disabled:opacity-50"
             >
-              {submitting ? 'Submitting Application...' : 'Submit Application (নিবন্ধন সম্পন্ন করুন)'}
+              {submitting ? tx('আবেদন জমা হচ্ছে...', 'Submitting Application...') : tx('নিবন্ধন সম্পন্ন করুন', 'Submit Application')}
             </button>
           </div>
         </form>

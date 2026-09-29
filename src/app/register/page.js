@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -16,8 +16,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider, getFirebaseAuth } from '@/lib/firebase';
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageToggle from '@/Components/LanguageToggle';
 
@@ -33,6 +33,38 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Handle redirect result if signInWithRedirect was used
+  useEffect(() => {
+    let isMounted = true;
+    const handleRedirectResult = async () => {
+      const fb = getFirebaseAuth();
+      if (!fb.auth) return;
+      try {
+        const result = await getRedirectResult(fb.auth);
+        if (result && result.user && isMounted) {
+          const fbUser = result.user;
+          setGoogleLoading(true);
+          const res = await api.googleLogin({
+            email: fbUser.email,
+            name: fbUser.displayName || fbUser.email.split('@')[0],
+            photoUrl: fbUser.photoURL || '',
+            uid: fbUser.uid
+          });
+
+          if (res.token) {
+            localStorage.setItem('wcc_token', res.token);
+            localStorage.setItem('wcc_user', JSON.stringify(res.user));
+            window.location.href = '/dashboard';
+          }
+        }
+      } catch (err) {
+        console.error('[Google Redirect Register Notice]', err);
+      }
+    };
+    handleRedirectResult();
+    return () => { isMounted = false; };
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -67,11 +99,30 @@ function RegisterForm() {
     setError('');
     setGoogleLoading(true);
     try {
-      if (!auth || !googleProvider) {
-        throw new Error(tx('গুগল অথেনটিকেশন প্রস্তুত নয়।', 'Firebase authentication is not ready.'));
+      const fb = getFirebaseAuth();
+      const currentAuth = fb.auth || auth;
+      const currentProvider = fb.googleProvider || googleProvider;
+
+      if (!currentAuth || !currentProvider) {
+        throw new Error(tx('গুগল অথেনটিকেশন প্রস্তুত নয়। অনুগ্রহ করে পৃষ্ঠাটি রিফ্রেশ করুন।', 'Firebase authentication is not ready. Please refresh the page.'));
       }
-      const result = await signInWithPopup(auth, googleProvider);
-      const fbUser = result.user;
+
+      let result;
+      try {
+        result = await signInWithPopup(currentAuth, currentProvider);
+      } catch (popupErr) {
+        if (popupErr.code === 'auth/popup-blocked') {
+          console.warn('[Firebase] Popup blocked, falling back to redirect...');
+          await signInWithRedirect(currentAuth, currentProvider);
+          return;
+        }
+        throw popupErr;
+      }
+
+      const fbUser = result?.user;
+      if (!fbUser || !fbUser.email) {
+        throw new Error(tx('গুগল একাউন্ট থেকে কোনো ইমেইল পাওয়া যায়নি।', 'No email associated with this Google account.'));
+      }
 
       const res = await api.googleLogin({
         email: fbUser.email,
@@ -83,12 +134,18 @@ function RegisterForm() {
       if (res.token) {
         localStorage.setItem('wcc_token', res.token);
         localStorage.setItem('wcc_user', JSON.stringify(res.user));
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       console.error('Google Sign Up Error:', err);
       if (err.code === 'auth/popup-closed-by-user') {
         setError(tx('গুগল নিবন্ধন উইন্ডো বন্ধ করা হয়েছে।', 'Google registration popup was closed before completing.'));
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        setError(tx('পূর্ববর্তী নিবন্ধন অনুরোধ বাতিল হয়েছে। আবার চেষ্টা করুন।', 'Previous registration request was cancelled. Please try again.'));
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError(tx('এই ডোমেইনটি ফায়ারবেসে অনুমোদিত নয়।', 'This domain is not authorized in Firebase configuration.'));
+      } else if (err.code === 'auth/network-request-failed') {
+        setError(tx('নেটওয়ার্ক সংযোগ ত্রুটি। ইন্টারনেট কানেকশন চেক করুন।', 'Network connection error. Please check your internet connection.'));
       } else {
         setError(err.message || tx('গুগল নিবন্ধন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'Google registration failed. Please try again.'));
       }

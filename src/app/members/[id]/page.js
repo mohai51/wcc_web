@@ -25,11 +25,36 @@ import {
 import { api } from '@/lib/api';
 import StatusBadge from '@/Components/StatusBadge';
 import DigitalIdCard from '@/Components/DigitalIdCard';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function MemberProfilePage({ params }) {
+  const { tx, lang } = useLanguage();
   const unwrappedParams = use(params);
   const memberId = unwrappedParams.id;
   const router = useRouter();
+
+  const formatWing = (w) => {
+    if (!w || w === 'সাধারণ উইং' || w === 'General Wing') return lang === 'bn' ? 'সাধারণ উইং' : 'General Wing';
+    if (w.includes('শিক্ষা') || w.toLowerCase().includes('education')) return lang === 'bn' ? 'শিক্ষা উইং' : 'Education Wing';
+    if (w.includes('স্বাস্থ্য') || w.toLowerCase().includes('health')) return lang === 'bn' ? 'স্বাস্থ্য উইং' : 'Health Wing';
+    if (w.includes('খেলাধুলা') || w.toLowerCase().includes('sports')) return lang === 'bn' ? 'খেলাধুলা উইং' : 'Sports Wing';
+    if (w.includes('সংস্কৃতি') || w.toLowerCase().includes('cultural')) return lang === 'bn' ? 'সংস্কৃতি উইং' : 'Cultural Wing';
+    if (w.includes('পরিবেশ') || w.toLowerCase().includes('environment')) return lang === 'bn' ? 'পরিবেশ উইং' : 'Environment Wing';
+    return w;
+  };
+
+  const formatUpazila = (u) => {
+    if (!u || u === 'ঝালকাঠি সদর') return lang === 'bn' ? 'ঝালকাঠি সদর' : 'Jhalokathi Sadar';
+    if (u === 'নলছিটি') return lang === 'bn' ? 'নলছিটি' : 'Nalchity';
+    if (u === 'রাজাপুর') return lang === 'bn' ? 'রাজাপুর' : 'Rajapur';
+    if (u === 'কাঠালিয়া' || u === 'কাঁঠালিয়া') return lang === 'bn' ? 'কাঠালিয়া' : 'Kathalia';
+    return u;
+  };
+
+  const formatDistrict = (d) => {
+    if (!d || d === 'ঝালকাঠি') return lang === 'bn' ? 'ঝালকাঠি' : 'Jhalokathi';
+    return d;
+  };
 
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -62,7 +87,7 @@ export default function MemberProfilePage({ params }) {
 
   const handleOpenAppointModal = () => {
     setAppointRole('volunteer');
-    setAppointWing(fullWings[0]?.nameBn || member?.wing || 'সাধারণ উইং');
+    setAppointWing(fullWings[0]?.nameBn || member?.wing || (lang === 'bn' ? 'সাধারণ উইং' : 'General Wing'));
     setAppointNote('');
     setAppointModalOpen(true);
   };
@@ -239,7 +264,7 @@ export default function MemberProfilePage({ params }) {
                 {member.memberId}
               </span>
               <span>•</span>
-              <span className="font-semibold text-slate-700">{member.wing || 'সাধারণ উইং'}</span>
+              <span className="font-semibold text-slate-700">{formatWing(member.wing)}</span>
               <span>•</span>
               <span>{member.membership || 'General'} Member</span>
             </div>
@@ -340,7 +365,7 @@ export default function MemberProfilePage({ params }) {
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
                 <dt className="text-slate-400">Designated Wing</dt>
-                <dd className="font-bold text-[#B62A35] mt-0.5">{member.wing || 'সাধারণ উইং'}</dd>
+                <dd className="font-bold text-[#B62A35] mt-0.5">{formatWing(member.wing)}</dd>
               </div>
               <div>
                 <dt className="text-slate-400">Membership Tier</dt>
@@ -384,7 +409,9 @@ export default function MemberProfilePage({ params }) {
               <div>
                 <dt className="text-slate-400">Currently Studying?</dt>
                 <dd className="font-semibold text-slate-800 mt-0.5">
-                  {member.currentlyStudying || 'না'}
+                  {member.currentlyStudying === 'হ্যাঁ' || member.currentlyStudying === 'Yes'
+                    ? (lang === 'bn' ? 'হ্যাঁ' : 'Yes')
+                    : (lang === 'bn' ? 'না' : 'No')}
                   {member.classYear ? ` (${member.classYear})` : ''}
                 </dd>
               </div>
@@ -458,11 +485,11 @@ export default function MemberProfilePage({ params }) {
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div>
                   <span className="text-slate-400 block text-[10px]">District</span>
-                  <span className="font-bold text-slate-800">{member.district || 'ঝালকাঠি'}</span>
+                  <span className="font-bold text-slate-800">{formatDistrict(member.district)}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[10px]">Upazila</span>
-                  <span className="font-bold text-slate-800">{member.upazila || 'ঝালকাঠি সদর'}</span>
+                  <span className="font-bold text-slate-800">{formatUpazila(member.upazila)}</span>
                 </div>
               </div>
             </div>
