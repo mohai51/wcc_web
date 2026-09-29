@@ -9,6 +9,7 @@ import Footer from '@/Components/footer';
 import Sidebar from '@/Components/Sidebar';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageToggle from '@/Components/LanguageToggle';
+import AIChatbot from '@/Components/AIChatbot';
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
@@ -87,6 +88,7 @@ export default function AppShell({ children }) {
           {children}
         </main>
         <Footer />
+        <AIChatbot />
       </div>
     );
   }
@@ -205,6 +207,7 @@ export default function AppShell({ children }) {
         <main className="flex-1 min-w-0">
           {children}
         </main>
+        <AIChatbot />
       </div>
     </div>
   );
