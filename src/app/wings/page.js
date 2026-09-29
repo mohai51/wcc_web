@@ -11,7 +11,12 @@ import {
   AlertCircle,
   RefreshCw,
   Target,
-  ArrowLeft
+  ArrowLeft,
+  Stethoscope,
+  Droplets,
+  Ambulance,
+  GraduationCap,
+  BookOpen
 } from 'lucide-react';
 
 export default function WingsPublicPage() {
@@ -230,6 +235,63 @@ export default function WingsPublicPage() {
                         </div>
                       </div>
                     )}
+                    {/* Quick Wing Features Pills */}
+                    {wing.slug === 'health' && (
+                      <div className="pt-2 border-t border-slate-100 space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 flex items-center gap-1">
+                          <Stethoscope className="w-3 h-3" />
+                          <span>{tx('সরাসরি সেবা অ্যাক্সেস', 'Direct Service Access')}</span>
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          <Link
+                            href="/wings/health?tab=camps"
+                            className="text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                          >
+                            <Stethoscope className="w-3 h-3" />
+                            <span>{tx('ফ্রি স্বাস্থ্য ক্যাম্প', 'Free Health Camps')}</span>
+                          </Link>
+                          <Link
+                            href="/wings/health?tab=blood_bank"
+                            className="text-[11px] font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                          >
+                            <Droplets className="w-3 h-3" />
+                            <span>{tx('ব্লাড ব্যাংক', 'Blood Bank')}</span>
+                          </Link>
+                          <Link
+                            href="/wings/health?tab=emergency_cell"
+                            className="text-[11px] font-bold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                          >
+                            <Ambulance className="w-3 h-3" />
+                            <span>{tx('২৪/৭ জরুরি সেল', '24/7 Emergency')}</span>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+
+                    {wing.slug === 'education' && (
+                      <div className="pt-2 border-t border-slate-100 space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 flex items-center gap-1">
+                          <GraduationCap className="w-3 h-3" />
+                          <span>{tx('সরাসরি সেবা অ্যাক্সেস', 'Direct Service Access')}</span>
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          <Link
+                            href="/wings/education?tab=courses"
+                            className="text-[11px] font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                          >
+                            <GraduationCap className="w-3 h-3" />
+                            <span>{tx('ফ্রি কোর্সসমূহ', 'Free Courses')}</span>
+                          </Link>
+                          <Link
+                            href="/wings/education?tab=books"
+                            className="text-[11px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                          >
+                            <BookOpen className="w-3 h-3" />
+                            <span>{tx('বই কর্নার ও লাইব্রেরি', 'Book Corner')}</span>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -239,7 +301,7 @@ export default function WingsPublicPage() {
                     href={`/wings/${wing.slug}`}
                     className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 hover:bg-[#B62A35] text-white text-xs font-bold rounded-2xl transition-all shadow-xs group-hover:shadow-md cursor-pointer"
                   >
-                    <span>{tx('উইংয়ের বিবরণ ও সেবা দেখুন', 'Explore Wing Details & Drives')}</span>
+                    <span>{tx('উইংয়ের পূর্ণ পোর্টাল ও সেবা দেখুন', 'Enter Wing Portal & Explore')}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>

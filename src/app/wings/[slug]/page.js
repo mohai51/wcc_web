@@ -1,10 +1,11 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
-import HealthWingView from '@/components/HealthWingView';
+import HealthWingView from '@/Components/HealthWingView';
 import {
   ArrowLeft,
   Calendar,
@@ -97,10 +98,12 @@ export function getYouTubeEmbedUrl(url) {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : trimmed;
 }
 
-export default function WingDetailPage({ params }) {
+function WingDetailPageInner({ params }) {
   const resolvedParams = use(params);
   const slug = resolvedParams?.slug;
   const { lang, tx, t } = useLanguage();
+  const searchParams = useSearchParams();
+  const queryTab = searchParams ? searchParams.get('tab') : null;
 
   const [wing, setWing] = useState(null);
   const [programs, setPrograms] = useState([]);
@@ -110,8 +113,27 @@ export default function WingDetailPage({ params }) {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Active Tab for Education Wing
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'courses' | 'books' | 'leader_panel'
+  // Active Tab for Wing
+  const [activeTab, setActiveTab] = useState(queryTab || 'overview');
+
+  useEffect(() => {
+    if (queryTab && queryTab !== activeTab) {
+      setActiveTab(queryTab);
+    }
+  }, [queryTab]);
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (newTab && newTab !== 'overview') {
+        url.searchParams.set('tab', newTab);
+      } else {
+        url.searchParams.delete('tab');
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   // Education Wing Specific States
   const [courses, setCourses] = useState([]);
@@ -1203,7 +1225,7 @@ export default function WingDetailPage({ params }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 overflow-x-auto py-2.5 scrollbar-none">
               <button
-                onClick={() => setActiveTab('overview')}
+                onClick={() => handleTabChange('overview')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'overview'
                     ? 'bg-[#B62A35] text-white shadow-xs'
@@ -1215,7 +1237,7 @@ export default function WingDetailPage({ params }) {
               </button>
 
               <button
-                onClick={() => setActiveTab('courses')}
+                onClick={() => handleTabChange('courses')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'courses'
                     ? 'bg-[#B62A35] text-white shadow-xs'
@@ -1230,7 +1252,7 @@ export default function WingDetailPage({ params }) {
               </button>
 
               <button
-                onClick={() => setActiveTab('books')}
+                onClick={() => handleTabChange('books')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'books'
                     ? 'bg-[#B62A35] text-white shadow-xs'
@@ -1243,7 +1265,7 @@ export default function WingDetailPage({ params }) {
 
               {isLeaderOrAdmin && (
                 <button
-                  onClick={() => setActiveTab('leader_panel')}
+                  onClick={() => handleTabChange('leader_panel')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeTab === 'leader_panel'
                       ? 'bg-purple-700 text-white shadow-xs'
@@ -1268,7 +1290,7 @@ export default function WingDetailPage({ params }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 overflow-x-auto py-2.5 scrollbar-none">
               <button
-                onClick={() => setActiveTab('overview')}
+                onClick={() => handleTabChange('overview')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'overview'
                     ? 'bg-rose-600 text-white shadow-xs'
@@ -1280,7 +1302,7 @@ export default function WingDetailPage({ params }) {
               </button>
 
               <button
-                onClick={() => setActiveTab('camps')}
+                onClick={() => handleTabChange('camps')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'camps'
                     ? 'bg-rose-600 text-white shadow-xs'
@@ -1295,7 +1317,7 @@ export default function WingDetailPage({ params }) {
               </button>
 
               <button
-                onClick={() => setActiveTab('blood_bank')}
+                onClick={() => handleTabChange('blood_bank')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'blood_bank'
                     ? 'bg-rose-600 text-white shadow-xs'
@@ -1307,7 +1329,7 @@ export default function WingDetailPage({ params }) {
               </button>
 
               <button
-                onClick={() => setActiveTab('emergency_cell')}
+                onClick={() => handleTabChange('emergency_cell')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'emergency_cell'
                     ? 'bg-rose-600 text-white shadow-xs'
@@ -1322,7 +1344,7 @@ export default function WingDetailPage({ params }) {
               </button>
 
               <button
-                onClick={() => setActiveTab('leader_panel')}
+                onClick={() => handleTabChange('leader_panel')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   activeTab === 'leader_panel'
                     ? 'bg-purple-700 text-white shadow-xs'
@@ -1359,9 +1381,26 @@ export default function WingDetailPage({ params }) {
       {/* Main Body Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
         {/* ========================================================================= */}
-        {/* TAB 1: OVERVIEW & INITIATIVES                                            */}
+        {/* HEALTH WING CONTENT & TABS                                                */}
         {/* ========================================================================= */}
-        {(!isEducation && !isHealth || activeTab === 'overview') && (
+        {isHealth && (
+          <HealthWingView
+            activeTab={activeTab}
+            setActiveTab={handleTabChange}
+            isLeaderOrAdmin={isLeaderOrAdmin}
+            user={user}
+            wing={wing}
+            tx={tx}
+            lang={lang}
+            showFeedback={showFeedback}
+            onHealthLeaderAutoLogin={handleHealthLeaderAutoLogin}
+          />
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 1: OVERVIEW & INITIATIVES (For General & Education Wings)             */}
+        {/* ========================================================================= */}
+        {(!isEducation && !isHealth || (isEducation && activeTab === 'overview')) && (
           <>
             {/* Wing Leader Profile Card */}
             {wing.leader && (
@@ -2234,23 +2273,6 @@ export default function WingDetailPage({ params }) {
             )}
           </section>
         )}
-
-        {/* ========================================================================= */}
-        {/* HEALTH WING CONTENT & TABS                                                */}
-        {/* ========================================================================= */}
-        {isHealth && (
-          <HealthWingView
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            isLeaderOrAdmin={isLeaderOrAdmin}
-            user={user}
-            wing={wing}
-            tx={tx}
-            lang={lang}
-            showFeedback={showFeedback}
-            onHealthLeaderAutoLogin={handleHealthLeaderAutoLogin}
-          />
-        )}
       </div>
 
       {/* ========================================================================= */}
@@ -2694,5 +2716,20 @@ export default function WingDetailPage({ params }) {
         </div>
       )}
     </div>
+  );
+}
+
+export default function WingDetailPage(props) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center space-y-4">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-[#B62A35] rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-slate-500">উইং পোর্টাল লোড হচ্ছে...</p>
+        </div>
+      }
+    >
+      <WingDetailPageInner {...props} />
+    </Suspense>
   );
 }

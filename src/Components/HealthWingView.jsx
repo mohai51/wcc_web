@@ -687,6 +687,180 @@ export default function HealthWingView({
               </button>
             </div>
           </div>
+
+          {/* 24/7 Emergency Response Bar */}
+          <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 text-white rounded-3xl p-5 sm:p-6 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur border border-white/30 text-white flex items-center justify-center shrink-0">
+                <PhoneCall className="w-6 h-6 animate-bounce" />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-black tracking-widest text-amber-200 block">
+                  {tx('জরুরি সেবা হটলাইন (২৪/৭ চালু)', 'EMERGENCY 24/7 HELPLINE')}
+                </span>
+                <h3 className="text-base sm:text-lg font-black tracking-tight">
+                  {tx('হাসপাতালে রোগী ভর্তি, অ্যাম্বুলেন্স বা জরুরি রক্তের প্রয়োজনে কল করুন', 'Immediate assistance for hospital admission & urgent blood')}
+                </h3>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <a
+                href="tel:01715678901"
+                className="px-4 py-2.5 bg-white text-rose-700 hover:bg-rose-50 font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>০১৭১৫-৬৭৮৯০১</span>
+              </a>
+              <a
+                href="tel:01711333444"
+                className="px-4 py-2.5 bg-rose-950/40 hover:bg-rose-950/60 text-white border border-white/20 font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>০১৭১১-৩৩৩৪৪৪</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setActiveTab('emergency_cell')}
+                className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>{tx('বার্তা পাঠান', 'Open Cell')}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Blood Group Finder */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Droplets className="w-5 h-5 text-rose-600" />
+                <h3 className="text-sm font-black text-slate-900">
+                  {tx('রক্তের গ্রুপ অনুযায়ী দ্রুত রক্তদাতা খুঁজুন', 'Quick Blood Donor Search by Group')}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setBloodGroupFilter('all');
+                  setActiveTab('blood_bank');
+                }}
+                className="text-xs font-bold text-rose-600 hover:underline cursor-pointer"
+              >
+                {tx('সম্পূর্ণ রক্তদাতা ডিরেক্টরি দেখুন →', 'View Full Blood Bank →')}
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              {bloodGroups.map(grp => (
+                <button
+                  key={grp}
+                  type="button"
+                  onClick={() => {
+                    setBloodGroupFilter(grp);
+                    setActiveTab('blood_bank');
+                  }}
+                  className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white font-black text-xs border border-rose-200 transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                >
+                  <span>{grp}</span>
+                  <span className="text-[10px] opacity-80">{tx('গ্রুপ', 'Group')}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Health Wing Leadership & Medical Board */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-700 shadow-lg flex flex-col md:flex-row items-center gap-6 justify-between">
+            <div className="flex items-center gap-5">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 p-1 shrink-0 shadow-md">
+                <img
+                  src={wing?.leader?.photoUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300'}
+                  alt="Dr. Mostafizur Rahman"
+                  className="w-full h-full rounded-xl object-cover bg-white"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-black">
+                  <Stethoscope className="w-3.5 h-3.5" />
+                  <span>{tx('স্বাস্থ্য উইং লিডার ও মেডিকেল ডিরেক্টর', 'Health Wing Leader & Medical Director')}</span>
+                </div>
+                <h3 className="text-xl font-black text-white">
+                  {wing?.leader?.name || 'ডা. মোস্তাফিজুর রহমান (Dr. Mostafizur Rahman)'}
+                </h3>
+                <p className="text-xs text-slate-300">
+                  {tx('মেডিসিন বিশেষজ্ঞ (MBBS, FCPS) • উই ক্যান চেঞ্জ স্বাস্থ্য ও চিকিৎসা উইং তত্ত্বাবধায়ক', 'Consultant Physician (MBBS, FCPS) • Supervisor of WCC Health & Medical Wing')}
+                </p>
+                <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-300">
+                  <a href="tel:01715678901" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                    <Phone className="w-3.5 h-3.5 text-rose-400" />
+                    <span>০১৭১৫-৬৭৮৯০১</span>
+                  </a>
+                  <a href="mailto:coordinator.health@wecanchange.org" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                    <Send className="w-3.5 h-3.5 text-rose-400" />
+                    <span>coordinator.health@wecanchange.org</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/10 text-center text-xs space-y-1.5 shrink-0 w-full md:w-auto">
+              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{tx('মেডিকেল প্যানেল', 'Medical Panel')}</span>
+              <p className="font-black text-white text-sm">{tx('ফ্রি প্রেসক্রিপশন ও ক্যাম্প পরিচালনা', 'Free Consultations & Camp Lead')}</p>
+              <span className="text-[10px] text-emerald-400 font-semibold block">{tx('ঝালকাঠি সদর হাসপাতাল নেটওয়ার্ক', 'Jhalakathi Sadar Hospital Network')}</span>
+            </div>
+          </div>
+
+          {/* Upcoming Camp Spotlight (if camps exist) */}
+          {camps.length > 0 && (
+            <div className="bg-white rounded-3xl border-2 border-emerald-500/30 overflow-hidden shadow-md">
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold">
+                    <Stethoscope className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-black tracking-wider text-emerald-200">
+                      {tx('আসন্ন ফ্রি স্বাস্থ্য ক্যাম্প', 'Upcoming Free Health Camp')}
+                    </span>
+                    <h4 className="text-base sm:text-lg font-black">{camps[0].title}</h4>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCamp(camps[0]);
+                    setRegisterCampModalOpen(true);
+                  }}
+                  className="px-4 py-2 bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-black rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
+                >
+                  {tx('ফ্রি নাম নিবন্ধন করুন', 'Free Patient Registration')}
+                </button>
+              </div>
+
+              <div className="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <strong className="block text-slate-900">{tx('তারিখ ও সময়:', 'Date & Time:')}</strong>
+                    <span>{camps[0].date} ({camps[0].time || 'সকাল ৯:০০ - বিকাল ৪:০০'})</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600">
+                  <MapPin className="w-4 h-4 text-rose-600 shrink-0" />
+                  <div>
+                    <strong className="block text-slate-900">{tx('ক্যাম্পের স্থান:', 'Location:')}</strong>
+                    <span>{camps[0].location}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Users className="w-4 h-4 text-purple-600 shrink-0" />
+                  <div>
+                    <strong className="block text-slate-900">{tx('লক্ষ্য ও সেবা:', 'Target Beneficiaries:')}</strong>
+                    <span>{camps[0].targetBeneficiaries || '৫০০+ সুবিধাবঞ্চিত মানুষ'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       )}
 

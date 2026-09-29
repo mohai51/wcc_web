@@ -27,7 +27,11 @@ import {
   FileText,
   HeartHandshake,
   AlertTriangle,
-  Languages
+  Languages,
+  Stethoscope,
+  Heart,
+  Droplets,
+  Ambulance
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageToggle from '@/Components/LanguageToggle';
@@ -79,6 +83,8 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
               ? [
                   { id: 'coordinators', label: isBn ? 'সমন্বয়ক হাব' : 'Coordinators Hub', icon: ShieldCheck, href: '/dashboard?tab=coordinators' },
                   { id: 'volunteers', label: isBn ? 'স্বেচ্ছাসেবক হাব' : 'Volunteer Hub', icon: HeartHandshake, href: '/dashboard?tab=volunteers' },
+                  { id: 'health-wing-portal', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
+                  { id: 'education-wing-portal', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing (Courses & Books)', icon: Sparkles, href: '/wings/education' },
                   { id: 'wings', label: isBn ? 'উইং ব্যবস্থাপনা' : 'Wings Management', icon: Sparkles, href: '/admin/wings' },
                   { id: 'programs', label: isBn ? 'প্রকল্প হাব' : 'Programs Hub', icon: Calendar, href: '/admin/programs' },
                   { id: 'events', label: isBn ? 'ইভেন্ট ও ক্যাম্প' : 'Events Hub', icon: CalendarDays, href: '/admin/events' },
@@ -112,13 +118,29 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
     }
 
     if (user.role === 'coordinator' || user.role === 'wing_leader') {
-      const assignedWingSlug = user.assignedWing?.slug || 'education';
+      let assignedWingSlug = user.assignedWing?.slug;
+      if (!assignedWingSlug) {
+        const uEmail = (user.email || '').toLowerCase();
+        const vWing = (user.volunteerWing || '').toLowerCase();
+        if (uEmail.includes('health') || vWing.includes('স্বাস্থ্য') || vWing.includes('health')) {
+          assignedWingSlug = 'health';
+        } else {
+          assignedWingSlug = 'education';
+        }
+      }
+      const isHealthLead = assignedWingSlug === 'health';
+
       return [
         {
           title: user.role === 'wing_leader' ? (isBn ? 'উইং পরিচালনা' : 'WING LEADERSHIP') : (isBn ? 'সমন্বয়ক পরিচালনা' : 'WING OPERATIONS'),
           items: [
             { id: 'overview', label: isBn ? 'লিডার হাব' : 'Leader Hub', icon: LayoutDashboard, href: '/dashboard' },
-            { id: 'wing-portal', label: isBn ? 'আমার উইং প্ল্যাটফর্ম' : 'My Wing Platform', icon: Sparkles, href: `/wings/${assignedWingSlug}` },
+            {
+              id: 'wing-portal',
+              label: isBn ? (isHealthLead ? 'আমার স্বাস্থ্য উইং প্ল্যাটফর্ম' : 'আমার শিক্ষা উইং প্ল্যাটফর্ম') : (isHealthLead ? 'My Health Wing Platform' : 'My Wing Platform'),
+              icon: isHealthLead ? Stethoscope : Sparkles,
+              href: `/wings/${assignedWingSlug}`
+            },
             { id: 'profile', label: isBn ? 'লিডার প্রোফাইল' : 'Leader Profile', icon: User, href: '/profile' },
             { id: 'programs', label: isBn ? 'উইং প্রকল্পসমূহ' : 'Wing Programs', icon: Calendar, href: '/admin/programs' },
             { id: 'events', label: isBn ? 'উইং ইভেন্টসমূহ' : 'Wing Events', icon: CalendarDays, href: '/admin/events' },
@@ -126,8 +148,10 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
           ]
         },
         {
-          title: isBn ? 'পাবলিক সেবা' : 'COMMUNITY & PUBLIC',
+          title: isBn ? 'উইং ও পাবলিক সেবা' : 'WINGS & PUBLIC SERVICES',
           items: [
+            { id: 'health-wing', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
+            { id: 'education-wing', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing (Courses & Books)', icon: Sparkles, href: '/wings/education' },
             { id: 'public-wings', label: isBn ? 'সকল উইং তালিকা' : 'Explore All Wings', icon: Sparkles, href: '/wings' },
             { id: 'verify', label: isBn ? 'পাবলিক কিউআর যাচাই' : 'Public QR Verification', icon: ShieldCheck, href: '/verify' }
           ]
@@ -143,8 +167,9 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
             { id: 'hub', label: isBn ? 'স্বেচ্ছাসেবক হাব' : 'Volunteer Hub', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
             { id: 'profile', label: isBn ? 'প্রোফাইল' : 'Volunteer Profile', icon: User, href: '/profile' },
             { id: 'requests', label: isBn ? 'উইং আবেদন' : 'Wing Requests', icon: HeartHandshake, href: '/dashboard?tab=requests' },
+            { id: 'health-wing-volunteer', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
             { id: 'wings-portal', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing & Books', icon: Sparkles, href: '/wings/education' },
-            { id: 'badge', label: isBn ? 'ডিজিタル ব্যাজ' : 'My Digital Badge', icon: Award, href: '/dashboard?tab=badge' },
+            { id: 'badge', label: isBn ? 'ডিজিটাল ব্যাজ' : 'My Digital Badge', icon: Award, href: '/dashboard?tab=badge' },
             { id: 'log', label: isBn ? 'কাজের সময় লিপিবদ্ধ' : 'Log Service Hours', icon: Clock, href: '/dashboard?tab=log' },
             { id: 'history', label: isBn ? 'কাজের ইতিহাস' : 'Service Log History', icon: FileText, href: '/dashboard?tab=history' }
           ]
@@ -152,6 +177,7 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
         {
           title: isBn ? 'সামাজিক কার্যক্রম' : 'COMMUNITY ACTION',
           items: [
+            { id: 'all-wings', label: isBn ? 'সকল উইং তালিকা' : 'All Wings Directory', icon: Sparkles, href: '/wings' },
             { id: 'drives', label: isBn ? 'আসন্ন ক্যাম্পেইন' : 'Upcoming Drives', icon: Calendar, href: '/dashboard?tab=drives' },
             { id: 'verify', label: isBn ? 'আইডি কার্ড যাচাই' : 'Verify Credentials', icon: ShieldCheck, href: '/verify' }
           ]
@@ -162,9 +188,10 @@ function SidebarInner({ user, collapsed, setCollapsed, onClose, isMobile }) {
     // Default: Member
     return [
       {
-        title: isBn ? 'আমার সদস্যপদ' : 'MY MEMBERSHIP',
+        title: isBn ? 'আমার সদস্যপদ ও সেবা' : 'MY MEMBERSHIP & SERVICES',
         items: [
           { id: 'hub', label: isBn ? 'মেম্বার পোর্টাল' : 'Member Portal', icon: LayoutDashboard, href: '/dashboard?tab=hub' },
+          { id: 'health-wing', label: isBn ? 'স্বাস্থ্য উইং (ক্যাম্প ও রক্তদান)' : 'Health Wing (Camps & Blood)', icon: Stethoscope, href: '/wings/health' },
           { id: 'education-wing', label: isBn ? 'শিক্ষা উইং (কোর্স ও বই)' : 'Education Wing (Courses & Books)', icon: Sparkles, href: '/wings/education' },
           { id: 'all-wings', label: isBn ? 'সকল উইং তালিকা' : 'WCC Wings Directory', icon: Sparkles, href: '/wings' },
           { id: 'profile', label: isBn ? 'সদস্য প্রোফাইল' : 'Membership Profile', icon: User, href: '/profile' },
