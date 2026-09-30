@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useSyncExternalStore, useMemo } from 'react';
 import Link from 'next/link';
 import {
   MessageSquare,
@@ -20,50 +20,52 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
+const emptySubscribe = () => () => {};
+function useIsClient() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
+
+let counter = 0;
+function createMessageId() {
+  counter += 1;
+  return `msg-${counter}`;
+}
+
 const QUICK_PROMPTS_BN = [
-  'আসন্ন ইভেন্টসমূহ কি কি?',
-  'ফ্রি স্বাস্থ্য ক্যাম্প ও ডাক্তার সেবা',
-  'রক্তদাতা ও ব্লাড ব্যাংক কীভাবে পাব?',
+  'WCC-এর ৫টি উইং কি কি?',
+  'ফ্রি স্বাস্থ্য ক্যাম্প ও ব্লাড ব্যাংক',
   'কীভাবে মেম্বার বা ভলান্টিয়ার হব?',
-  'শিক্ষা উইংয়ের ফ্রি কোর্সসমূহ'
+  'ঝালকাঠির ঐতিহাসিক স্থানসমূহ',
+  'ভিমরুলির ভাসমান পেয়ারা বাজার'
 ];
 
 const QUICK_PROMPTS_EN = [
-  'What are the upcoming events?',
-  'Free health camps & medical care',
-  'How to find blood donors in Jhalokathi?',
+  'What are WCC 5 Wings?',
+  'Free health camps & blood bank',
   'How do I register as a member/volunteer?',
-  'Education Wing free IT courses'
+  'Historical places in Jhalokathi',
+  'Bhimruli floating guava market'
 ];
 
 export default function AIChatbot() {
   const { lang, tx } = useLanguage();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      sender: 'bot',
-      text: ''
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    setMounted(true);
-    setMessages(prev => {
-      const welcomeText = lang === 'bn'
-        ? 'আসসালামু আলাইকুম! আমি উই ক্যান চেঞ্জ (WCC)-এর স্মার্ট এআই সহকারী। WCC-এর কার্যক্রম, ৫টি উইং, ফ্রি স্বাস্থ্য ক্যাম্প, ব্লাড ব্যাংক বা আসন্ন ইভেন্ট সম্পর্কিত যে কোনো প্রশ্ন করতে পারেন।'
-        : 'Hello! I am the official AI Assistant for We Can Change (WCC). Ask me anything about our 5 wings, upcoming events, health camps, blood bank, or volunteer registration!';
-      if (prev.length === 1 && prev[0].id === 'welcome') {
-        return [{ id: 'welcome', sender: 'bot', text: welcomeText }];
-      }
-      return prev;
-    });
-  }, [lang]);
+  const welcomeText = lang === 'bn'
+    ? 'আসসালামু আলাইকুম! আমি উই ক্যান চেঞ্জ (WCC) এবং ঝালকাঠি জেলার স্মার্ট এআই সহকারী। WCC-এর কার্যক্রম, ৫টি উইং, ফ্রি স্বাস্থ্য ক্যাম্প, ব্লাড ব্যাংক কিংবা ঝালকাঠি জেলা সম্পর্কিত যেকোনো তথ্য আমাকে জিজ্ঞাসা করতে পারেন।'
+    : 'Hello! I am the official AI Assistant for We Can Change (WCC) and Jhalokathi District. Ask me anything about our 5 wings, upcoming events, health camps, blood bank, or Jhalokathi!';
+
+  const displayedMessages = useMemo(() => {
+    return messages.length === 0
+      ? [{ id: 'welcome', sender: 'bot', text: welcomeText }]
+      : messages;
+  }, [messages, welcomeText]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,7 +76,7 @@ export default function AIChatbot() {
       scrollToBottom();
       setTimeout(() => inputRef.current?.focus(), 150);
     }
-  }, [isOpen, messages]);
+  }, [isOpen, displayedMessages]);
 
   if (!mounted) return null;
 
@@ -83,11 +85,12 @@ export default function AIChatbot() {
     if (!text || loading) return;
 
     const userMsg = {
-      id: Date.now().toString(),
+      id: createMessageId(),
       sender: 'user',
       text
     };
 
+    const currentHistory = displayedMessages;
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
@@ -98,13 +101,13 @@ export default function AIChatbot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text,
-          conversationHistory: messages.slice(-6)
+          conversationHistory: currentHistory.slice(-6)
         })
       });
 
       const data = await res.json();
       const botMsg = {
-        id: (Date.now() + 1).toString(),
+        id: createMessageId(),
         sender: 'bot',
         text: data.reply || (lang === 'bn' ? 'দুঃখিত, কোনো উত্তর পাওয়া যায়নি।' : 'Sorry, no response available.'),
         guardrailBlocked: data.guardrailBlocked
@@ -115,7 +118,7 @@ export default function AIChatbot() {
       setMessages((prev) => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: createMessageId(),
           sender: 'bot',
           text: lang === 'bn'
             ? 'সার্ভারে সংযোগে কিছুটা সমস্যা হচ্ছে। অনুগ্রহ করে একটু পর আবার চেষ্টা করুন।'
@@ -226,17 +229,7 @@ export default function AIChatbot() {
 
             <div className="flex items-center gap-1">
               <button
-                onClick={() =>
-                  setMessages([
-                    {
-                      id: 'welcome-reset',
-                      sender: 'bot',
-                      text: lang === 'bn'
-                        ? 'চ্যাট হিস্ট্রি রিসেট করা হয়েছে। আপনি আমাকে WCC সম্পর্কিত যেকোনো প্রশ্ন করতে পারেন।'
-                        : 'Chat reset. Ask me anything about WCC!'
-                    }
-                  ])
-                }
+                onClick={() => setMessages([])}
                 title={lang === 'bn' ? 'চ্যাট রিসেট করুন' : 'Reset Chat'}
                 className="p-1.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
@@ -251,18 +244,18 @@ export default function AIChatbot() {
             </div>
           </div>
 
-          {/* Quick Notice Guardrail Bar */}
+          {/* Notice Banner */}
           <div className="bg-slate-50 border-b border-slate-200/80 px-3 py-1.5 text-[10px] text-slate-500 flex items-center justify-between">
             <span className="flex items-center gap-1 truncate">
-              <ShieldAlert className="w-3 h-3 text-[#B62A35] shrink-0" />
-              <span>{tx('শুধুমাত্র WCC সংশ্লিষ্ট তথ্যের উত্তর দেওয়া হয়', 'Strictly answers WCC inquiries only')}</span>
+              <Sparkles className="w-3 h-3 text-[#B62A35] shrink-0" />
+              <span>{tx('WCC ও ঝালকাঠি সংক্রান্ত যেকোনো তথ্য সেবা', 'WCC & Jhalokathi Official AI Desk')}</span>
             </span>
             <span className="text-[9px] text-[#B62A35] font-bold">Jhalokathi</span>
           </div>
 
           {/* Message List */}
           <div className="flex-1 p-3.5 overflow-y-auto space-y-3 bg-slate-50/50">
-            {messages.map((msg) => {
+            {displayedMessages.map((msg) => {
               const isBot = msg.sender === 'bot';
               return (
                 <div
@@ -333,7 +326,7 @@ export default function AIChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={tx('WCC সম্পর্কে কিছু জানতে চান? লিখুন...', 'Ask anything about WCC...')}
+              placeholder={tx('WCC বা ঝালকাঠি সম্পর্কে লিখুন...', 'Ask about WCC or Jhalokathi...')}
               className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:border-[#B62A35] focus:bg-white transition-all"
               disabled={loading}
             />
